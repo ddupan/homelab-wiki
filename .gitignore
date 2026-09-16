@@ -1,0 +1,8 @@
+.obsidian/
+.DS_Store
+.trash/
+site/
+node_modules/
+.env
+.env.*
+!.env.example

@@ -1,0 +1,35 @@
+# 待核实与文档缺口
+
+审阅日期：2026-09-16；本轮只盘点仓库，未查询现场。
+以下路径相对于 homelab-infra。优先修复影响恢复、认证、DNS 和首次使用的问题。
+
+## 记录冲突
+
+| 项目 | 两边的记录 | 核实与收敛方式 |
+|---|---|---|
+| LAN DNS | `apps/blocky/README.md` 说已是主 DNS；`infrastructure/dns/README.md` 仍说未成为正式 resolver | 读取 NEC DHCP 配置、客户端 DNS 和 Blocky 查询结果，再同步两份说明 |
+| SPIRE | `clusters/homelab/README.md` 说首次上线待验证；`apps/zot/README.md` 记录 9 月 14/16 日真实 JWT-SVID 验收 | 核对 Flux revision、SPIRE 健康和 Workload API，再更新集群总览；zot 的部分验收不等于全部身份集成完成 |
+| Authelia | README 仍描述 OIDC 为后续阶段、旧 Contour/Traefik 路径；退役记录和 Envoy 文档已描述 Authelia 替代旧 IdP | 核对 OIDC discovery、登录及 forward-auth，重写过时段落；迁移旧文档前检查其中的敏感示例 |
+| microVM runner | `infrastructure/microvm-runner/README.md` 说 PoC 完成但正式启用仍有前提；远端已有独立 runner 仓库 | 查清两个仓库的职责、controller/worker 部署和一次 job 生命周期，不能把仓库存在当作服务已启用 |
+| NATS durable 名称 | NATS 文档示例为 `kind-microvm-pve2`；microVM 文档配置为 `kind-microvm`，要求同类 worker 共享 durable | 查运行配置和 consumer；统一文档，避免多 worker 队列语义不一致 |
+| 旧 VictoriaMetrics Compose | `platform/observability/README.md` 说已替代；`apps/victoriametrics/` 仍留配置 | 只读检查 Docker 与采集目标，确认是否仍承担职责，再标记退役或迁移 |
+
+## 优先补充的使用说明
+
+1. Gitea / Actions：登录、创建仓库、选择 runner，以及可信任务限制。
+2. Grafana：登录、找到内存与 Swap 看板、查询指标和日志的一个完整例子。
+3. zot / SeaweedFS：拉取、发布授权、S3 客户端接入，以及数据备份边界。
+4. OpenBao：日常登录、按权限取用秘密、申请权限；与灾难恢复分开说明。
+5. NetBox：查看拓扑与 IPAM 的路径，强调目前是评估镜像，改动入口在 Git。
+6. codex-proxy、LiteLLM gateway、shared PostgreSQL、Tailscale、ps3netsrv、vlmcsd、k3s：补用途和当前状态；这些目录缺少根 README。
+
+## 盘点盲区
+
+- `docs/cicd.md` 提及 `e5renew`、`rustfs`，但无独立组件目录；需要确认现状与归属。
+- `infrastructure/docker/README.md` 提及仓库外 `research-auto`，不能在本轮算作已盘点服务。
+- 本轮发现远端仓库 `gitea-microvm-runner`、`postgresql-tenant-operator`、`workload-sts`，
+  尚未审阅内容或运行状态。后续将跨仓库服务纳入总览。
+- 新增 NATS、zot、microVM 等来源含未提交文件；合并后补可访问的 commit/PR 链接。
+- Backstage 仍作为计划入口记录；本轮没有证明已有部署。
+
+完成核实后，将结果写回对应权威文档，并更新服务总览的证据等级和验证日期。
