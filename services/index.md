@@ -26,7 +26,7 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 | openviking | 上下文检索服务 | `记录端口 1933 / 8020` | 配置与部署指南；未附上线记录 | `apps/openviking/README.md` | 缺导入、查询的完整例子 |
 | ps3netsrv | PS3 网络内容服务 | `未记录` | Docker 运维文档记录运行 | `apps/ps3netsrv/docker-compose.yml` | 缺客户端使用与挂载说明 |
 | [seaweedfs](seaweedfs.md) | S3 对象存储 | `s3.ad.ddupan.top` | zot 文档记录已使用 | `apps/seaweedfs/README.md` | 已有客户端读写指南与备份边界说明 |
-| shared-postgresql | 共享 PostgreSQL / CNPG | `shared-db namespace` | 历史迁移记录已完成 | `apps/shared-postgresql/migration.md` | 缺服务首页、租户接入说明 |
+| [shared-postgresql](shared-postgresql.md) | 共享 PostgreSQL / CNPG | `shared-db namespace` | 历史迁移记录已完成 | `apps/shared-postgresql/migration.md` | 已有连接、应用接入与共享资源边界指南 |
 | smtp-relay | 应用经 Microsoft 365 发信 | `smtp-relay.smtp-relay.svc.cluster.local:25` | 有配置与测试指南；未附上线记录 | `apps/smtp-relay/README.md` | 补发信链路与消费者说明 |
 | tailscale | 远程网络与子网路由 | `Tailscale 网络` | 有配置；本轮未读敏感安装脚本 | `apps/tailscale/subnet-routes.sh` | 缺 README、路由与客户端说明 |
 | vlmcsd | KMS 兼容服务，使用范围未记录 | `未记录` | 仅发现配置 | `apps/vlmcsd/compose.yaml` | 缺 README 与状态说明 |

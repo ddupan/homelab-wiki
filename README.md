@@ -12,6 +12,7 @@
 - [OpenBao 使用指南](services/openbao.md)：日常登录、按权限取密与机器身份边界。
 - [NetBox 使用指南](services/netbox.md)：浏览设备和 IPAM，按 Git 来源维护资产镜像。
 - [SPIFFE/SPIRE](services/spire.md)：按 #34 整理的阶段状态、使用与 runbook 入口。
+- [共享 PostgreSQL 使用指南](services/shared-postgresql.md)：应用接入、连接示例与共享实例维护边界。
 - [PostgreSQL Tenant Operator](services/postgresql-tenant-operator.md)：计划在共享 PostgreSQL 上提供的 DBaaS 中间层。
 - [Gitea Dynamic Runner](services/gitea-dynamic-runner.md)：原 microVM runner，现支持 Pod/VM 两种一次性执行环境。
 - [NATS](services/nats.md)：已部署的集群共享消息服务，目前仅 Dynamic Runner 消费。
