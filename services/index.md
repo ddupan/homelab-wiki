@@ -35,8 +35,8 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 
 | 组件 | 用途 | 记录入口 | 状态依据 | 来源 | 文档缺口 / 下一步 |
 |---|---|---|---|---|---|
-| cert-manager | 签发与续期 TLS 证书 | `ClusterIssuer API` | 记录已接管 Flux | `platform/cert-manager/README.md` | 已有签发和验证说明 |
-| envoy-gateway | LAN HTTP 入口与认证集成 | `192.168.10.127:443` | 记录已接管 Flux | `platform/envoy-gateway/README.md` | 已有服务接入说明 |
+| [cert-manager](../guides/publish-service.md) | 签发与续期 TLS 证书 | `ClusterIssuer API` | 记录已接管 Flux | `platform/cert-manager/README.md` | 已有新服务证书复用与接入指南 |
+| [envoy-gateway](../guides/publish-service.md) | LAN HTTP 入口与认证集成 | `192.168.10.127:443` | 记录已接管 Flux | `platform/envoy-gateway/README.md` | 已有 DNS、路由、认证与发布路径指南 |
 | [external-secrets](external-secrets.md) | OpenBao 到 Kubernetes 的秘密投射 | `Kubernetes API` | Helm 记录已接管；对象范围需区分 | `platform/external-secrets/README.md` | 已有字段投射示例与 ownership 边界 |
 | gitea-runner | 旧常驻 Gitea Actions runner | 纯 `self-hosted` | 维护者说明准备退役，尚未标为已退役 | `platform/gitea-runner/README.md`、维护者说明 | 新 workflow 改用 [动态 Pod/VM](gitea-dynamic-runner.md) 的明确 labels |
 | [k3s DNS](k3s-dns.md) | 集群 CoreDNS 定制 | `集群内 DNS` | 仅发现 DNS 配置 | `platform/k3s/Corefile.desired` | 已有集群 DNS 使用与配置边界说明 |

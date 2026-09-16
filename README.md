@@ -4,6 +4,7 @@
 
 ## 从这里开始
 
+- [发布新服务](guides/publish-service.md)：串联 LAN DNS、证书、HTTPRoute、认证与 GitOps。
 - [服务总览](services/index.md)：有什么、有什么用、在哪里、状态依据是什么。
 - [Gitea / Actions 入门](services/gitea.md)：登录、创建仓库、运行第一个 CI 与选择 runner。
 - [Grafana 使用指南](services/grafana.md)：内存看板、指标查询和日志搜索。
