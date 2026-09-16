@@ -9,6 +9,7 @@
 - [PostgreSQL Tenant Operator](services/postgresql-tenant-operator.md)：计划在共享 PostgreSQL 上提供的 DBaaS 中间层。
 - [Gitea Dynamic Runner](services/gitea-dynamic-runner.md)：原 microVM runner，现支持 Pod/VM 两种一次性执行环境。
 - [NATS](services/nats.md)：已部署的集群共享消息服务，目前仅 Dynamic Runner 消费。
+- [旧 VictoriaMetrics 栈](services/victoriametrics-legacy.md)：运行栈已停用，历史数据卷保留。
 - [LAN DNS](services/lan-dns.md)：Blocky 主 DNS、路由器上游与备用、Samba AD 域 DNS 的现状。
 - [Authelia](services/authelia.md)：active 的唯一主 OIDC broker 与登录入口。
 - [待核实与文档缺口](verification.md)：互相矛盾的记录、缺少使用说明的服务、下一步核实方法。
@@ -28,7 +29,8 @@ PostgreSQL Tenant Operator 的 README 与架构文档，以及 Gitea Dynamic Run
 LAN DNS 已按维护者于 2026-09-16 提供的现状更新，未查询现场。
 Authelia 同日由维护者明确为 active、唯一的主 OIDC broker，已同步到服务总览。
 后续状态查询先向维护者确认动态工作与资料来源，授权范围内不重复询问。
-本轮没有查询运行环境；“文档记录已部署”不等于今天已验证健康。
+初轮没有查询运行环境；后续仅对旧 VictoriaMetrics 栈做了维护者明确授权的有限只读检查，
+检查范围和结果见对应页面。“文档记录已部署”不等于今天已验证健康。
 本库中的入口地址来自原有记录，也尚未逐一验证可达性。
 
 基础设施源码仓库：[homelab-infra](https://git.ddupan.top/panxiao81/homelab-infra)。

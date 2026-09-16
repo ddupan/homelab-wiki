@@ -1,7 +1,8 @@
 # 服务总览
 
 审阅日期：2026-09-16。以下覆盖源码工作区 apps/、platform/、infrastructure/ 的一级组件，以及集群入口。
-**所有条目本轮均未现场验证。** 状态栏表示维护者说明、文档、ticket 或配置证据，不表示实时健康状态。
+**除旧 VictoriaMetrics Compose 已获授权做有限现场检查外，其余条目未在本轮现场验证。**
+状态栏区分维护者说明、文档、ticket、配置与现场证据，不提供持续的实时健康判断。
 SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护者说明更新，
 独立项目按指定 README 收录。其余条目仍为初轮工作区盘点，查询前先向维护者对齐。
 来源路径相对于 [homelab-infra](https://git.ddupan.top/panxiao81/homelab-infra)；包含未提交内容，见首页证据边界。
