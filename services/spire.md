@@ -78,6 +78,10 @@ SPIFFE/SPIRE 取代了原计划中由 **workload-sts 承担统一 IAM 平台**�
    `auth/jwt-spire/login` 换取短期 Bao token。
 5. 只执行该 policy 允许的操作；退出时尽力吊销 token，并清理进程内的临时凭据。
 
+对于动态 CI，这里的下游登录、audience 选择、token 交换及清理由 workflow 负责。
+[Dynamic Runner](gitea-dynamic-runner.md) 提供 Pod/VM 执行环境及获取自身 SPIFFE 身份的能力，
+不将 OpenBao 或其他服务的业务登录流程内置为 runner 职责。
+
 可直接沿用的配置模板、交换示例和排障步骤见
 [权威 RUNBOOK](https://git.ddupan.top/panxiao81/homelab-infra/src/branch/main/platform/spire/RUNBOOK.md)
 的第 4–8 节。这里不复制第二份操作脚本。接入需要新增身份和授权配置，不是挂载 socket 后

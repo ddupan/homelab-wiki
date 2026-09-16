@@ -61,10 +61,28 @@ webhook → NATS 是尽快验证 Pod/VM 生命周期的 bootstrap 实现。
 长期目标是 controller 兼容 Gitea Runner 协议，直接注册、声明 labels、领取 task，
 再交给 Pod/VM executor；不能把该目标描述为已经实现。
 
-## 身份与基础设施归属
+## 设计原则：runner 提供环境，workflow 消费身份
 
-- `jwt-broker` 是早期共享 Kubernetes runner 的过渡实验；目标架构不部署它，
-  每个动态 Pod/VM 直接取得自己的 SPIFFE 身份。该目标不代表真实 workload 身份接入已经完成。
+**每个动态 Pod/VM 都应具备独立获取自身 SPIFFE 身份的能力。** 这是执行环境的设计原则，
+由维护者于 2026-09-16 明确；不以是否接入某个特定下游服务作为 runner 的职责定义。
+
+runner 负责创建、运行和清理环境，并提供该环境获取自身 SPIFFE 身份的能力。
+workflow 决定如何消费身份：登录哪个服务、请求哪个 audience、交换什么 token、
+何时刷新或撤销凭据，以及执行哪些业务操作。下游服务继续自行验证身份并维护权限。
+
+例如，向 OpenBao 登录并交换 Bao token 是需要访问 OpenBao 的 workflow 的工作，
+不属于 runner 内置的业务流程。向其他服务请求 token 也遵循同一边界；
+runner 不应替 workflow 选择下游 role/policy，或统一代理其业务凭据交换。
+
+因此，身份相关的环境验收应关注 Pod/VM 能否取得各自身份和是否保持隔离；
+具体服务的登录与 token 使用由对应 workflow 验收。
+本段记录设计职责，不表示获取身份的能力已经在所有 backend 完成实现或现场验证。
+
+## 基础设施归属与运行凭据
+
+- `jwt-broker` 是早期共享 Kubernetes runner 的过渡实验；目标架构不部署它。
+- 以下 NATS、webhook 与 runner registration 凭据用于执行平台本身运作，
+  与 workflow 自行请求的下游业务 token 分开管理。
 - NATS 密码、webhook secret 和 registration token 从文件读取，不复制进知识库。
 - registration token 不写入 seed image；worker 通过单次 nonce endpoint 交给 guest。
 - base image 不携带 runner identity、registration token、SSH 密码或 host key。
