@@ -8,6 +8,7 @@
 - [SPIFFE/SPIRE](services/spire.md)：按 #34 整理的阶段状态、使用与 runbook 入口。
 - [待核实与文档缺口](verification.md)：互相矛盾的记录、缺少使用说明的服务、下一步核实方法。
 - [架构约束](architecture/constraints.md)：修改环境前必须遵守的设计及原始依据。
+- [workload-sts 设计历史](architecture/workload-sts-history.md)：已归档的早期身份方案及 SPIRE 替代决策。
 - [文档维护规则](CONTRIBUTING.md)：人和 AI 如何共同维护知识。
 - [服务文档模板](templates/service.md)：新服务必须同时提供使用说明。
 - [AI 工作入口](AGENTS.md)：新上下文按任务查找资料。
