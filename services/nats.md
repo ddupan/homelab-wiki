@@ -16,10 +16,22 @@ sources:
 共享服务的定位不随当前消费者数量改变。NATS 属于平台基础设施，
 Dynamic Runner 使用它传递任务消息，但不独占消息服务的用途和生命周期。
 
+## 多租户边界
+
+NATS 原生通过 **Account** 提供多租户隔离。不同 Account 拥有各自的 subject 命名空间
+和 JetStream 资源范围，多个消费者可以使用同一套 NATS 服务。
+不同 Account 下的 stream、subject 或 durable 名称不会仅因重名而互相冲突。
+
+因此，讨论队列与 consumer 必须同时明确所属 Account、stream 和消费者约定，
+不能把不同租户的名称当作集群全局冲突。跨 Account 通信需要显式配置，
+同一 Account 内的 worker 协调则遵循所属项目的约定。
+这一共享服务的隔离定位由维护者于 2026-09-16 补充。
+
 ## 如何接入与维护
 
 平台部署、连接入口、TLS 和账户配置以 homelab-infra 的 `platform/nats/README.md`
-及其配置为维护入口。新增消费者应使用适合自身的账户与权限，不能直接沿用 runner 的业务约定。
+及其配置为维护入口。新租户通过独立 Account 及对应权限接入；属于同一租户的消费者
+按该 Account 的业务约定使用资源，不能把 runner 的约定推广为整个集群的统一命名要求。
 
 Dynamic Runner 的 stream、subject、durable 名称、worker 配置和具体启用范围，以
 [gitea-dynamic-runner 项目文档](https://git.ddupan.top/panxiao81/gitea-dynamic-runner)

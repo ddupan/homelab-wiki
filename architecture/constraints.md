@@ -18,7 +18,7 @@
 | NetBox 目前是评估，拓扑由 Git 管理 | 不把网页编辑结果当作新的权威数据 | `apps/netbox/README.md`、`CLAUDE.md` |
 | 现有 privileged DinD runner 只运行可信 workflow | 实例级 runner 不能视为不可信任务隔离边界 | `platform/gitea-runner/README.md` |
 | 每个动态 Pod/VM 应能独立取得自身 SPIFFE 身份；runner 只提供执行环境 | 登录目标、audience、token 交换及业务凭据生命周期由 workflow 决定；服务自行维护权限 | [Dynamic Runner 设计原则](../services/gitea-dynamic-runner.md)，维护者于 2026-09-16 明确 |
-| NATS 是集群共享消息服务，目前仅 Dynamic Runner 消费 | 平台服务与消费者职责分开；runner 的 durable 等动态业务约定由其项目文档维护 | [NATS](../services/nats.md)，维护者于 2026-09-16 说明 |
+| NATS 是集群共享消息服务，原生以 Account 隔离租户，目前仅 Dynamic Runner 消费 | 不把跨 Account 的名称当作全局冲突；runner 所属 Account 内的 durable 等业务约定由其项目文档维护 | [NATS](../services/nats.md)，维护者于 2026-09-16 说明 |
 | zot 匿名入口只读；鉴权入口必须按具体身份授权 | 能认证不代表可以推送；不得给整个 trust domain 写权限 | `apps/zot/README.md` |
 
 通用变更约束：先做适用的 plan/check/diff，再操作现场；不将凭据和 Terraform state

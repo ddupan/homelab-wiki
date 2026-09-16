@@ -57,7 +57,8 @@ Gitea workflow_job webhook
 `microvm-runner-launch` 管理 VM 的临时磁盘、网络及清理，`guest-runner` 领取一次性
 注册凭据并以 ephemeral 模式注册。`pod-worker` 创建 Kubernetes 执行 Pod。
 该次 README 描述同一 runner label 的 worker 共享同一个 durable consumer，通过增加 worker
-或 capacity 扩容。具体 durable 名称和后续调度改动以项目文档为准。
+或 capacity 扩容。这是 runner 所属 Account 和 stream 内的协调约定，不是跨 NATS Account
+的全局命名要求。具体 durable 名称和后续调度改动以项目文档为准。
 
 [NATS](nats.md) 作为集群共享服务部署；维护者说明当前只有 Dynamic Runner 消费它，
 不因此将 NATS 视为 runner 私有组件。
