@@ -35,8 +35,11 @@ SPIFFE/SPIRE 按维护者指定，以 [#34](https://git.ddupan.top/panxiao81/hom
 
 - `docs/cicd.md` 提及 `e5renew`、`rustfs`，但无独立组件目录；需要确认现状与归属。
 - `infrastructure/docker/README.md` 提及仓库外 `research-auto`，不能在本轮算作已盘点服务。
-- 本轮发现远端仓库 `gitea-microvm-runner`、`postgresql-tenant-operator`，
+- 本轮发现远端仓库 `gitea-microvm-runner`，
   尚未审阅内容或运行状态。后续将跨仓库服务纳入总览。
+- PostgreSQL Tenant Operator 已按维护者说明及项目 README/架构文档收录为
+  [计划中的 DBaaS 中间层](services/postgresql-tenant-operator.md)。共享 PostgreSQL 已在使用，
+  operator 仍按项目记录标为 API 骨架阶段；本轮未查询运行环境。
 - workload-sts 已按维护者提供的信息查阅：仓库已归档，停止开发、不部署 PoC，
   作为[早期设计与替代决策的历史来源](architecture/workload-sts-history.md)保留，不列为待接入服务。
 - 新增 NATS、zot、microVM 等来源含未提交文件；合并后补可访问的 commit/PR 链接。

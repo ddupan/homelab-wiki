@@ -67,6 +67,7 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；其他条目仍为初轮工作区
 
 ## 计划、归档与范围外
 
+- [PostgreSQL Tenant Operator](postgresql-tenant-operator.md)：计划中的 DBaaS 中间层，管理共享实例中的数据库与账号；README 记录为 API 骨架阶段，不代表服务已上线。
 - [workload-sts](../architecture/workload-sts-history.md)：已归档的早期机器身份方案；停止开发、不部署 PoC，由 SPIFFE/SPIRE 替代。
 - Backstage：规划中的服务目录与文档入口；本轮未发现独立部署目录。
 - Keycloak、Casdoor：`archive/` 下有明确退役记录，替代入口为 Authelia。
