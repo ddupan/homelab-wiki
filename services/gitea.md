@@ -41,7 +41,7 @@ name: Hello
 on: [push]
 jobs:
   hello:
-    runs-on: self-hosted
+    runs-on: [self-hosted, pod]
     steps:
       - name: Check execution
         run: echo 'homelab CI is running'
@@ -52,15 +52,21 @@ jobs:
 若仓库设置没有 Actions 开关，先确认自己的管理权限。
 workflow 路径、启用方式与事件规则见 [Gitea 官方入门](https://docs.gitea.com/usage/actions/quickstart/)。
 
-`self-hosted` 来自现有 homelab-infra workflow。本页没有检查当前在线 runner：
-如果任务排队，先查看 runner 是否在线以及是否匹配 labels，不能把入队当作执行成功。
+维护者于 2026-09-16 说明：动态 `pod` 已上线测试，系统总并发量为 4；
+纯 `self-hosted` runner 准备退役，新 workflow 使用明确的动态环境 labels。
+本例据此采用 `[self-hosted, pod]`，本轮未实际运行示例。
+若任务排队，除 runner 在线状态和 labels 外，也要考虑系统并发容量，不能把入队当作执行成功。
 
 ## 选择 runner
 
 | 需求 | 使用入口 |
 |---|---|
-| 现有可信仓库的常规 CI | 已有 workflow 使用 `self-hosted`；常驻 runner 的实现见 `platform/gitea-runner/README.md` |
-| 动态一次性 Pod 或 VM | [Dynamic Runner](gitea-dynamic-runner.md)，接口为 `[self-hosted, pod]` / `[self-hosted, vm]`；开发进度及启用条件以项目文档为准 |
+| 动态 Pod：已上线测试 | `[self-hosted, pod]`；系统总并发 4，不是每个仓库各有 4 个名额 |
+| 动态 VM：正在工作 | `[self-hosted, vm]`；系统总并发 1，具体可用范围和进度以项目文档为准 |
+| 旧常驻 runner：准备退役 | 纯 `self-hosted`，不再作为新 workflow 的默认示例；已有 workflow 需按需求迁移到明确的 Pod/VM 接口 |
+
+上述阶段与容量由维护者于 2026-09-16 提供。实现与后续变化见
+[Dynamic Runner](gitea-dynamic-runner.md) 及其项目文档。
 
 常驻 runner 使用 privileged DinD，README 明确限定可信 workflow；不要为不可信代码开放它。
 动态 runner 提供环境及获取自身 SPIFFE 身份的能力；登录下游、请求 token 和凭据清理由 workflow 负责。

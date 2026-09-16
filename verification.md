@@ -12,6 +12,8 @@
 NATS 已作为集群共享服务部署，当前唯一消费者为 Dynamic Runner，见 [NATS](services/nats.md)。
 维护者明确 Dynamic Runner 正在积极开发，其启用范围、durable 名称和实现进度以
 [项目文档](https://git.ddupan.top/panxiao81/gitea-dynamic-runner)为准。
+维护者补充动态 Pod 已上线测试、系统总并发 4，VM 正在工作、系统总并发 1；
+纯 self-hosted runner 准备退役。使用入口见 [Gitea / Actions](services/gitea.md)。
 不再将旧示例的 durable 名称差异或启用范围列为独立待核实项。
 NATS 原生通过 Account 隔离租户，跨 Account 的名称不构成全局冲突；
 runner 的队列协调约定仅在其所属 Account 和 stream 范围内讨论。
