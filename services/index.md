@@ -1,8 +1,9 @@
 # 服务总览
 
 审阅日期：2026-09-16。以下覆盖源码工作区 apps/、platform/、infrastructure/ 的一级组件，以及集群入口。
-**所有条目本轮均未现场验证。** 状态栏表示文档、ticket 或配置证据，不表示实时健康状态。
-SPIFFE/SPIRE 已按维护者授权补读 #34；其他条目仍为初轮工作区盘点，查询前先向维护者对齐。
+**所有条目本轮均未现场验证。** 状态栏表示维护者说明、文档、ticket 或配置证据，不表示实时健康状态。
+SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护者说明更新，
+独立项目按指定 README 收录。其余条目仍为初轮工作区盘点，查询前先向维护者对齐。
 来源路径相对于 [homelab-infra](https://git.ddupan.top/panxiao81/homelab-infra)；包含未提交内容，见首页证据边界。
 
 入口按来源记录列出，访问范围和可达性仍需验证。缺口详情见[待核实清单](../verification.md)。
@@ -11,7 +12,7 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；其他条目仍为初轮工作区
 
 | 组件 | 用途 | 记录入口 | 状态依据 | 来源 | 文档缺口 / 下一步 |
 |---|---|---|---|---|---|
-| authelia | 统一登录与 OIDC | `auth.ddupan.top` | 记录已部署；旧 README 冲突 | `apps/authelia/README.md` | 补当前登录与接入指南 |
+| [authelia](authelia.md) | 唯一主 OIDC broker、统一登录 | `auth.ddupan.top` | active；维护者于 2026-09-16 明确已在工作 | 维护者说明、`apps/authelia/` | 同步源码 README 中过时的 OIDC 阶段说明 |
 | [blocky](lan-dns.md) | LAN 主 DNS、广告过滤、分流 | `192.168.10.127:53` | 维护者说明已作为 DHCP 主 DNS，上游为路由器 | 维护者 2026-09-16 说明、`apps/blocky/README.md` | 无需逐台确认主机；旧源码说明待同步 |
 | codex-proxy | 代理服务，具体接口待确认 | `待核实` | 仅发现配置 | `apps/codex-proxy/docker-compose.yml` | 缺 README 与使用说明 |
 | gitea | 代码托管与 Actions | `git.ddupan.top` | 记录已部署 | `apps/gitea/README.md` | 补首次使用与 runner 选择 |

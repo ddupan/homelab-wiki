@@ -6,6 +6,10 @@
 
 ## 已对齐的动态工作
 
+Authelia 已按维护者于 2026-09-16 的说明标为 **active、唯一的主 OIDC broker**，
+见 [Authelia](services/authelia.md)。原工作区的“OIDC 后续启用”描述待同步，
+不再将其列为上线状态冲突，也不据此发起现场核实。
+
 LAN DNS 已按维护者于 2026-09-16 提供的现状对齐：DHCP 下发主 DNS Blocky、副 DNS
 路由器，Blocky 上游为路由器，Samba AD 部分已完成。详见 [LAN DNS](services/lan-dns.md)。
 维护者明确无需逐台确认主机；源码 DNS README 的旧描述待同步，不再据此判定尚未启用。
@@ -20,7 +24,6 @@ SPIFFE/SPIRE 按维护者指定，以 [#34](https://git.ddupan.top/panxiao81/hom
 
 | 项目 | 两边的记录 | 核实与收敛方式 |
 |---|---|---|
-| Authelia | README 仍描述 OIDC 为后续阶段、旧 Contour/Traefik 路径；退役记录和 Envoy 文档已描述 Authelia 替代旧 IdP | 核对 OIDC discovery、登录及 forward-auth，重写过时段落；迁移旧文档前检查其中的敏感示例 |
 | Dynamic Runner 的启用范围 | 新仓库 README 定义 Pod/VM 两种接口；旧工作区仍记录 kind-microvm PoC | 软件与基础设施归属已由 README 明确；实际启用范围先问维护者，再按指定 ticket 或验证记录补充，不将旧 PoC 当作新接口已上线的依据 |
 | NATS durable 名称 | NATS 文档示例为 `kind-microvm-pve2`；microVM 文档配置为 `kind-microvm`，要求同类 worker 共享 durable | 查运行配置和 consumer；统一文档，避免多 worker 队列语义不一致 |
 | 旧 VictoriaMetrics Compose | `platform/observability/README.md` 说已替代；`apps/victoriametrics/` 仍留配置 | 只读检查 Docker 与采集目标，确认是否仍承担职责，再标记退役或迁移 |
