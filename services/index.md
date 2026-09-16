@@ -16,20 +16,19 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 |---|---|---|---|---|---|
 | [authelia](authelia.md) | 唯一主 OIDC broker、统一登录 | `auth.ddupan.top` | active；维护者于 2026-09-16 明确已在工作 | 维护者说明、`apps/authelia/` | 同步源码 README 中过时的 OIDC 阶段说明 |
 | [blocky](lan-dns.md) | LAN 主 DNS、广告过滤、分流 | `192.168.10.127:53` | 维护者说明已作为 DHCP 主 DNS，上游为路由器 | 维护者 2026-09-16 说明、`apps/blocky/README.md` | 无需逐台确认主机；旧源码说明待同步 |
-| codex-proxy | 代理服务，具体接口未记录 | `未记录` | 仅发现配置 | `apps/codex-proxy/docker-compose.yml` | 缺 README 与使用说明 |
 | [gitea](gitea.md) | 代码托管与 Actions | `git.ddupan.top` | 记录已部署 | `apps/gitea/README.md` | 已有登录、最小 CI 与 runner 选择指南 |
 | http-echo | Flux 部署与漂移修复 canary | `集群内` | 记录已验证 | `apps/http-echo/README.md` | 已有验证步骤 |
-| litellm-gateway | 模型 API 网关，实际消费者未记录 | `未记录` | 仅发现配置 | `apps/litellm-gateway/docker-compose.yml` | 缺 README 与接入说明 |
+| [litellm-gateway](litellm-gateway.md) | 模型 API 网关，实际消费者未记录 | `宿主 TCP 4000；地址未记录` | 仅发现配置 | `apps/litellm-gateway/docker-compose.yml` | 已有参数、请求示例与依赖说明 |
 | marker | GPU 文档转换 API | `集群内端口 8001` | 配置与部署指南；未附上线记录 | `apps/marker/README.md` | 缺 API 使用例子 |
 | netboot | PXE 与系统安装 | `192.168.10.127` | 有部署及使用记录 | `apps/netboot/README.md` | 已有客户端启动说明 |
 | [netbox](netbox.md) | 网络资产与地址管理评估 | `netbox.ad.ddupan.top` | 记录已部署；评估用途 | `apps/netbox/README.md` | 已有浏览与 Git 修改入口指南 |
 | openviking | 上下文检索服务 | `记录端口 1933 / 8020` | 配置与部署指南；未附上线记录 | `apps/openviking/README.md` | 缺导入、查询的完整例子 |
-| ps3netsrv | PS3 网络内容服务 | `未记录` | Docker 运维文档记录运行 | `apps/ps3netsrv/docker-compose.yml` | 缺客户端使用与挂载说明 |
+| [ps3netsrv](ps3netsrv.md) | PS3 网络内容服务 | `宿主 TCP 38008；地址未记录` | Docker 运维文档记录运行 | `apps/ps3netsrv/docker-compose.yml` | 已有客户端与内容目录指南 |
 | [seaweedfs](seaweedfs.md) | S3 对象存储 | `s3.ad.ddupan.top` | zot 文档记录已使用 | `apps/seaweedfs/README.md` | 已有客户端读写指南与备份边界说明 |
 | [shared-postgresql](shared-postgresql.md) | 共享 PostgreSQL / CNPG | `shared-db namespace` | 历史迁移记录已完成 | `apps/shared-postgresql/migration.md` | 已有连接、应用接入与共享资源边界指南 |
 | smtp-relay | 应用经 Microsoft 365 发信 | `smtp-relay.smtp-relay.svc.cluster.local:25` | 有配置与测试指南；未附上线记录 | `apps/smtp-relay/README.md` | 补发信链路与消费者说明 |
-| tailscale | 远程网络与子网路由 | `Tailscale 网络` | 有配置；本轮未读敏感安装脚本 | `apps/tailscale/subnet-routes.sh` | 缺 README、路由与客户端说明 |
-| vlmcsd | KMS 兼容服务，使用范围未记录 | `未记录` | 仅发现配置 | `apps/vlmcsd/compose.yaml` | 缺 README 与状态说明 |
+| [tailscale](tailscale.md) | 远程网络与子网路由 | `Tailscale 网络` | 有配置；本轮未读敏感安装脚本 | `apps/tailscale/subnet-routes.sh` | 已有远程访问与路由边界指南 |
+| [vlmcsd](vlmcsd.md) | KMS 兼容服务，使用范围未记录 | `宿主 TCP 1688；地址未记录` | 仅发现配置 | `apps/vlmcsd/compose.yaml` | 已有协议入口与客户端指南；未查询现场 |
 | [zot](zot.md) | OCI 镜像与制品仓库 | `zot.ad.ddupan.top / zot-push.ad.ddupan.top` | 文档记录 9 月 16 日验收 | `apps/zot/README.md` | 已有拉取与发布模板；实际 publisher 授权以项目配置为准 |
 
 ## 平台
@@ -68,6 +67,8 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 | homelab | k3s 的 Flux reconciliation 入口 | `flux-system namespace` | 已有部署记录；部分汇总滞后 | `clusters/homelab/README.md` | 同步 SPIRE 与新增组件状态 |
 
 ## 计划、归档与范围外
+
+- codex-proxy：维护者于 2026-09-16 表述为“应该是退役的”，按退役方向归档；源码目录仍保留，未确认现场清理情况，不再作为新接入对象。
 
 - [旧 VictoriaMetrics Compose](victoriametrics-legacy.md)：旧配置和三个数据卷已于 2026-09-16 按维护者要求删除；现役监控在 platform/observability。
 

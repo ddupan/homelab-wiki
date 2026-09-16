@@ -44,6 +44,10 @@ SPIFFE/SPIRE 按维护者指定，以 [#34](https://git.ddupan.top/panxiao81/hom
 
 ## 已确认的归属与范围
 
+- 维护者于 2026-09-16 说明 codex-proxy“应该是退役的”，已从现役应用列表移至归档范围；
+  未查询运行环境，也没有删除源码或数据。LiteLLM、Tailscale、ps3netsrv、vlmcsd 无需补充动态事项，
+  已基于仓库配置补使用指南；这不等于新增的现场验收。
+
 - e5renew 和 research-auto 已由维护者明确为 GitHub 上的[外部消费者](services/external-consumers.md)，
   不属于 homelab 基础设施，不再列为盘点盲区或缺失组件。
 - `gitea-microvm-runner` 已更名 `gitea-dynamic-runner`，按维护者指定查阅 README，

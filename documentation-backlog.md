@@ -14,11 +14,19 @@
 
 - [共享 PostgreSQL](services/shared-postgresql.md)：应用接入、连接检查与共享实例维护边界。
 
+- [LiteLLM](services/litellm-gateway.md)：模型请求、认证边界与独立数据库依赖。
+- [Tailscale](services/tailscale.md)：客户端接入、子网路由和 operator Service 的区别。
+- [ps3netsrv](services/ps3netsrv.md)、[vlmcsd](services/vlmcsd.md)：客户端使用与配置入口。
+
 以上依据源码文档和上游说明整理，示例未在本轮执行，不作为现场验收记录。
 
 ## 后续使用说明
 
-1. codex-proxy、LiteLLM gateway、Tailscale、ps3netsrv、vlmcsd、k3s：整理用途和已知状态；这些目录缺少根 README。
+1. k3s：补 CoreDNS 定制说明；目录缺少根 README。
+2. marker、openviking、smtp-relay、external-secrets、openebs 等：按服务总览逐步补齐消费示例。
+
+codex-proxy 已按维护者“应该是退役的”的说明移至归档范围，不再补新接入指南。
+本轮新增的四份使用指南已完成；其源码目录仍缺根 README，权威配置入口已在各页列出。
 
 ## 文档同步与来源链接
 
