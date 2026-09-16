@@ -29,10 +29,10 @@ sources:
 中的旧路径引用已修正。旧配置可以从 Git 历史找回；不能通过 Git 恢复已删除的数据卷内容。
 本次未创建任何数据备份。
 
-基础设施清理原本地提交为 `3c4045a`，随后从最新 main 单独移植为
-[`d9486b4`](https://git.ddupan.top/panxiao81/homelab-infra/commit/d9486b4)，
-已推送至 `chore/remove-legacy-monitoring` 分支，尚未合并 main。
-该分支只包含此次清理；源码工作区原有的其他修改保留未提交。
+基础设施清理已通过 [PR #73](https://git.ddupan.top/panxiao81/homelab-infra/pulls/73)
+于 2026-09-16 16:05:33 UTC 合并到 main，合并提交为
+[`9c64d31`](https://git.ddupan.top/panxiao81/homelab-infra/commit/9c64d31d3dea2ac2663170ca8125f03ac95cf0dd)。
+PR 仅包含此次清理；源码工作区原有的其他修改未纳入。
 
 ## 清理后的检查
 

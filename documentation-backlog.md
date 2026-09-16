@@ -16,4 +16,3 @@
 
 - 源码仓库中 Authelia OIDC、LAN DNS、SPIRE 的旧说明后续与知识库结论同步。
 - 未提交工作区来源合并后，补充正式 commit/PR 链接。
-- 旧监控清理提交 `d9486b4` 已推送至 `chore/remove-legacy-monitoring` 分支，尚未合并 main；属于代码交付收尾，不是状态疑问。
