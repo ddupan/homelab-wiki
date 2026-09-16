@@ -9,6 +9,8 @@
 - [Grafana 使用指南](services/grafana.md)：内存看板、指标查询和日志搜索。
 - [zot 使用指南](services/zot.md)：匿名拉取、SPIFFE 发布身份与仓库授权。
 - [SeaweedFS 使用指南](services/seaweedfs.md)：S3 客户端接入、对象读写与存储边界。
+- [OpenBao 使用指南](services/openbao.md)：日常登录、按权限取密与机器身份边界。
+- [NetBox 使用指南](services/netbox.md)：浏览设备和 IPAM，按 Git 来源维护资产镜像。
 - [SPIFFE/SPIRE](services/spire.md)：按 #34 整理的阶段状态、使用与 runbook 入口。
 - [PostgreSQL Tenant Operator](services/postgresql-tenant-operator.md)：计划在共享 PostgreSQL 上提供的 DBaaS 中间层。
 - [Gitea Dynamic Runner](services/gitea-dynamic-runner.md)：原 microVM runner，现支持 Pod/VM 两种一次性执行环境。

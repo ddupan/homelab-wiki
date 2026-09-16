@@ -1,0 +1,86 @@
+---
+title: OpenBao 使用指南
+lifecycle: active
+evidence: documented
+last_reviewed: 2026-09-16
+last_verified: null
+---
+
+# OpenBao
+
+OpenBao 提供秘密管理与内部 CA，部署在 Kubernetes 之外的独立主机上。
+日常使用是以自己的身份登录，按已有 policy 读取秘密或申请短期凭据。
+
+本页依据 homelab-infra 工作区 `infrastructure/openbao/README.md` 整理，
+CLI 语法参考下列官方文档。本轮未登录服务、读取秘密或验证现场。
+
+## 人的登录入口
+
+前提是客户端能解析并访问内部域名，已安装 `bao` CLI，且账号具备相应 OIDC 授权。
+
+```bash
+export BAO_ADDR=https://bao.ad.ddupan.top:8200
+bao login -method=oidc -no-print
+```
+
+按提示通过浏览器进入 Authelia，完成登录和二次认证。
+使用域名进行 TLS 校验，不用 IP 地址代替，也不关闭证书校验。
+`-no-print` 避免显示 token，但成功登录后仍会把它存入本机 token helper，供后续命令使用。
+因此应在自己的受控会话中登录。参见 [OpenBao login](https://openbao.org/docs/commands/login/)。
+
+登录成功后，只查看当前会话的权限与有效期：
+
+```bash
+bao token lookup -field=policies
+bao token lookup -field=ttl
+```
+
+这两个命令不打印完整 token；字段选项见
+[token lookup](https://openbao.org/docs/commands/token/lookup/)。能登录不代表能读取任意秘密。
+
+## 按授权路径读取一个字段
+
+先由服务所有者提供准确的 mount、秘密路径和字段名。
+下例 `YOUR_AUTHORIZED_PATH` 是占位符，须替换为 `kv` mount 下已授权且存在的路径；
+`password` 也应替换为实际字段名。命令仅适合已获相应权限的会话。
+
+```bash
+set +x
+APP_PASSWORD="$(bao kv get -mount=kv -field=password YOUR_AUTHORIZED_PATH)"
+# 在当前会话中交给实际消费者；不要 echo，也不要放入命令行参数或日志。
+unset APP_PASSWORD
+```
+
+示例只演示接收字段后清除变量，不会配置任何应用；接入脚本还应检查命令失败并停止后续操作。
+`kv get` 会处理 KV 引擎的 API 路径，CLI 的相对路径无需自行插入 `data/`。
+参见 [OpenBao kv get](https://openbao.org/docs/commands/kv/get/)。
+
+Kubernetes 应用通常消费 ESO 投射的 Secret。修改秘密应通过其受管来源及对应服务的轮换流程，
+不能只编辑 ESO 生成的副本。不要把完整秘密内容粘贴到 AI 上下文、issue 或 wiki。
+
+## 机器身份的使用边界
+
+| 调用者 | 本库已记录的认证路径 |
+|---|---|
+| 人 | Authelia OIDC 登录 |
+| laptop 本地 AI agent | 独立客户端证书，cert auth role 为 `local-agent` |
+| SPIFFE workload | 按 [SPIRE 接入说明](spire.md) 与对应 OpenBao role 配置换取 token |
+
+源码记录的本地 agent 证书与私钥由 Ansible 安装在 `/etc/homelab-agent/openbao/`，
+不要复制到仓库或 workflow。其 token TTL 为 15 分钟、最长 1 小时；权限包括受限的 SSH 签名、
+自身证书续期及 `kv/agents/local/*`，明确不包含 `kv/k8s/*`。
+证书注册、登录与续期按源码 README 操作，不能从 SPIFFE 的整体设计推断该路径已迁移。
+
+SPIFFE 验证机器身份，OpenBao 自己签发 token 并维护 policy。
+Dynamic Runner 提供执行环境和 workload 身份，具体向 OpenBao 请求什么 token 由 workflow 决定。
+
+## 权限申请与故障入口
+
+申请权限时提供调用者身份、准确路径、所需动作、有效期及用途，由维护者调整受管 role/policy。
+遇到拒绝访问先核对上述信息及会话有效期，不用管理员 token 代替应用身份。
+连接失败时先区分内部 DNS、网络、TLS 与认证问题；OIDC 回调问题需结合客户端浏览器所在位置排查。
+
+部署、PKI、SSH 签名、本地 agent 身份和恢复细节见 homelab-infra
+`infrastructure/openbao/README.md`。服务依赖主机持久存储及 Raft 数据，人的登录还依赖 Authelia。
+根密钥与恢复身份不应依赖 Kubernetes 或只能由 OpenBao 自身解密的秘密；
+日常登录成功不等于已完成备份或灾难恢复验收。
