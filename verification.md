@@ -1,9 +1,11 @@
-# 待核实与文档缺口
+# 首轮状态对齐记录（已完成）
 
-审阅日期：2026-09-16；初版依据工作区，后续按维护者说明和指定资料对齐。
-旧 VictoriaMetrics Compose 已获授权检查并清理，其余项目未因本清单自动查询现场。
-下面的检查方法只是候选步骤，执行前先问维护者当前进度及查询范围。
-以下路径相对于 homelab-infra。优先修复影响恢复、认证、DNS 和首次使用的问题。
+**2026-09-16，维护者确认本轮待核实事项已结束；当前没有开放的状态核实任务。**
+
+结论来自维护者说明、指定的项目文档与 ticket，以及旧监控栈的授权检查和清理。
+本轮完成不等于所有服务都经过现场检查，也不等于各开发项目全部完工。
+下文保留对齐结果；后续写作与源码文档同步移至[文档完善清单](documentation-backlog.md)。
+动态实施进度继续由各项目文档和 ticket 维护，不另开一轮全量状态盘点。
 
 ## 已对齐的动态工作
 
@@ -28,7 +30,7 @@ SPIFFE/SPIRE 按维护者指定，以 [#34](https://git.ddupan.top/panxiao81/hom
 原工作区集群总览的“首次上线待验证”不作为当前阶段判断。
 详见 [SPIFFE/SPIRE 使用入口与阶段状态](services/spire.md)；源码工作区本轮未修改。
 
-## 待向维护者确认的记录差异
+## 旧监控栈清理结果
 
 初轮列出的状态差异已按维护者说明、指定资料或授权检查完成分类；不再保留自动现场核查任务。
 
@@ -37,16 +39,7 @@ SPIFFE/SPIRE 按维护者指定，以 [#34](https://git.ddupan.top/panxiao81/hom
 未备份或迁移数据。新 Kubernetes 栈的资源状态检查和指标清单渲染通过。
 基础设施清理提交 `3c4045a` 已在本地创建，尚未推送；数据处置不再是待决事项。
 
-## 优先补充的使用说明
-
-1. Gitea / Actions：登录、创建仓库、选择 runner，以及可信任务限制。
-2. Grafana：登录、找到内存与 Swap 看板、查询指标和日志的一个完整例子。
-3. zot / SeaweedFS：拉取、发布授权、S3 客户端接入，以及数据备份边界。
-4. OpenBao：日常登录、按权限取用秘密、申请权限；与灾难恢复分开说明。
-5. NetBox：查看拓扑与 IPAM 的路径，强调目前是评估镜像，改动入口在 Git。
-6. codex-proxy、LiteLLM gateway、shared PostgreSQL、Tailscale、ps3netsrv、vlmcsd、k3s：补用途和当前状态；这些目录缺少根 README。
-
-## 盘点盲区
+## 已确认的归属与范围
 
 - e5renew 和 research-auto 已由维护者明确为 GitHub 上的[外部消费者](services/external-consumers.md)，
   不属于 homelab 基础设施，不再列为盘点盲区或缺失组件。
@@ -57,7 +50,6 @@ SPIFFE/SPIRE 按维护者指定，以 [#34](https://git.ddupan.top/panxiao81/hom
   operator 仍按项目记录标为 API 骨架阶段；本轮未查询运行环境。
 - workload-sts 已按维护者提供的信息查阅：仓库已归档，停止开发、不部署 PoC，
   作为[早期设计与替代决策的历史来源](architecture/workload-sts-history.md)保留，不列为待接入服务。
-- 新增 NATS、zot、microVM 等来源含未提交文件；合并后补可访问的 commit/PR 链接。
-- Backstage 仍作为计划入口记录；本轮没有证明已有部署。
+- Backstage 为计划中的统一入口，不作为已部署服务记录。
 
-完成核实后，将结果写回对应权威文档，并更新服务总览的证据等级和验证日期。
+后续出现新的状态问题时，先向维护者对齐，再按授权范围更新对应服务文档。

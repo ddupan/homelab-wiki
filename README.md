@@ -12,7 +12,8 @@
 - [旧 VictoriaMetrics 栈](services/victoriametrics-legacy.md)：旧运行栈、配置及数据卷已清理。
 - [LAN DNS](services/lan-dns.md)：Blocky 主 DNS、路由器上游与备用、Samba AD 域 DNS 的现状。
 - [Authelia](services/authelia.md)：active 的唯一主 OIDC broker 与登录入口。
-- [待核实与文档缺口](verification.md)：互相矛盾的记录、缺少使用说明的服务、下一步核实方法。
+- [首轮状态对齐记录](verification.md)：本轮已完成，没有开放的状态核实任务。
+- [文档完善清单](documentation-backlog.md)：后续补充使用说明、同步旧文档和完善来源链接。
 - [架构约束](architecture/constraints.md)：修改环境前必须遵守的设计及原始依据。
 - [workload-sts 设计历史](architecture/workload-sts-history.md)：已归档的早期身份方案及 SPIRE 替代决策。
 - [文档维护规则](CONTRIBUTING.md)：人和 AI 如何共同维护知识。

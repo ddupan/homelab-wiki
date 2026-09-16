@@ -7,7 +7,8 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 独立项目按指定 README 收录。其余条目仍为初轮工作区盘点，查询前先向维护者对齐。
 来源路径相对于 [homelab-infra](https://git.ddupan.top/panxiao81/homelab-infra)；包含未提交内容，见首页证据边界。
 
-入口按来源记录列出，访问范围和可达性仍需验证。缺口详情见[待核实清单](../verification.md)。
+入口按已有来源记录列出，未记录的内容保持未知，不自动生成现场核实任务。
+本轮状态对齐已[完成](../verification.md)；后续写作见[文档完善清单](../documentation-backlog.md)。
 
 ## 应用
 
@@ -15,21 +16,20 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 |---|---|---|---|---|---|
 | [authelia](authelia.md) | 唯一主 OIDC broker、统一登录 | `auth.ddupan.top` | active；维护者于 2026-09-16 明确已在工作 | 维护者说明、`apps/authelia/` | 同步源码 README 中过时的 OIDC 阶段说明 |
 | [blocky](lan-dns.md) | LAN 主 DNS、广告过滤、分流 | `192.168.10.127:53` | 维护者说明已作为 DHCP 主 DNS，上游为路由器 | 维护者 2026-09-16 说明、`apps/blocky/README.md` | 无需逐台确认主机；旧源码说明待同步 |
-| codex-proxy | 代理服务，具体接口待确认 | `待核实` | 仅发现配置 | `apps/codex-proxy/docker-compose.yml` | 缺 README 与使用说明 |
+| codex-proxy | 代理服务，具体接口未记录 | `未记录` | 仅发现配置 | `apps/codex-proxy/docker-compose.yml` | 缺 README 与使用说明 |
 | gitea | 代码托管与 Actions | `git.ddupan.top` | 记录已部署 | `apps/gitea/README.md` | 补首次使用与 runner 选择 |
 | http-echo | Flux 部署与漂移修复 canary | `集群内` | 记录已验证 | `apps/http-echo/README.md` | 已有验证步骤 |
-| litellm-gateway | 模型 API 网关，实际消费者待确认 | `待核实` | 仅发现配置 | `apps/litellm-gateway/docker-compose.yml` | 缺 README 与接入说明 |
-| marker | GPU 文档转换 API | `集群内端口 8001` | 配置与部署指南；上线待核实 | `apps/marker/README.md` | 缺 API 使用例子 |
+| litellm-gateway | 模型 API 网关，实际消费者未记录 | `未记录` | 仅发现配置 | `apps/litellm-gateway/docker-compose.yml` | 缺 README 与接入说明 |
+| marker | GPU 文档转换 API | `集群内端口 8001` | 配置与部署指南；未附上线记录 | `apps/marker/README.md` | 缺 API 使用例子 |
 | netboot | PXE 与系统安装 | `192.168.10.127` | 有部署及使用记录 | `apps/netboot/README.md` | 已有客户端启动说明 |
 | netbox | 网络资产与地址管理评估 | `netbox.ad.ddupan.top` | 记录已部署；评估用途 | `apps/netbox/README.md` | 补面向浏览者的使用路径 |
-| openviking | 上下文检索服务 | `记录端口 1933 / 8020` | 配置与部署指南；上线待核实 | `apps/openviking/README.md` | 缺导入、查询的完整例子 |
-| ps3netsrv | PS3 网络内容服务 | `待核实` | Docker 运维文档记录运行 | `apps/ps3netsrv/docker-compose.yml` | 缺客户端使用与挂载说明 |
+| openviking | 上下文检索服务 | `记录端口 1933 / 8020` | 配置与部署指南；未附上线记录 | `apps/openviking/README.md` | 缺导入、查询的完整例子 |
+| ps3netsrv | PS3 网络内容服务 | `未记录` | Docker 运维文档记录运行 | `apps/ps3netsrv/docker-compose.yml` | 缺客户端使用与挂载说明 |
 | seaweedfs | S3 对象存储 | `s3.ad.ddupan.top` | zot 文档记录已使用 | `apps/seaweedfs/README.md` | 补客户端接入、备份与恢复 |
 | shared-postgresql | 共享 PostgreSQL / CNPG | `shared-db namespace` | 历史迁移记录已完成 | `apps/shared-postgresql/migration.md` | 缺服务首页、租户接入说明 |
-| smtp-relay | 应用经 Microsoft 365 发信 | `smtp-relay.smtp-relay.svc.cluster.local:25` | 有配置与测试指南；上线待核实 | `apps/smtp-relay/README.md` | 核实发信链路与消费者 |
+| smtp-relay | 应用经 Microsoft 365 发信 | `smtp-relay.smtp-relay.svc.cluster.local:25` | 有配置与测试指南；未附上线记录 | `apps/smtp-relay/README.md` | 补发信链路与消费者说明 |
 | tailscale | 远程网络与子网路由 | `Tailscale 网络` | 有配置；本轮未读敏感安装脚本 | `apps/tailscale/subnet-routes.sh` | 缺 README、路由与客户端说明 |
-| victoriametrics | 旧 Compose 监控栈 | `待核实` | 文档称被平台栈替代；残留待查 | `apps/victoriametrics/compose.yaml` | 明确退役或现存职责 |
-| vlmcsd | KMS 兼容服务，使用范围待确认 | `待核实` | 仅发现配置 | `apps/vlmcsd/compose.yaml` | 缺 README 与状态说明 |
+| vlmcsd | KMS 兼容服务，使用范围未记录 | `未记录` | 仅发现配置 | `apps/vlmcsd/compose.yaml` | 缺 README 与状态说明 |
 | zot | OCI 镜像与制品仓库 | `zot.ad.ddupan.top / zot-push.ad.ddupan.top` | 文档记录 9 月 16 日验收 | `apps/zot/README.md` | 已有拉取示例；长期 CI 发布仍待接入 |
 
 ## 平台
@@ -81,4 +81,4 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 - `docs/superpowers/`：已退役工作流，记录已完成的 CNPG/ZFS 迁移。
 - `docs/cicd.md`、`docs/homelab-gitops-redesign.md`：部分实施设计，不代表所有阶段都上线。
 - `docs/gitea-upgrade-plan.md`：包含已完成升级记录，现状以服务 README 和现场为准。
-- 仓库外服务与独立源码仓库见[盘点盲区](../verification.md#盘点盲区)。
+- 仓库外服务与独立源码仓库见[已确认的归属与范围](../verification.md#已确认的归属与范围)。
