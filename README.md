@@ -39,6 +39,8 @@ Authelia 同日由维护者明确为 active、唯一的主 OIDC broker，已同�
 ## 内容归属
 
 本库保存全局导航、跨服务设计与约束、面向使用者的指南及跨服务 runbook。
+e5renew、research-auto 是 GitHub 上的[外部消费者](services/external-consumers.md)，不属于
+homelab 基础设施；本库不接管其应用文档或运行状态。
 紧贴实现的部署参数与操作细节继续保存在源码仓库的 README/runbook，双方以链接关联，
 不复制维护两份事实。单次变更由 commit/PR 记录，历史计划不能代替现状说明。
 

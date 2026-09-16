@@ -48,8 +48,9 @@ SPIFFE/SPIRE 按维护者指定，以 [#34](https://git.ddupan.top/panxiao81/hom
 
 ## 盘点盲区
 
-- `docs/cicd.md` 提及 `e5renew`、`rustfs`，但无独立组件目录；需要确认现状与归属。
-- `infrastructure/docker/README.md` 提及仓库外 `research-auto`，不能在本轮算作已盘点服务。
+- `docs/cicd.md` 提及 `rustfs`，但无独立组件目录；需要先向维护者确认现状与归属。
+- e5renew 和 research-auto 已由维护者明确为 GitHub 上的[外部消费者](services/external-consumers.md)，
+  不属于 homelab 基础设施，不再列为盘点盲区或缺失组件。
 - `gitea-microvm-runner` 已更名 `gitea-dynamic-runner`，按维护者指定查阅 README，
   已收录[动态 Pod/VM runner](services/gitea-dynamic-runner.md)的接口、组件和路线；实际运行状态未查询。
 - PostgreSQL Tenant Operator 已按维护者说明及项目 README/架构文档收录为
