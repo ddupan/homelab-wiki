@@ -48,7 +48,6 @@ SPIFFE/SPIRE 按维护者指定，以 [#34](https://git.ddupan.top/panxiao81/hom
 
 ## 盘点盲区
 
-- RustFS 已由维护者确认为 [S3 选型阶段的已退役实现](services/rustfs.md)，不再属于盘点盲区。
 - e5renew 和 research-auto 已由维护者明确为 GitHub 上的[外部消费者](services/external-consumers.md)，
   不属于 homelab 基础设施，不再列为盘点盲区或缺失组件。
 - `gitea-microvm-runner` 已更名 `gitea-dynamic-runner`，按维护者指定查阅 README，

@@ -69,7 +69,6 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 
 ## 计划、归档与范围外
 
-- [RustFS](rustfs.md)：S3 选型阶段测试过的实现，维护者已确认 retired；仅保留历史背景。
 - [e5renew、research-auto](external-consumers.md)：GitHub 上的外部消费者，不属于 homelab 基础设施；仅保留归属入口。
 - [Gitea Dynamic Runner](gitea-dynamic-runner.md)：正在积极开发的动态 Pod/VM runner，原名 gitea-microvm-runner；具体启用范围、调度和队列约定以项目文档为准。
 - [PostgreSQL Tenant Operator](postgresql-tenant-operator.md)：计划中的 DBaaS 中间层，管理共享实例中的数据库与账号；README 记录为 API 骨架阶段，不代表服务已上线。
