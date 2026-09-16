@@ -17,7 +17,7 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 | [authelia](authelia.md) | 唯一主 OIDC broker、统一登录 | `auth.ddupan.top` | active；维护者于 2026-09-16 明确已在工作 | 维护者说明、`apps/authelia/` | 同步源码 README 中过时的 OIDC 阶段说明 |
 | [blocky](lan-dns.md) | LAN 主 DNS、广告过滤、分流 | `192.168.10.127:53` | 维护者说明已作为 DHCP 主 DNS，上游为路由器 | 维护者 2026-09-16 说明、`apps/blocky/README.md` | 无需逐台确认主机；旧源码说明待同步 |
 | codex-proxy | 代理服务，具体接口未记录 | `未记录` | 仅发现配置 | `apps/codex-proxy/docker-compose.yml` | 缺 README 与使用说明 |
-| gitea | 代码托管与 Actions | `git.ddupan.top` | 记录已部署 | `apps/gitea/README.md` | 补首次使用与 runner 选择 |
+| [gitea](gitea.md) | 代码托管与 Actions | `git.ddupan.top` | 记录已部署 | `apps/gitea/README.md` | 已有登录、最小 CI 与 runner 选择指南 |
 | http-echo | Flux 部署与漂移修复 canary | `集群内` | 记录已验证 | `apps/http-echo/README.md` | 已有验证步骤 |
 | litellm-gateway | 模型 API 网关，实际消费者未记录 | `未记录` | 仅发现配置 | `apps/litellm-gateway/docker-compose.yml` | 缺 README 与接入说明 |
 | marker | GPU 文档转换 API | `集群内端口 8001` | 配置与部署指南；未附上线记录 | `apps/marker/README.md` | 缺 API 使用例子 |
@@ -42,7 +42,7 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 | gitea-runner | 可信 Gitea Actions 任务执行 | `Gitea Actions` | 记录已接管 Flux | `platform/gitea-runner/README.md` | 补 workflow label 与使用限制 |
 | k3s | 集群 CoreDNS 定制 | `集群内 DNS` | 仅发现 DNS 配置 | `platform/k3s/Corefile.desired` | 缺组件 README |
 | [nats](nats.md) | 集群共享消息与 JetStream 队列 | `nats.ad.ddupan.top:4222` | 已部署；维护者说明目前唯一消费者为 Dynamic Runner | 维护者 2026-09-16 说明、`platform/nats/README.md` | runner 消息队列约定以独立项目文档为准 |
-| observability | Grafana、指标、日志和追踪 | `grafana.ad.ddupan.top` | 记录已接管 Flux；9 月 16 日变更入口 | `platform/observability/README.md` | 补看板和查询使用指南 |
+| [observability / Grafana](grafana.md) | Grafana、指标、日志和追踪 | `grafana.ad.ddupan.top` | 记录已接管 Flux；9 月 16 日变更入口 | `platform/observability/README.md` | 已有看板、指标与日志查询指南 |
 | openebs | k3s 本地 ZFS 持久卷 | `localpv-zfs-ceph StorageClass` | 记录已接管 Flux | `platform/openebs/README.md` | 已有运维检查；补 PVC 使用边界 |
 | [spire](spire.md) | 跨基础设施的统一机器身份入口 | `Workload API / spire-oidc.ad.ddupan.top` | #34 记录基础设施与最小 OpenBao PoC 已完成；后续集成进行中 | [#34](https://git.ddupan.top/panxiao81/homelab-infra/issues/34)、[RUNBOOK](https://git.ddupan.top/panxiao81/homelab-infra/src/branch/main/platform/spire/RUNBOOK.md) | 已有接入指南；动态任务以 ticket 为准 |
 

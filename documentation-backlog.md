@@ -3,14 +3,19 @@
 本轮待核实事项已于 2026-09-16 收尾。以下是后续写作工作，不是未解决的状态核实任务，
 也不代表所有相关项目都已部署或经过现场验收。需要补充事实时仍先向维护者对齐范围。
 
-## 优先补充的使用说明
+## 已补充使用指南
 
-1. Gitea / Actions：登录、创建仓库、选择 runner，以及可信任务限制。
-2. Grafana：登录、找到内存与 Swap 看板、查询指标和日志的一个完整例子。
-3. zot / SeaweedFS：拉取、发布授权、S3 客户端接入，以及数据备份边界。
-4. OpenBao：日常登录、按权限取用秘密、申请权限；与灾难恢复分开说明。
-5. NetBox：查看拓扑与 IPAM 的路径，强调目前是评估镜像，改动入口在 Git。
-6. codex-proxy、LiteLLM gateway、shared PostgreSQL、Tailscale、ps3netsrv、vlmcsd、k3s：整理用途和已知状态；这些目录缺少根 README。
+- [Gitea / Actions](services/gitea.md)：登录、建仓库、最小 CI、runner 选择和常见问题。
+- [Grafana](services/grafana.md)：内存看板、指标查询、日志搜索和数据源用途。
+
+以上依据源码文档和上游说明整理，示例未在本轮执行，不作为现场验收记录。
+
+## 后续使用说明
+
+1. zot / SeaweedFS：拉取、发布授权、S3 客户端接入，以及数据备份边界。
+2. OpenBao：日常登录、按权限取用秘密、申请权限；与灾难恢复分开说明。
+3. NetBox：查看拓扑与 IPAM 的路径，强调目前是评估镜像，改动入口在 Git。
+4. codex-proxy、LiteLLM gateway、shared PostgreSQL、Tailscale、ps3netsrv、vlmcsd、k3s：整理用途和已知状态；这些目录缺少根 README。
 
 ## 文档同步与来源链接
 

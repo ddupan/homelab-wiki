@@ -5,6 +5,8 @@
 ## 从这里开始
 
 - [服务总览](services/index.md)：有什么、有什么用、在哪里、状态依据是什么。
+- [Gitea / Actions 入门](services/gitea.md)：登录、创建仓库、运行第一个 CI 与选择 runner。
+- [Grafana 使用指南](services/grafana.md)：内存看板、指标查询和日志搜索。
 - [SPIFFE/SPIRE](services/spire.md)：按 #34 整理的阶段状态、使用与 runbook 入口。
 - [PostgreSQL Tenant Operator](services/postgresql-tenant-operator.md)：计划在共享 PostgreSQL 上提供的 DBaaS 中间层。
 - [Gitea Dynamic Runner](services/gitea-dynamic-runner.md)：原 microVM runner，现支持 Pod/VM 两种一次性执行环境。
