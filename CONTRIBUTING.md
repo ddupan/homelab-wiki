@@ -86,8 +86,9 @@ git diff --check
 
 依赖版本固定在 [requirements-docs.txt](requirements-docs.txt)。安装依赖需要网络，检查器本身离线运行。
 Gitea 工作流 [.gitea/workflows/docs.yml](.gitea/workflows/docs.yml) 在 main push、PR 和手动触发时运行，
-使用 `[self-hosted, pod]` 与 Python 容器；无需业务秘密或集群权限。
-CI 拉取容器、checkout action 和依赖仍需要对应网络可用。
+使用 `[self-hosted, pod]` 的 Python 虚拟环境；无需业务秘密或集群权限。
+不设置 job `container`：此次 Pod runner 日志确认没有 Docker socket，额外启动 job 容器会在检查前失败。
+CI 获取 checkout action 和依赖仍需要对应网络可用。
 
 检查范围：
 
