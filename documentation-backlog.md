@@ -38,6 +38,12 @@ LiteLLM、Tailscale、ps3netsrv、vlmcsd 与 k3s 的 wiki 指南已补；源码�
 - 已核对 62 个主要来源文件，提供[固定版本与工作区差异](sources.md)。
 - 仍有差异或未收录的来源，等内容合并后再补对应版本；不自动提交原仓库工作区。
 
+## 持续维护
+
+- 已提供离线文档检查器、Gitea Actions 工作流与检查器测试。
+- 已补 PR 模板及服务变更到文档的对应规则，见 [CONTRIBUTING](CONTRIBUTING.md)。
+- Backstage 展示与 OpenViking 自动索引仍是独立后续工作，本轮未接入。
+
 ## 原仓库文档同步（按维护者要求暂缓）
 
 - 源码仓库中 Authelia OIDC、LAN DNS、SPIRE 的旧说明后续与知识库结论同步。

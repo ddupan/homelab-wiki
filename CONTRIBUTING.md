@@ -52,3 +52,53 @@ accepted 不代表部署完成，implemented 必须附实现和验收依据。
 使用普通 Markdown 链接、相对附件路径和文字说明；关键事实直接写入正文。
 可选 Obsidian 编辑，个人布局、缓存、插件和同步配置不提交。对外分享前检查敏感内容。
 提交前检查相对链接、服务目录覆盖，以及新增内容是否混淆计划和运行事实。
+
+
+## 一次服务变更应更新哪里
+
+| 变化 | 必须查看的文档 |
+|---|---|
+| 使用入口、认证、权限、客户端参数 | 对应 `services/` 页面；入口变化同时更新服务总览 |
+| 新增或退役组件 | 服务页、`services/index.md`；任务入口变化再改 `guides/task-index.md` |
+| 跨服务设计或边界 | `architecture/constraints.md` 及受影响指南 |
+| 只有开发进度变化 | 原项目 ticket；wiki 仅在阶段摘要需要变化时更新并注明日期 |
+| 取得新的验证结果 | 服务页说明日期与验证范围，据实更新 `last_verified` |
+| 工作区来源已合并 | 核对实际内容后更新 `sources.md` 的固定链接及差异标记 |
+
+先修改最接近事实的页面，再同步导航，避免把同一套操作复制到多份文档。
+无需每次修改都更新首页、所有服务页或整个来源索引。
+原仓库 README 同步按维护者要求暂缓，不阻塞 wiki 的维护。
+
+PR 使用 [.gitea/PULL_REQUEST_TEMPLATE.md](.gitea/PULL_REQUEST_TEMPLATE.md)，简述问题、最终变化、依据与验证。
+直接提交也遵循相同的检查与证据规则，不为纯文案修改制造额外审批。
+
+## 本地与 CI 检查
+
+需要 Python 3.10 或更新版本；首次在 wiki 根目录准备环境：
+
+```bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements-docs.txt
+.venv/bin/python -m unittest discover -s tests -v
+.venv/bin/python scripts/check_docs.py
+git diff --check
+```
+
+依赖版本固定在 [requirements-docs.txt](requirements-docs.txt)。安装依赖需要网络，检查器本身离线运行。
+Gitea 工作流 [.gitea/workflows/docs.yml](.gitea/workflows/docs.yml) 在 main push、PR 和手动触发时运行，
+使用 `[self-hosted, pod]` 与 Python 容器；无需业务秘密或集群权限。
+CI 拉取容器、checkout action 和依赖仍需要对应网络可用。
+
+检查范围：
+
+- Markdown 的相对文件链接、图片、引用式链接及本地标题锚点；不探测远端 URL。
+- frontmatter 的类型、重复键、状态枚举、日期与 `live-verified` 必须有验证日期的约束。
+- `services/` 下的服务页必须有完整状态字段，并由服务总览链接；总览及外部消费者范围页除外。
+- 已有 frontmatter 的其他页面校验 title 和审阅日期；`templates/` 允许日期占位为 null。
+
+标题锚点按常见 Gitea/GitHub 规则处理中文、字母、数字、连字符和重复标题。
+需要特殊字符锚点时可声明 HTML `id`，不要依赖 Obsidian 插件或非标准 heading 属性。
+代码块和行内代码里的路径是示例或说明，不当链接执行或检查；源码路径的存在性由 `sources.md` 的明确核对维护。
+检查错误带文件与行号，但不打印原始 frontmatter 内容。
+
+检查器不证明命令正确、外链可达、事实最新或服务健康，也不自动获取凭据或执行文档中的示例。

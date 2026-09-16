@@ -19,4 +19,5 @@
 - 每项当前事实注明来源；last_verified 只在完成所述现场验证后更新，不随文字编辑刷新。
 - 凭据只记录取得方式和受管位置，不复制实际密码、token、私钥、state 或含敏感值的输出。
 - 不复制 apps/tailscale/helm.sh 的内容。迁移旧文档前先审查敏感内容，不能整库直接发布。
+- 提交前运行 `python3 scripts/check_docs.py`；修改检查器时运行 `python3 -m unittest discover -s tests -v`。依赖与本地环境见 CONTRIBUTING.md。
 - 遵守 CONTRIBUTING.md；不把临时检查日志和个人 agent memory 当成正式文档。
