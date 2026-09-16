@@ -7,6 +7,7 @@
 - [服务总览](services/index.md)：有什么、有什么用、在哪里、状态依据是什么。
 - [SPIFFE/SPIRE](services/spire.md)：按 #34 整理的阶段状态、使用与 runbook 入口。
 - [PostgreSQL Tenant Operator](services/postgresql-tenant-operator.md)：计划在共享 PostgreSQL 上提供的 DBaaS 中间层。
+- [Gitea Dynamic Runner](services/gitea-dynamic-runner.md)：原 microVM runner，现支持 Pod/VM 两种一次性执行环境。
 - [待核实与文档缺口](verification.md)：互相矛盾的记录、缺少使用说明的服务、下一步核实方法。
 - [架构约束](architecture/constraints.md)：修改环境前必须遵守的设计及原始依据。
 - [workload-sts 设计历史](architecture/workload-sts-history.md)：已归档的早期身份方案及 SPIRE 替代决策。
@@ -19,7 +20,8 @@
 首轮盘点日期为 **2026-09-16**，依据 `/home/panxiao81/services` 工作区，基线 commit 为
 `ebe0ec154dab557598075b5cf6d3629c3c23fe2a`。该工作区包含未提交修改和未跟踪文件。
 后续按维护者提供的线索补读了 SPIFFE/SPIRE #34 与 runbook、workload-sts 归档决策、
-PostgreSQL Tenant Operator 的 README 与架构文档。具体来源和查阅范围见各页；其余条目仍以初轮工作区证据为限。
+PostgreSQL Tenant Operator 的 README 与架构文档，以及 Gitea Dynamic Runner README。
+具体来源和查阅范围见各页；其余条目仍以初轮工作区证据为限。
 后续状态查询先向维护者确认动态工作与资料来源，授权范围内不重复询问。
 本轮没有查询运行环境；“文档记录已部署”不等于今天已验证健康。
 本库中的入口地址来自原有记录，也尚未逐一验证可达性。

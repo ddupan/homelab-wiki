@@ -53,7 +53,7 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；其他条目仍为初轮工作区
 | docker | 宿主 Docker 网络管理 | `laptop` | 记录已迁移地址池 | `infrastructure/docker/README.md` | 已有 DN42 与挂载路径约束 |
 | kata-lab | Kata VM 试验环境 | `历史 VMID 147` | 记录 9 月 14 日已销毁 | `infrastructure/kata-lab/README.md` | 保留验证历史，勿当现役 VM |
 | kata-lxc-lab | LXC 内 Kata worker 试验 | `pve2 / 记录地址 192.168.10.128` | 记录 PoC 验证；非正式生产服务 | `infrastructure/kata-lxc-lab/README.md` | 明确与 microVM runner 的职责 |
-| microvm-runner | 按 job 创建临时 CI VM | `计划使用 kind-microvm label` | PoC 验证；正式启用有未完成前提 | `infrastructure/microvm-runner/README.md` | 核对独立 runner 仓库与实际部署 |
+| microvm-runner（历史目录名） | 动态 runner 的 homelab 基础设施记录 | 当前项目接口见 [Dynamic Runner](gitea-dynamic-runner.md) | 旧工作区记录 PoC；独立项目已更名并扩展到 Pod/VM，实际启用范围未查询 | `infrastructure/microvm-runner/README.md`、独立项目 README | 软件与基础设施职责已明确；旧 kind-microvm label 不作为当前接口 |
 | oci | 云主机、网络与站点互联 | `OCI ap-osaka-1` | 有恢复、接管与网络实施记录 | `infrastructure/oci/README.md` | 补跨站点使用入口 |
 | openbao | 秘密管理与内部 CA | `bao.ad.ddupan.top` | 有部署与接管记录 | `infrastructure/openbao/README.md` | 补日常使用和恢复入口 |
 | proxmox | PVE、虚拟化与主机基础设施 | `PVE 管理入口` | 已有基础设施；README 混有设计设想 | `infrastructure/proxmox/README.md` | 分离当前环境与 workload identity 设想 |
@@ -67,6 +67,7 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；其他条目仍为初轮工作区
 
 ## 计划、归档与范围外
 
+- [Gitea Dynamic Runner](gitea-dynamic-runner.md)：独立开发的动态 Pod/VM runner，原名 gitea-microvm-runner；README 描述 bootstrap 实现与长期调度路线，部署范围尚未查询。
 - [PostgreSQL Tenant Operator](postgresql-tenant-operator.md)：计划中的 DBaaS 中间层，管理共享实例中的数据库与账号；README 记录为 API 骨架阶段，不代表服务已上线。
 - [workload-sts](../architecture/workload-sts-history.md)：已归档的早期机器身份方案；停止开发、不部署 PoC，由 SPIFFE/SPIRE 替代。
 - Backstage：规划中的服务目录与文档入口；本轮未发现独立部署目录。

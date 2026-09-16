@@ -18,7 +18,7 @@ SPIFFE/SPIRE 按维护者指定，以 [#34](https://git.ddupan.top/panxiao81/hom
 |---|---|---|
 | LAN DNS | `apps/blocky/README.md` 说已是主 DNS；`infrastructure/dns/README.md` 仍说未成为正式 resolver | 读取 NEC DHCP 配置、客户端 DNS 和 Blocky 查询结果，再同步两份说明 |
 | Authelia | README 仍描述 OIDC 为后续阶段、旧 Contour/Traefik 路径；退役记录和 Envoy 文档已描述 Authelia 替代旧 IdP | 核对 OIDC discovery、登录及 forward-auth，重写过时段落；迁移旧文档前检查其中的敏感示例 |
-| microVM runner | `infrastructure/microvm-runner/README.md` 说 PoC 完成但正式启用仍有前提；远端已有独立 runner 仓库 | 查清两个仓库的职责、controller/worker 部署和一次 job 生命周期，不能把仓库存在当作服务已启用 |
+| Dynamic Runner 的启用范围 | 新仓库 README 定义 Pod/VM 两种接口；旧工作区仍记录 kind-microvm PoC | 软件与基础设施归属已由 README 明确；实际启用范围先问维护者，再按指定 ticket 或验证记录补充，不将旧 PoC 当作新接口已上线的依据 |
 | NATS durable 名称 | NATS 文档示例为 `kind-microvm-pve2`；microVM 文档配置为 `kind-microvm`，要求同类 worker 共享 durable | 查运行配置和 consumer；统一文档，避免多 worker 队列语义不一致 |
 | 旧 VictoriaMetrics Compose | `platform/observability/README.md` 说已替代；`apps/victoriametrics/` 仍留配置 | 只读检查 Docker 与采集目标，确认是否仍承担职责，再标记退役或迁移 |
 
@@ -35,8 +35,8 @@ SPIFFE/SPIRE 按维护者指定，以 [#34](https://git.ddupan.top/panxiao81/hom
 
 - `docs/cicd.md` 提及 `e5renew`、`rustfs`，但无独立组件目录；需要确认现状与归属。
 - `infrastructure/docker/README.md` 提及仓库外 `research-auto`，不能在本轮算作已盘点服务。
-- 本轮发现远端仓库 `gitea-microvm-runner`，
-  尚未审阅内容或运行状态。后续将跨仓库服务纳入总览。
+- `gitea-microvm-runner` 已更名 `gitea-dynamic-runner`，按维护者指定查阅 README，
+  已收录[动态 Pod/VM runner](services/gitea-dynamic-runner.md)的接口、组件和路线；实际运行状态未查询。
 - PostgreSQL Tenant Operator 已按维护者说明及项目 README/架构文档收录为
   [计划中的 DBaaS 中间层](services/postgresql-tenant-operator.md)。共享 PostgreSQL 已在使用，
   operator 仍按项目记录标为 API 骨架阶段；本轮未查询运行环境。
