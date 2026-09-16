@@ -21,11 +21,15 @@
 - [External Secrets](services/external-secrets.md)、[OpenEBS](services/openebs.md)：应用秘密与 PVC 消费示例。
 - [k3s DNS](services/k3s-dns.md)：Pod 解析路径、配置意图与排障入口。
 
+- [Marker](services/marker.md)、[OpenViking](services/openviking.md)：转换与导入、等待、检索、读取示例。
+- [SMTP relay](services/smtp-relay.md)：应用配置、测试邮件与投递边界。
+
 以上依据源码文档和上游说明整理，示例未在本轮执行，不作为现场验收记录。
 
 ## 后续使用说明
 
-1. marker、openviking、smtp-relay 等：按服务总览逐步补齐消费示例。
+1. cert-manager、Envoy Gateway：补新服务的证书与 HTTP 入口接入路径。
+2. Samba AD、OCI、Proxmox：按已有来源补日常管理入口，涉及动态状态前先对齐维护者。
 
 codex-proxy 已按维护者“应该是退役的”的说明移至归档范围，不再补新接入指南。
 LiteLLM、Tailscale、ps3netsrv、vlmcsd 与 k3s 的 wiki 指南已补；源码目录仍缺根 README，配置入口已在各页列出。

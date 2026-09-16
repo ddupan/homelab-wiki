@@ -15,6 +15,8 @@
 - [LiteLLM 网关](services/litellm-gateway.md)：模型 API 接入参数与请求示例。
 - [Tailscale](services/tailscale.md)：远程客户端、子网路由与 Service 入口。
 - [ps3netsrv](services/ps3netsrv.md) / [vlmcsd](services/vlmcsd.md)：客户端接入与故障入口。
+- [Marker](services/marker.md) / [OpenViking](services/openviking.md)：文档转换与上下文检索。
+- [SMTP relay](services/smtp-relay.md)：应用发信参数、测试与投递排障。
 - [External Secrets](services/external-secrets.md)：应用秘密投射与更新流程。
 - [OpenEBS](services/openebs.md)：PVC 申请、绑定和数据回收边界。
 - [k3s DNS](services/k3s-dns.md)：Pod 解析、内部域分流与缓存规则。

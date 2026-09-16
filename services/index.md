@@ -19,14 +19,14 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 | [gitea](gitea.md) | 代码托管与 Actions | `git.ddupan.top` | 记录已部署 | `apps/gitea/README.md` | 已有登录、最小 CI 与 runner 选择指南 |
 | http-echo | Flux 部署与漂移修复 canary | `集群内` | 记录已验证 | `apps/http-echo/README.md` | 已有验证步骤 |
 | [litellm-gateway](litellm-gateway.md) | 模型 API 网关，实际消费者未记录 | `宿主 TCP 4000；地址未记录` | 仅发现配置 | `apps/litellm-gateway/docker-compose.yml` | 已有参数、请求示例与依赖说明 |
-| marker | GPU 文档转换 API | `集群内端口 8001` | 配置与部署指南；未附上线记录 | `apps/marker/README.md` | 缺 API 使用例子 |
+| [marker](marker.md) | GPU 文档转换 API | `集群内端口 8001` | 配置与部署指南；未附上线记录 | `apps/marker/README.md` | 已有转换示例；部署镜像仍为占位符 |
 | netboot | PXE 与系统安装 | `192.168.10.127` | 有部署及使用记录 | `apps/netboot/README.md` | 已有客户端启动说明 |
 | [netbox](netbox.md) | 网络资产与地址管理评估 | `netbox.ad.ddupan.top` | 记录已部署；评估用途 | `apps/netbox/README.md` | 已有浏览与 Git 修改入口指南 |
-| openviking | 上下文检索服务 | `记录端口 1933 / 8020` | 配置与部署指南；未附上线记录 | `apps/openviking/README.md` | 缺导入、查询的完整例子 |
+| [openviking](openviking.md) | 上下文检索服务 | `记录端口 1933 / 8020` | 配置与部署指南；未附上线记录 | `apps/openviking/README.md` | 已有导入、任务查询、检索与原文读取指南 |
 | [ps3netsrv](ps3netsrv.md) | PS3 网络内容服务 | `宿主 TCP 38008；地址未记录` | Docker 运维文档记录运行 | `apps/ps3netsrv/docker-compose.yml` | 已有客户端与内容目录指南 |
 | [seaweedfs](seaweedfs.md) | S3 对象存储 | `s3.ad.ddupan.top` | zot 文档记录已使用 | `apps/seaweedfs/README.md` | 已有客户端读写指南与备份边界说明 |
 | [shared-postgresql](shared-postgresql.md) | 共享 PostgreSQL / CNPG | `shared-db namespace` | 历史迁移记录已完成 | `apps/shared-postgresql/migration.md` | 已有连接、应用接入与共享资源边界指南 |
-| smtp-relay | 应用经 Microsoft 365 发信 | `smtp-relay.smtp-relay.svc.cluster.local:25` | 有配置与测试指南；未附上线记录 | `apps/smtp-relay/README.md` | 补发信链路与消费者说明 |
+| [smtp-relay](smtp-relay.md) | 应用经 Microsoft 365 发信 | `smtp-relay.smtp-relay.svc.cluster.local:25` | 有配置与测试指南；未附上线记录 | `apps/smtp-relay/README.md` | 已有应用参数、测试邮件与投递边界指南 |
 | [tailscale](tailscale.md) | 远程网络与子网路由 | `Tailscale 网络` | 有配置；本轮未读敏感安装脚本 | `apps/tailscale/subnet-routes.sh` | 已有远程访问与路由边界指南 |
 | [vlmcsd](vlmcsd.md) | KMS 兼容服务，使用范围未记录 | `宿主 TCP 1688；地址未记录` | 仅发现配置 | `apps/vlmcsd/compose.yaml` | 已有协议入口与客户端指南；未查询现场 |
 | [zot](zot.md) | OCI 镜像与制品仓库 | `zot.ad.ddupan.top / zot-push.ad.ddupan.top` | 文档记录 9 月 16 日验收 | `apps/zot/README.md` | 已有拉取与发布模板；实际 publisher 授权以项目配置为准 |
