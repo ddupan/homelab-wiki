@@ -11,8 +11,38 @@ sources:
 
 # SPIFFE/SPIRE
 
-为运行中的程序提供可证明、短期的身份。SPIRE 负责签发身份，OpenBao 和其他目标服务
-根据身份决定权限。人类登录继续使用 Samba AD 与 Authelia。
+SPIFFE 为 homelab 中跨基础设施、由我们自行集成的服务提供统一的机器身份入口，
+相当于跨平台的 service account。SPIRE 负责证明运行中的 workload 身份并签发 SVID，
+让 Kubernetes、普通 Linux 主机、VM 和 CI/AI Agent 能使用同一套身份体系。
+
+## 核心设计与取舍
+
+SPIFFE/SPIRE 取代了原计划中由 **workload-sts 承担统一 IAM 平台**的方案。
+统一的是机器身份：应用信任 SPIFFE 身份，在验证后签发服务自己的 token，
+并继续自行维护角色、policy 和资源权限。
+
+```text
+运行在不同基础设施上的 workload
+  → SPIRE 证明身份，签发 SPIFFE SVID
+  → 目标服务验证并信任该身份
+  → 目标服务签发自己的 token
+  → 按该服务维护的权限访问资源
+```
+
+例如 OpenBao 验证 JWT-SVID 后，按照自己的 role/policy 签发短期 Bao token。
+能够直接验证 SVID 的服务也可以直接消费身份，授权仍由该服务决定。
+人类登录继续使用 Samba AD 与 Authelia。
+
+这一设计有两个主要优势：
+
+- **跨基础设施获取身份。** 非 Kubernetes workload 可以通过适合其环境的节点和进程证明
+  接入 SPIRE，无需依赖 Kubernetes ServiceAccount。Kubernetes ServiceAccount 只是
+  Kubernetes 环境内的初始证明方式，不是整个 homelab 的身份根。
+- **控制现有系统的改造量。** 优先利用目标服务已有的身份验证、token 交换和权限机制，
+  增加对 SPIFFE 的信任与身份映射，保留各服务已有的授权模型。
+
+设计定位由维护者于 2026-09-16 补充。这里记录的是方案替代关系，不代表 workload-sts
+仓库已删除或所有相关组件已退役；非 Kubernetes 接入和各消费者的实施进度仍以 ticket 为准。
 
 ## 当前做到哪里
 
@@ -34,7 +64,9 @@ sources:
 ## 如何使用
 
 这是一项面向程序的基础能力，没有供人登录的 SPIRE 业务门户。
-如果你的 CI job 或 AI Agent 需要访问 OpenBao，接入路径是：
+下面以已经完成最小 PoC 的 **Kubernetes workload → OpenBao** 路径为例；
+其他基础设施使用各自的初始证明方式，取得 SPIFFE 身份后沿用目标服务的信任与授权机制。
+如果你的 Kubernetes CI job 或 AI Agent 需要访问 OpenBao，接入路径是：
 
 1. 为 Kubernetes workload 定义专用 ServiceAccount 和稳定 SPIFFE ID。
 2. 通过 ClusterSPIFFEID 声明哪些 Pod 能取得该身份，并挂载 CSI Workload API socket。

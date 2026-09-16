@@ -37,6 +37,8 @@ SPIFFE/SPIRE 按维护者指定，以 [#34](https://git.ddupan.top/panxiao81/hom
 - `infrastructure/docker/README.md` 提及仓库外 `research-auto`，不能在本轮算作已盘点服务。
 - 本轮发现远端仓库 `gitea-microvm-runner`、`postgresql-tenant-operator`、`workload-sts`，
   尚未审阅内容或运行状态。后续将跨仓库服务纳入总览。
+  维护者已明确原计划由 workload-sts 承担的统一 IAM 平台方案被 SPIFFE/SPIRE 替代，
+  见 [设计定位](services/spire.md#核心设计与取舍)；仓库及组件的实际保留范围仍未查询。
 - 新增 NATS、zot、microVM 等来源含未提交文件；合并后补可访问的 commit/PR 链接。
 - Backstage 仍作为计划入口记录；本轮没有证明已有部署。
 

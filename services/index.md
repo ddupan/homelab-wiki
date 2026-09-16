@@ -42,7 +42,7 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；其他条目仍为初轮工作区
 | nats | 共享消息与 JetStream 队列 | `nats.ad.ddupan.top:4222` | 有配置与拓扑记录；现场待核实 | `platform/nats/README.md` | 补生产/消费示例与队列检查 |
 | observability | Grafana、指标、日志和追踪 | `grafana.ad.ddupan.top` | 记录已接管 Flux；9 月 16 日变更入口 | `platform/observability/README.md` | 补看板和查询使用指南 |
 | openebs | k3s 本地 ZFS 持久卷 | `localpv-zfs-ceph StorageClass` | 记录已接管 Flux | `platform/openebs/README.md` | 已有运维检查；补 PVC 使用边界 |
-| [spire](spire.md) | workload 身份签发 | `Workload API / spire-oidc.ad.ddupan.top` | #34 记录基础设施与最小 OpenBao PoC 已完成；后续集成进行中 | [#34](https://git.ddupan.top/panxiao81/homelab-infra/issues/34)、[RUNBOOK](https://git.ddupan.top/panxiao81/homelab-infra/src/branch/main/platform/spire/RUNBOOK.md) | 已有接入指南；动态任务以 ticket 为准 |
+| [spire](spire.md) | 跨基础设施的统一机器身份入口 | `Workload API / spire-oidc.ad.ddupan.top` | #34 记录基础设施与最小 OpenBao PoC 已完成；后续集成进行中 | [#34](https://git.ddupan.top/panxiao81/homelab-infra/issues/34)、[RUNBOOK](https://git.ddupan.top/panxiao81/homelab-infra/src/branch/main/platform/spire/RUNBOOK.md) | 已有接入指南；动态任务以 ticket 为准 |
 
 ## 基础设施
 
