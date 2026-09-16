@@ -21,11 +21,14 @@
 - [SMTP relay](services/smtp-relay.md)：应用配置、测试邮件与投递边界。
 - [发布新服务](guides/publish-service.md)：LAN DNS、证书、Envoy 路由、认证与 GitOps 的完整路径。
 
+- [Samba AD](services/samba-ad.md)、[OCI](services/oci.md)、[Proxmox](services/proxmox.md)：已有资料中的日常管理路径，动态状态未重查。
+
 以上依据源码文档和上游说明整理，示例未在本轮执行，不作为现场验收记录。
 
 ## 后续使用说明
 
-1. Samba AD、OCI、Proxmox：按已有来源补日常管理入口，涉及动态状态前先对齐维护者。
+本轮列出的使用指南已补齐。后续以实际接入任务补充细节，不自动启动全量现场检查。
+Samba AD、OCI、Proxmox 已按维护者指定采用 IaC 优先、以代码为准，并核对关键配置入口；未查询现场。
 
 codex-proxy 已按维护者“应该是退役的”的说明移至归档范围，不再补新接入指南。
 LiteLLM、Tailscale、ps3netsrv、vlmcsd 与 k3s 的 wiki 指南已补；源码目录仍缺根 README，配置入口已在各页列出。
@@ -34,4 +37,5 @@ LiteLLM、Tailscale、ps3netsrv、vlmcsd 与 k3s 的 wiki 指南已补；源码�
 
 - 源码仓库中 Authelia OIDC、LAN DNS、SPIRE 的旧说明后续与知识库结论同步。
 - cert-manager / Envoy Gateway README 的 DNS 修改入口仍写旧变量，待同步为受管 records.yml 流程。
+- Proxmox README 的早期身份方案与 runner bootstrap 描述待与当前 SPIFFE 原则对齐；Samba README 的通用示例域名/地址待清理。
 - 未提交工作区来源合并后，补充正式 commit/PR 链接。

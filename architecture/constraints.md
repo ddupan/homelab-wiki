@@ -5,6 +5,7 @@
 
 | 约束 | 原因与边界 | 来源 |
 |---|---|---|
+| Samba AD、OCI、Proxmox 优先 IaC，以代码为准 | Ansible/Terraform 声明及任务优先于旧 README；声明不等于已验证部署 | 维护者于 2026-09-16 明确、各服务使用指南 |
 | 服务独立部署，Terraform root/state 按服务隔离 | 避免认证和变更影响范围绑在一起 | `AGENTS.md`、`CLAUDE.md` |
 | OpenBao 恢复不能依赖 k3s 或读取自己内部的恢复凭据 | 先恢复信任根，再恢复消费者 | `infrastructure/openbao/README.md`、`CLAUDE.md` |
 | Terraform 管 API 配置，Ansible 管主机及不能安全纳管的密钥材料 | 不可读回秘密和根密钥不能靠反复重建实现收敛 | `infrastructure/openbao/README.md` |

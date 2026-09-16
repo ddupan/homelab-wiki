@@ -44,6 +44,9 @@ SPIFFE/SPIRE 按维护者指定，以 [#34](https://git.ddupan.top/panxiao81/hom
 
 ## 已确认的归属与范围
 
+- 维护者于 2026-09-16 指定 Samba AD、OCI、Proxmox 优先 IaC、以代码为准；
+  后续可直接核对仓库配置，不重复询问同一资料范围。配置声明与现场验证仍分开记录。
+
 - 维护者于 2026-09-16 说明 codex-proxy“应该是退役的”，已从现役应用列表移至归档范围；
   未查询运行环境，也没有删除源码或数据。LiteLLM、Tailscale、ps3netsrv、vlmcsd 无需补充动态事项，
   已基于仓库配置补使用指南；这不等于新增的现场验收。
