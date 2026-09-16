@@ -1,14 +1,22 @@
 # 待核实与文档缺口
 
-审阅日期：2026-09-16；本轮只盘点仓库，未查询现场。
+审阅日期：2026-09-16；初版依据工作区，SPIFFE/SPIRE 已按维护者指定补读 #34 与 runbook，未查询现场。
+下面的检查方法只是候选步骤，执行前先问维护者当前进度及查询范围。
 以下路径相对于 homelab-infra。优先修复影响恢复、认证、DNS 和首次使用的问题。
 
-## 记录冲突
+## 已对齐的动态工作
+
+SPIFFE/SPIRE 按维护者指定，以 [#34](https://git.ddupan.top/panxiao81/homelab-infra/issues/34)
+记录为主要依据：基础设施与最小 OpenBao PoC 已完成，issue 保持 open 跟踪后续集成。
+已合并的 runbook 也包含新 workload 接入和运维说明，不能再标记为“缺接入指南”。
+原工作区集群总览的“首次上线待验证”不作为当前阶段判断。
+详见 [SPIFFE/SPIRE 使用入口与阶段状态](services/spire.md)；源码工作区本轮未修改。
+
+## 待向维护者确认的记录差异
 
 | 项目 | 两边的记录 | 核实与收敛方式 |
 |---|---|---|
 | LAN DNS | `apps/blocky/README.md` 说已是主 DNS；`infrastructure/dns/README.md` 仍说未成为正式 resolver | 读取 NEC DHCP 配置、客户端 DNS 和 Blocky 查询结果，再同步两份说明 |
-| SPIRE | `clusters/homelab/README.md` 说首次上线待验证；`apps/zot/README.md` 记录 9 月 14/16 日真实 JWT-SVID 验收 | 核对 Flux revision、SPIRE 健康和 Workload API，再更新集群总览；zot 的部分验收不等于全部身份集成完成 |
 | Authelia | README 仍描述 OIDC 为后续阶段、旧 Contour/Traefik 路径；退役记录和 Envoy 文档已描述 Authelia 替代旧 IdP | 核对 OIDC discovery、登录及 forward-auth，重写过时段落；迁移旧文档前检查其中的敏感示例 |
 | microVM runner | `infrastructure/microvm-runner/README.md` 说 PoC 完成但正式启用仍有前提；远端已有独立 runner 仓库 | 查清两个仓库的职责、controller/worker 部署和一次 job 生命周期，不能把仓库存在当作服务已启用 |
 | NATS durable 名称 | NATS 文档示例为 `kind-microvm-pve2`；microVM 文档配置为 `kind-microvm`，要求同类 worker 共享 durable | 查运行配置和 consumer；统一文档，避免多 worker 队列语义不一致 |

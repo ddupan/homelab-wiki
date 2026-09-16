@@ -1,7 +1,8 @@
 # 服务总览
 
 审阅日期：2026-09-16。以下覆盖源码工作区 apps/、platform/、infrastructure/ 的一级组件，以及集群入口。
-**所有条目本轮均未现场验证。** 状态栏表示文档或配置证据，不表示实时健康状态。
+**所有条目本轮均未现场验证。** 状态栏表示文档、ticket 或配置证据，不表示实时健康状态。
+SPIFFE/SPIRE 已按维护者授权补读 #34；其他条目仍为初轮工作区盘点，查询前先向维护者对齐。
 来源路径相对于 [homelab-infra](https://git.ddupan.top/panxiao81/homelab-infra)；包含未提交内容，见首页证据边界。
 
 入口按来源记录列出，访问范围和可达性仍需验证。缺口详情见[待核实清单](../verification.md)。
@@ -41,7 +42,7 @@
 | nats | 共享消息与 JetStream 队列 | `nats.ad.ddupan.top:4222` | 有配置与拓扑记录；现场待核实 | `platform/nats/README.md` | 补生产/消费示例与队列检查 |
 | observability | Grafana、指标、日志和追踪 | `grafana.ad.ddupan.top` | 记录已接管 Flux；9 月 16 日变更入口 | `platform/observability/README.md` | 补看板和查询使用指南 |
 | openebs | k3s 本地 ZFS 持久卷 | `localpv-zfs-ceph StorageClass` | 记录已接管 Flux | `platform/openebs/README.md` | 已有运维检查；补 PVC 使用边界 |
-| spire | workload 身份签发 | `Workload API / spire-oidc.ad.ddupan.top` | zot 验收有运行证据；集群总览冲突 | `platform/spire/README.md` | 核实状态，补身份申请和消费流程 |
+| [spire](spire.md) | workload 身份签发 | `Workload API / spire-oidc.ad.ddupan.top` | #34 记录基础设施与最小 OpenBao PoC 已完成；后续集成进行中 | [#34](https://git.ddupan.top/panxiao81/homelab-infra/issues/34)、[RUNBOOK](https://git.ddupan.top/panxiao81/homelab-infra/src/branch/main/platform/spire/RUNBOOK.md) | 已有接入指南；动态任务以 ticket 为准 |
 
 ## 基础设施
 

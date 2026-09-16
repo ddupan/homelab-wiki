@@ -9,7 +9,7 @@
 | OpenBao 恢复不能依赖 k3s 或读取自己内部的恢复凭据 | 先恢复信任根，再恢复消费者 | `infrastructure/openbao/README.md`、`CLAUDE.md` |
 | Terraform 管 API 配置，Ansible 管主机及不能安全纳管的密钥材料 | 不可读回秘密和根密钥不能靠反复重建实现收敛 | `infrastructure/openbao/README.md` |
 | LAN HTTP 入口为 Envoy Gateway；新增服务核对 parentRefs、DNS 和认证 | 不直接套用 archive 中的 Gateway 示例 | `platform/envoy-gateway/README.md`、`AGENTS.md` |
-| 人类身份由 Samba AD / Authelia 提供，workload 身份由 SPIRE 提供 | 身份签发不等于资源授权；SPIRE 实施状态见核实清单 | `platform/spire/README.md` |
+| 人类身份由 Samba AD / Authelia 提供，workload 身份由 SPIRE 提供 | 身份签发不等于资源授权；基础设施与最小 PoC 已完成，后续集成以 #34 为准 | [SPIRE 状态与依据](../services/spire.md) |
 | 已由 Flux 接管的资源通过 Git 修改；brownfield 不全局开启 prune | 防止漂移回滚与误删；未接管资源不能假定受 Flux 管理 | `clusters/homelab/README.md` |
 | DNS 各视图保留权威边界；只管理明确声明的 RRset | 不清理 Samba 自动维护的域记录；DNS 文档尚有冲突 | `infrastructure/dns/README.md` |
 | Docker 地址池不得与 DN42 的 172.20.0.0/14 重叠 | 本地直连路由会干扰 DN42；已有网络不自动改地址 | `infrastructure/docker/README.md` |
