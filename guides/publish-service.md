@@ -162,3 +162,5 @@ homelab-infra：`platform/cert-manager/README.md`、`certificate-wildcard-ad.yam
 `apps/http-echo/httproute.yaml` 是已排除出 Kustomization 的历史 Contour 示例，
 `archive/traefik/` 也不是当前接入模板；不要因文件存在就直接应用。
 上述源码 README 的旧描述尚待同步，本页按实际所读配置与维护者已经确认的结论整理。
+
+来源文件的固定版本与工作区差异见[来源追溯](../sources.md#publish-service)。

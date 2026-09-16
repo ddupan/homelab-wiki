@@ -81,3 +81,5 @@ zot 的持久数据在 SeaweedFS `zot` bucket 的 `registry/` 前缀；zot Pod �
 不能将同一 SeaweedFS 的副本视为独立灾备；重装 zot 不得删除该 bucket。
 
 部署、授权变更、凭据轮换及验收细节以 homelab-infra `apps/zot/README.md` 为准。
+
+来源文件的固定版本与工作区差异见[来源追溯](../sources.md#zot)。

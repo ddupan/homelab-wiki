@@ -72,3 +72,5 @@ refresh token 持久化在 `smtp-relay-tokens` PVC，SASL 层负责更新；
 初始化、重新授权、DKIM 与恢复入口为 `apps/smtp-relay/README.md`。
 其中 DKIM 等日期属于历史记录，本文不将其升级为新一次验证。
 依赖为 Kubernetes/DNS、token PVC、Microsoft 365 邮箱与授权、上游网络及域名邮件配置。
+
+来源文件的固定版本与工作区差异见[来源追溯](../sources.md#smtp-relay)。

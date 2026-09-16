@@ -76,3 +76,5 @@ sudo samba-tool group listmembers YOUR_GROUP
 
 域备份、第二域控和恢复方案回到源码 README；有备份命令不代表已建立定时异机备份或演练过恢复。
 域控身份数据库与应用数据不同，不能通过重跑建域、清空数据库来排查普通登录失败。
+
+来源文件的固定版本与工作区差异见[来源追溯](../sources.md#samba-ad)。

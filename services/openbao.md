@@ -84,3 +84,5 @@ Dynamic Runner 提供执行环境和 workload 身份，具体向 OpenBao 请求�
 `infrastructure/openbao/README.md`。服务依赖主机持久存储及 Raft 数据，人的登录还依赖 Authelia。
 根密钥与恢复身份不应依赖 Kubernetes 或只能由 OpenBao 自身解密的秘密；
 日常登录成功不等于已完成备份或灾难恢复验收。
+
+来源文件的固定版本与工作区差异见[来源追溯](../sources.md#openbao)。

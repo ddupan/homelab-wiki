@@ -39,3 +39,5 @@ cscript.exe "$env:SystemRoot\System32\slmgr.vbs" /dlv
 依赖为 Docker 与客户端到宿主的网络。所读 Compose 未声明持久卷；
 这只描述此服务配置，不代表客户端状态可以随意清除。
 维护配置入口为 homelab-infra `apps/vlmcsd/compose.yaml`。
+
+来源文件的固定版本与工作区差异见[来源追溯](../sources.md#vlmcsd)。

@@ -80,3 +80,5 @@ VictoriaLogs 使用 LogsQL。上述 limit 限制返回数量，不保证返回�
 内存指标解释见 `platform/observability/metrics/exporters/README.md`。
 看板配置由 Git/ConfigMap 管理，网页临时调整不作为持久配置的权威来源。
 旧 Compose 栈与数据已[清理](victoriametrics-legacy.md)，不要再使用旧实例作为排障入口。
+
+来源文件的固定版本与工作区差异见[来源追溯](../sources.md#grafana)。

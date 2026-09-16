@@ -55,3 +55,5 @@ NetBox 中的地址状态来自资产记录，不会自动证明主机在线、�
 部署、依赖、认证边界、拓扑同步与配置生成细节见 homelab-infra `apps/netbox/README.md`。
 应用使用数据库与 Redis，登录链路依赖 LAN DNS、Envoy、Authelia 和 Samba AD。
 本地管理员属于故障恢复入口，日常浏览不使用该路径。
+
+来源文件的固定版本与工作区差异见[来源追溯](../sources.md#netbox)。

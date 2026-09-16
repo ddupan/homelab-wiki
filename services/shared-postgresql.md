@@ -78,3 +78,5 @@ AI 接续任务时先确认操作范围，再执行现场查询；不能因为�
 源码入口为 homelab-infra 的 `apps/shared-postgresql/migration.md`、
 `cloudnativepg-cluster.yaml` 和 `shared-postgresql-service.yaml`（后两者位于同一目录）。
 服务依赖 Kubernetes、CNPG、集群 DNS 与持久存储；Tailscale 入口另依赖对应网络及授权。
+
+来源文件的固定版本与工作区差异见[来源追溯](../sources.md#shared-postgresql)。

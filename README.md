@@ -4,38 +4,17 @@
 
 ## 从这里开始
 
-- [Samba AD](services/samba-ad.md)、[OCI](services/oci.md)、[Proxmox](services/proxmox.md)：身份、云主机与虚拟化的日常管理入口。
-- [发布新服务](guides/publish-service.md)：串联 LAN DNS、证书、HTTPRoute、认证与 GitOps。
-- [服务总览](services/index.md)：有什么、有什么用、在哪里、状态依据是什么。
-- [Gitea / Actions 入门](services/gitea.md)：登录、创建仓库、运行第一个 CI 与选择 runner。
-- [Grafana 使用指南](services/grafana.md)：内存看板、指标查询和日志搜索。
-- [zot 使用指南](services/zot.md)：匿名拉取、SPIFFE 发布身份与仓库授权。
-- [SeaweedFS 使用指南](services/seaweedfs.md)：S3 客户端接入、对象读写与存储边界。
-- [OpenBao 使用指南](services/openbao.md)：日常登录、按权限取密与机器身份边界。
-- [NetBox 使用指南](services/netbox.md)：浏览设备和 IPAM，按 Git 来源维护资产镜像。
-- [SPIFFE/SPIRE](services/spire.md)：按 #34 整理的阶段状态、使用与 runbook 入口。
-- [LiteLLM 网关](services/litellm-gateway.md)：模型 API 接入参数与请求示例。
-- [Tailscale](services/tailscale.md)：远程客户端、子网路由与 Service 入口。
-- [ps3netsrv](services/ps3netsrv.md) / [vlmcsd](services/vlmcsd.md)：客户端接入与故障入口。
-- [Marker](services/marker.md) / [OpenViking](services/openviking.md)：文档转换与上下文检索。
-- [SMTP relay](services/smtp-relay.md)：应用发信参数、测试与投递排障。
-- [External Secrets](services/external-secrets.md)：应用秘密投射与更新流程。
-- [OpenEBS](services/openebs.md)：PVC 申请、绑定和数据回收边界。
-- [k3s DNS](services/k3s-dns.md)：Pod 解析、内部域分流与缓存规则。
-- [共享 PostgreSQL 使用指南](services/shared-postgresql.md)：应用接入、连接示例与共享实例维护边界。
-- [PostgreSQL Tenant Operator](services/postgresql-tenant-operator.md)：计划在共享 PostgreSQL 上提供的 DBaaS 中间层。
-- [Gitea Dynamic Runner](services/gitea-dynamic-runner.md)：原 microVM runner，现支持 Pod/VM 两种一次性执行环境。
-- [NATS](services/nats.md)：已部署的集群共享消息服务，目前仅 Dynamic Runner 消费。
-- [旧 VictoriaMetrics 栈](services/victoriametrics-legacy.md)：旧运行栈、配置及数据卷已清理。
-- [LAN DNS](services/lan-dns.md)：Blocky 主 DNS、路由器上游与备用、Samba AD 域 DNS 的现状。
-- [Authelia](services/authelia.md)：active 的唯一主 OIDC broker 与登录入口。
-- [首轮状态对齐记录](verification.md)：本轮已完成，没有开放的状态核实任务。
-- [文档完善清单](documentation-backlog.md)：后续补充使用说明、同步旧文档和完善来源链接。
-- [架构约束](architecture/constraints.md)：修改环境前必须遵守的设计及原始依据。
-- [workload-sts 设计历史](architecture/workload-sts-history.md)：已归档的早期身份方案及 SPIRE 替代决策。
-- [文档维护规则](CONTRIBUTING.md)：人和 AI 如何共同维护知识。
-- [服务文档模板](templates/service.md)：新服务必须同时提供使用说明。
-- [AI 工作入口](AGENTS.md)：新上下文按任务查找资料。
+- [按任务查找文档](guides/task-index.md)：接入服务、写 CI、查日志、取秘密或接续 AI 任务。
+- [服务总览](services/index.md)：组件、用途、入口和状态依据。
+- [发布新服务](guides/publish-service.md)：LAN DNS、证书、HTTPRoute、认证与 GitOps。
+- [架构约束](architecture/constraints.md)：修改环境前必须遵守的设计。
+- [来源追溯](sources.md)：固定源码版本，以及与工作区的差异。
+- [文档维护规则](CONTRIBUTING.md)、[服务模板](templates/service.md)、[AI 工作入口](AGENTS.md)：如何共同维护知识。
+- [首轮状态对齐记录](verification.md)：已完成的澄清与历史处置。
+- [文档完善清单](documentation-backlog.md)：已补指南与暂缓事项。
+
+设计历史与范围外项目见[workload-sts](architecture/workload-sts-history.md)、
+[旧监控栈](services/victoriametrics-legacy.md)及[外部消费者](services/external-consumers.md)。
 
 ## 当前证据边界
 
@@ -43,7 +22,8 @@
 `ebe0ec154dab557598075b5cf6d3629c3c23fe2a`。该工作区包含未提交修改和未跟踪文件。
 后续按维护者提供的线索补读了 SPIFFE/SPIRE #34 与 runbook、workload-sts 归档决策、
 PostgreSQL Tenant Operator 的 README 与架构文档，以及 Gitea Dynamic Runner README。
-具体来源和查阅范围见各页；其余条目仍以初轮工作区证据为限。
+具体来源和查阅范围见各页；后续使用指南已按对应源码和上游接口文档逐项补充。
+未补充的状态仍以初轮证据为限；来源文件与已提交版本的比较见[来源追溯](sources.md)。
 LAN DNS 已按维护者于 2026-09-16 提供的现状更新，未查询现场。
 Authelia 同日由维护者明确为 active、唯一的主 OIDC broker，已同步到服务总览。
 后续状态查询先向维护者确认动态工作与资料来源，授权范围内不重复询问。

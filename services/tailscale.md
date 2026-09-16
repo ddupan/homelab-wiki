@@ -60,3 +60,5 @@ IP 可达而域名失败时，先查看远程客户端 DNS 路径，不直接改
 依赖为 Tailscale 控制与数据路径、laptop 转发及目标网络；SDN 另依赖 VyOS/OSPF，
 operator Service 另依赖 Kubernetes 和 operator。
 本页没有记录 tailnet OAuth、设备密钥或凭据内容。
+
+来源文件的固定版本与工作区差异见[来源追溯](../sources.md#tailscale)。

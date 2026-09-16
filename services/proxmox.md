@@ -74,3 +74,5 @@ PVE 主机存储、DRBD 副本和 k3s 的 [OpenEBS](openebs.md) 是不同管理�
 故障入口依次为目标任务日志、guest、宿主节点、存储和集群网络；
 涉及 quorum、fencing 或 watchdog 的处理先读 `README-ha.md`，不要套用普通单机重启排障。
 长期配置入口为 `infrastructure/proxmox/ansible/`，并按实际变更选择对应 playbook。
+
+来源文件的固定版本与工作区差异见[来源追溯](../sources.md#proxmox)。

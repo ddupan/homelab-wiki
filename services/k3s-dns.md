@@ -62,3 +62,5 @@ DNS 成功只证明解析路径，不证明应用认证和业务请求成功。
 故障定位先区分集群 Service 解析、AD 转发、固定分流、默认上游和客户端搜索域。
 依赖包括 CoreDNS、Kubernetes API、网络、Samba AD DNS 及默认上游；
 Authelia/Gitea 的业务可达性还依赖 Envoy 和各自后端。
+
+来源文件的固定版本与工作区差异见[来源追溯](../sources.md#k3s-dns)。

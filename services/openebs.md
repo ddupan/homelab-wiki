@@ -74,3 +74,5 @@ StorageClass 配置 `WaitForFirstConsumer`，PVC 在没有可调度消费者时�
 运维与 break-glass 入口为 `platform/openebs/README.md`。
 StorageClass 独立于 Helm release 管理；不要通过卸载 chart、删除 CRD 或业务卷验证升级。
 依赖包括 OpenEBS ZFS CSI、宿主 ZFS、文件系统与 Kubernetes 调度。
+
+来源文件的固定版本与工作区差异见[来源追溯](../sources.md#openebs)。

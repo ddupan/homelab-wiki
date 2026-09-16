@@ -1,8 +1,10 @@
 # 人与 AI 共用的知识库
 
-先读 README.md，按任务从 services/index.md 和 architecture/constraints.md 查找资料，
+先读 README.md，按 guides/task-index.md 定位所需服务，再读 services/index.md 和 architecture/constraints.md，
 并检查 verification.md 中的相关冲突。不要求把整个仓库一次性放入上下文。
 
+- 原仓库 README 同步已按维护者要求暂缓；当前优先维护 wiki，不将源码文档同步作为其他工作的前置步骤。
+- 原仓库来源的固定版本与工作区差异见 sources.md；不能把基线链接当成未提交内容已经合并的证据。
 - 正式知识写给人和 AI 共同阅读；本文件只放工作规则，不另存一份服务事实。
 - 以中文维护正文、commit、PR；配置键、命令和上游专有名称保留原文。
 - 区分设计、配置、部署记录与现场验证。没有访问现场，不得写“运行正常”。

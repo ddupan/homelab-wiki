@@ -80,3 +80,5 @@ workflow 路径、启用方式与事件规则见 [Gitea 官方入门](https://do
 
 服务部署与升级恢复以 homelab-infra `apps/gitea/README.md` 为入口；常驻 runner 以
 `platform/gitea-runner/README.md` 为入口。本页不复制 token、密码或部署命令。
+
+来源文件的固定版本与工作区差异见[来源追溯](../sources.md#gitea)。
