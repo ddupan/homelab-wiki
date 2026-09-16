@@ -8,6 +8,7 @@
 - [SPIFFE/SPIRE](services/spire.md)：按 #34 整理的阶段状态、使用与 runbook 入口。
 - [PostgreSQL Tenant Operator](services/postgresql-tenant-operator.md)：计划在共享 PostgreSQL 上提供的 DBaaS 中间层。
 - [Gitea Dynamic Runner](services/gitea-dynamic-runner.md)：原 microVM runner，现支持 Pod/VM 两种一次性执行环境。
+- [NATS](services/nats.md)：已部署的集群共享消息服务，目前仅 Dynamic Runner 消费。
 - [LAN DNS](services/lan-dns.md)：Blocky 主 DNS、路由器上游与备用、Samba AD 域 DNS 的现状。
 - [Authelia](services/authelia.md)：active 的唯一主 OIDC broker 与登录入口。
 - [待核实与文档缺口](verification.md)：互相矛盾的记录、缺少使用说明的服务、下一步核实方法。

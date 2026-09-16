@@ -40,7 +40,7 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 | external-secrets | OpenBao 到 Kubernetes 的秘密投射 | `Kubernetes API` | Helm 记录已接管；对象范围需区分 | `platform/external-secrets/README.md` | 补新增秘密引用的使用流程 |
 | gitea-runner | 可信 Gitea Actions 任务执行 | `Gitea Actions` | 记录已接管 Flux | `platform/gitea-runner/README.md` | 补 workflow label 与使用限制 |
 | k3s | 集群 CoreDNS 定制 | `集群内 DNS` | 仅发现 DNS 配置 | `platform/k3s/Corefile.desired` | 缺组件 README |
-| nats | 共享消息与 JetStream 队列 | `nats.ad.ddupan.top:4222` | 有配置与拓扑记录；现场待核实 | `platform/nats/README.md` | 补生产/消费示例与队列检查 |
+| [nats](nats.md) | 集群共享消息与 JetStream 队列 | `nats.ad.ddupan.top:4222` | 已部署；维护者说明目前唯一消费者为 Dynamic Runner | 维护者 2026-09-16 说明、`platform/nats/README.md` | runner 消息队列约定以独立项目文档为准 |
 | observability | Grafana、指标、日志和追踪 | `grafana.ad.ddupan.top` | 记录已接管 Flux；9 月 16 日变更入口 | `platform/observability/README.md` | 补看板和查询使用指南 |
 | openebs | k3s 本地 ZFS 持久卷 | `localpv-zfs-ceph StorageClass` | 记录已接管 Flux | `platform/openebs/README.md` | 已有运维检查；补 PVC 使用边界 |
 | [spire](spire.md) | 跨基础设施的统一机器身份入口 | `Workload API / spire-oidc.ad.ddupan.top` | #34 记录基础设施与最小 OpenBao PoC 已完成；后续集成进行中 | [#34](https://git.ddupan.top/panxiao81/homelab-infra/issues/34)、[RUNBOOK](https://git.ddupan.top/panxiao81/homelab-infra/src/branch/main/platform/spire/RUNBOOK.md) | 已有接入指南；动态任务以 ticket 为准 |
@@ -54,7 +54,7 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 | docker | 宿主 Docker 网络管理 | `laptop` | 记录已迁移地址池 | `infrastructure/docker/README.md` | 已有 DN42 与挂载路径约束 |
 | kata-lab | Kata VM 试验环境 | `历史 VMID 147` | 记录 9 月 14 日已销毁 | `infrastructure/kata-lab/README.md` | 保留验证历史，勿当现役 VM |
 | kata-lxc-lab | LXC 内 Kata worker 试验 | `pve2 / 记录地址 192.168.10.128` | 记录 PoC 验证；非正式生产服务 | `infrastructure/kata-lxc-lab/README.md` | 明确与 microVM runner 的职责 |
-| microvm-runner（历史目录名） | 动态 runner 的 homelab 基础设施记录 | 当前项目接口见 [Dynamic Runner](gitea-dynamic-runner.md) | 旧工作区记录 PoC；独立项目已更名并扩展到 Pod/VM，实际启用范围未查询 | `infrastructure/microvm-runner/README.md`、独立项目 README | 软件与基础设施职责已明确；旧 kind-microvm label 不作为当前接口 |
+| microvm-runner（历史目录名） | 动态 runner 的 homelab 基础设施记录 | 当前项目接口见 [Dynamic Runner](gitea-dynamic-runner.md) | 独立项目已更名并扩展到 Pod/VM，正在积极开发 | `infrastructure/microvm-runner/README.md`、独立项目文档 | 具体启用范围和实现进度以独立项目文档为准 |
 | oci | 云主机、网络与站点互联 | `OCI ap-osaka-1` | 有恢复、接管与网络实施记录 | `infrastructure/oci/README.md` | 补跨站点使用入口 |
 | openbao | 秘密管理与内部 CA | `bao.ad.ddupan.top` | 有部署与接管记录 | `infrastructure/openbao/README.md` | 补日常使用和恢复入口 |
 | proxmox | PVE、虚拟化与主机基础设施 | `PVE 管理入口` | 已有基础设施；README 混有设计设想 | `infrastructure/proxmox/README.md` | 分离当前环境与 workload identity 设想 |
@@ -68,7 +68,7 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 
 ## 计划、归档与范围外
 
-- [Gitea Dynamic Runner](gitea-dynamic-runner.md)：独立开发的动态 Pod/VM runner，原名 gitea-microvm-runner；README 描述 bootstrap 实现与长期调度路线，部署范围尚未查询。
+- [Gitea Dynamic Runner](gitea-dynamic-runner.md)：正在积极开发的动态 Pod/VM runner，原名 gitea-microvm-runner；具体启用范围、调度和队列约定以项目文档为准。
 - [PostgreSQL Tenant Operator](postgresql-tenant-operator.md)：计划中的 DBaaS 中间层，管理共享实例中的数据库与账号；README 记录为 API 骨架阶段，不代表服务已上线。
 - [workload-sts](../architecture/workload-sts-history.md)：已归档的早期机器身份方案；停止开发、不部署 PoC，由 SPIFFE/SPIRE 替代。
 - Backstage：规划中的服务目录与文档入口；本轮未发现独立部署目录。

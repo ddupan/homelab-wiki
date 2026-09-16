@@ -15,9 +15,10 @@ sources:
 它为 Gitea Actions 按需创建一次性执行环境，支持 Kubernetes Pod 和 Cloud Hypervisor
 microVM；每个环境只执行一个 job，结束后销毁环境及本地状态。
 
-更名由维护者提供；以下内容依据 2026-09-16 查阅的项目 README。
-README 描述了 bootstrap 实现与后续路线，没有明确记录当前部署范围或端到端上线验收。
-本页因此按试验阶段记录，不表示现场 runner 已注册或下面的 labels 已可调度；本轮未查询现场。
+更名由维护者提供；以下组件与接口说明依据 2026-09-16 查阅的项目 README。
+维护者进一步明确：**项目正在积极开发，具体启用范围和实现进度以该项目文档为准。**
+本页保留用途、设计原则和该次 README 的摘要，不另行维护部署范围或消息队列参数清单。
+本轮未查询现场，不将设计接口视为已完成的上线验收。
 
 ## workflow 如何选择执行环境
 
@@ -55,7 +56,11 @@ Gitea workflow_job webhook
 
 `microvm-runner-launch` 管理 VM 的临时磁盘、网络及清理，`guest-runner` 领取一次性
 注册凭据并以 ephemeral 模式注册。`pod-worker` 创建 Kubernetes 执行 Pod。
-同一 runner label 的 worker 共享同一个 durable consumer，通过增加 worker 或 capacity 扩容。
+该次 README 描述同一 runner label 的 worker 共享同一个 durable consumer，通过增加 worker
+或 capacity 扩容。具体 durable 名称和后续调度改动以项目文档为准。
+
+[NATS](nats.md) 作为集群共享服务部署；维护者说明当前只有 Dynamic Runner 消费它，
+不因此将 NATS 视为 runner 私有组件。
 
 webhook → NATS 是尽快验证 Pod/VM 生命周期的 bootstrap 实现。
 长期目标是 controller 兼容 Gitea Runner 协议，直接注册、声明 labels、领取 task，
@@ -96,4 +101,5 @@ runner 不应替 workflow 选择下游 role/policy，或统一代理其业务凭
 - [Runner 协议路线](https://git.ddupan.top/panxiao81/gitea-dynamic-runner/src/branch/main/docs/runner-protocol-roadmap.md)：README 指向的长期调度路线与迁移边界，本轮未逐篇复核。
 - [SPIFFE/SPIRE](spire.md)：统一机器身份的设计定位与阶段依据。
 
-后续需补充实际启用范围、workflow 验收示例和失败任务排障入口；查询前先向维护者对齐动态工作。
+实际启用范围、workflow 验收、排障及消息队列约定在项目文档中维护。
+开发中的变化直接以项目文档为准，知识库不另列“启用范围待核实”任务。

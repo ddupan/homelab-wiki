@@ -6,6 +6,11 @@
 
 ## 已对齐的动态工作
 
+NATS 已作为集群共享服务部署，当前唯一消费者为 Dynamic Runner，见 [NATS](services/nats.md)。
+维护者明确 Dynamic Runner 正在积极开发，其启用范围、durable 名称和实现进度以
+[项目文档](https://git.ddupan.top/panxiao81/gitea-dynamic-runner)为准。
+不再将旧示例的 durable 名称差异或启用范围列为独立待核实项。
+
 Authelia 已按维护者于 2026-09-16 的说明标为 **active、唯一的主 OIDC broker**，
 见 [Authelia](services/authelia.md)。原工作区的“OIDC 后续启用”描述待同步，
 不再将其列为上线状态冲突，也不据此发起现场核实。
@@ -24,8 +29,6 @@ SPIFFE/SPIRE 按维护者指定，以 [#34](https://git.ddupan.top/panxiao81/hom
 
 | 项目 | 两边的记录 | 核实与收敛方式 |
 |---|---|---|
-| Dynamic Runner 的启用范围 | 新仓库 README 定义 Pod/VM 两种接口；旧工作区仍记录 kind-microvm PoC | 软件与基础设施归属已由 README 明确；实际启用范围先问维护者，再按指定 ticket 或验证记录补充，不将旧 PoC 当作新接口已上线的依据 |
-| NATS durable 名称 | NATS 文档示例为 `kind-microvm-pve2`；microVM 文档配置为 `kind-microvm`，要求同类 worker 共享 durable | 查运行配置和 consumer；统一文档，避免多 worker 队列语义不一致 |
 | 旧 VictoriaMetrics Compose | `platform/observability/README.md` 说已替代；`apps/victoriametrics/` 仍留配置 | 只读检查 Docker 与采集目标，确认是否仍承担职责，再标记退役或迁移 |
 
 ## 优先补充的使用说明
