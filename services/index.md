@@ -1,7 +1,7 @@
 # 服务总览
 
 审阅日期：2026-09-16。以下覆盖源码工作区 apps/、platform/、infrastructure/ 的一级组件，以及集群入口。
-**除旧 VictoriaMetrics Compose 已获授权做有限现场检查外，其余条目未在本轮现场验证。**
+**除旧 VictoriaMetrics Compose 已获授权检查并清理外，其余条目未在本轮现场验证。**
 状态栏区分维护者说明、文档、ticket、配置与现场证据，不提供持续的实时健康判断。
 SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护者说明更新，
 独立项目按指定 README 收录。其余条目仍为初轮工作区盘点，查询前先向维护者对齐。
@@ -68,6 +68,8 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 | homelab | k3s 的 Flux reconciliation 入口 | `flux-system namespace` | 已有部署记录；部分汇总滞后 | `clusters/homelab/README.md` | 同步 SPIRE 与新增组件状态 |
 
 ## 计划、归档与范围外
+
+- [旧 VictoriaMetrics Compose](victoriametrics-legacy.md)：旧配置和三个数据卷已于 2026-09-16 按维护者要求删除；现役监控在 platform/observability。
 
 - [e5renew、research-auto](external-consumers.md)：GitHub 上的外部消费者，不属于 homelab 基础设施；仅保留归属入口。
 - [Gitea Dynamic Runner](gitea-dynamic-runner.md)：正在积极开发的动态 Pod/VM runner，原名 gitea-microvm-runner；具体启用范围、调度和队列约定以项目文档为准。

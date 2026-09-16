@@ -1,7 +1,7 @@
 # 待核实与文档缺口
 
 审阅日期：2026-09-16；初版依据工作区，后续按维护者说明和指定资料对齐。
-旧 VictoriaMetrics Compose 已获授权做有限现场检查，其余项目未因本清单自动查询现场。
+旧 VictoriaMetrics Compose 已获授权检查并清理，其余项目未因本清单自动查询现场。
 下面的检查方法只是候选步骤，执行前先问维护者当前进度及查询范围。
 以下路径相对于 homelab-infra。优先修复影响恢复、认证、DNS 和首次使用的问题。
 
@@ -32,10 +32,10 @@ SPIFFE/SPIRE 按维护者指定，以 [#34](https://git.ddupan.top/panxiao81/hom
 
 初轮列出的状态差异已按维护者说明、指定资料或授权检查完成分类；不再保留自动现场核查任务。
 
-[旧 VictoriaMetrics Compose](services/victoriametrics-legacy.md) 已于 2026-09-16 只读检查：
-旧栈无容器，三个旧卷仍存在且无容器引用；VM 卷约 131 MiB、Grafana 卷约 45 MiB。
-新 Kubernetes 栈的资源状态正常，但没有验证数据迁移或新旧数据一致性。
-旧数据暂时保留，是否恢复、迁移或删除需先由维护者决定。
+[旧 VictoriaMetrics Compose](services/victoriametrics-legacy.md) 已于 2026-09-16 完成清理：
+维护者明确要求直接删除旧配置和全部数据卷，三个无引用 Docker 卷及旧配置均已删除，
+未备份或迁移数据。新 Kubernetes 栈的资源状态检查和指标清单渲染通过。
+基础设施清理提交 `3c4045a` 已在本地创建，尚未推送；数据处置不再是待决事项。
 
 ## 优先补充的使用说明
 
