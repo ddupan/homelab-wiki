@@ -12,7 +12,7 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；其他条目仍为初轮工作区
 | 组件 | 用途 | 记录入口 | 状态依据 | 来源 | 文档缺口 / 下一步 |
 |---|---|---|---|---|---|
 | authelia | 统一登录与 OIDC | `auth.ddupan.top` | 记录已部署；旧 README 冲突 | `apps/authelia/README.md` | 补当前登录与接入指南 |
-| blocky | LAN DNS、广告过滤、分流 | `192.168.10.127:53` | 记录已部署；DNS 记录冲突 | `apps/blocky/README.md` | 补日常排障入口 |
+| [blocky](lan-dns.md) | LAN 主 DNS、广告过滤、分流 | `192.168.10.127:53` | 维护者说明已作为 DHCP 主 DNS，上游为路由器 | 维护者 2026-09-16 说明、`apps/blocky/README.md` | 无需逐台确认主机；旧源码说明待同步 |
 | codex-proxy | 代理服务，具体接口待确认 | `待核实` | 仅发现配置 | `apps/codex-proxy/docker-compose.yml` | 缺 README 与使用说明 |
 | gitea | 代码托管与 Actions | `git.ddupan.top` | 记录已部署 | `apps/gitea/README.md` | 补首次使用与 runner 选择 |
 | http-echo | Flux 部署与漂移修复 canary | `集群内` | 记录已验证 | `apps/http-echo/README.md` | 已有验证步骤 |
@@ -49,7 +49,7 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；其他条目仍为初轮工作区
 | 组件 | 用途 | 记录入口 | 状态依据 | 来源 | 文档缺口 / 下一步 |
 |---|---|---|---|---|---|
 | cloudflared | 公网 Tunnel 与 DNS | `Cloudflare 边缘配置` | 有现有资源接管记录 | `infrastructure/cloudflared/terraform/README.md` | 明确配置权威位置与服务发布流程 |
-| dns | 跨视图 DNS 声明 | `records.yml` | 部分接管；LAN DNS 说明冲突 | `infrastructure/dns/README.md` | 补现状与新增记录流程 |
+| [dns](lan-dns.md) | 跨视图 DNS 声明 | `records.yml` | LAN 角色已按维护者说明对齐；声明接管范围未重查 | `infrastructure/dns/README.md`、维护者说明 | 同步旧描述；补新增记录流程 |
 | docker | 宿主 Docker 网络管理 | `laptop` | 记录已迁移地址池 | `infrastructure/docker/README.md` | 已有 DN42 与挂载路径约束 |
 | kata-lab | Kata VM 试验环境 | `历史 VMID 147` | 记录 9 月 14 日已销毁 | `infrastructure/kata-lab/README.md` | 保留验证历史，勿当现役 VM |
 | kata-lxc-lab | LXC 内 Kata worker 试验 | `pve2 / 记录地址 192.168.10.128` | 记录 PoC 验证；非正式生产服务 | `infrastructure/kata-lxc-lab/README.md` | 明确与 microVM runner 的职责 |
@@ -57,7 +57,7 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；其他条目仍为初轮工作区
 | oci | 云主机、网络与站点互联 | `OCI ap-osaka-1` | 有恢复、接管与网络实施记录 | `infrastructure/oci/README.md` | 补跨站点使用入口 |
 | openbao | 秘密管理与内部 CA | `bao.ad.ddupan.top` | 有部署与接管记录 | `infrastructure/openbao/README.md` | 补日常使用和恢复入口 |
 | proxmox | PVE、虚拟化与主机基础设施 | `PVE 管理入口` | 已有基础设施；README 混有设计设想 | `infrastructure/proxmox/README.md` | 分离当前环境与 workload identity 设想 |
-| samba-ad | AD 身份、域 DNS 与域成员管理 | `dc1 / 192.168.10.5` | 有部署与变更记录 | `infrastructure/samba-ad/README.md` | 补入域和日常管理入口 |
+| samba-ad | AD 身份、域 DNS 与域成员管理 | `dc1 / 192.168.10.5` | 有部署记录；维护者说明 DNS 部分已完成 | `infrastructure/samba-ad/README.md`、[LAN DNS](lan-dns.md) | 补入域和日常管理入口 |
 
 ## 集群
 
