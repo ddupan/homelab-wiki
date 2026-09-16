@@ -37,7 +37,8 @@ SPIFFE/SPIRE 按维护者指定，以 [#34](https://git.ddupan.top/panxiao81/hom
 [旧 VictoriaMetrics Compose](services/victoriametrics-legacy.md) 已于 2026-09-16 完成清理：
 维护者明确要求直接删除旧配置和全部数据卷，三个无引用 Docker 卷及旧配置均已删除，
 未备份或迁移数据。新 Kubernetes 栈的资源状态检查和指标清单渲染通过。
-基础设施清理提交 `3c4045a` 已在本地创建，尚未推送；数据处置不再是待决事项。
+基础设施清理已单独移植为 `d9486b4` 并推送至 `chore/remove-legacy-monitoring` 分支，
+尚未合并 main；数据处置不再是待决事项。
 
 ## 已确认的归属与范围
 
