@@ -37,12 +37,12 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 |---|---|---|---|---|---|
 | cert-manager | 签发与续期 TLS 证书 | `ClusterIssuer API` | 记录已接管 Flux | `platform/cert-manager/README.md` | 已有签发和验证说明 |
 | envoy-gateway | LAN HTTP 入口与认证集成 | `192.168.10.127:443` | 记录已接管 Flux | `platform/envoy-gateway/README.md` | 已有服务接入说明 |
-| external-secrets | OpenBao 到 Kubernetes 的秘密投射 | `Kubernetes API` | Helm 记录已接管；对象范围需区分 | `platform/external-secrets/README.md` | 补新增秘密引用的使用流程 |
+| [external-secrets](external-secrets.md) | OpenBao 到 Kubernetes 的秘密投射 | `Kubernetes API` | Helm 记录已接管；对象范围需区分 | `platform/external-secrets/README.md` | 已有字段投射示例与 ownership 边界 |
 | gitea-runner | 旧常驻 Gitea Actions runner | 纯 `self-hosted` | 维护者说明准备退役，尚未标为已退役 | `platform/gitea-runner/README.md`、维护者说明 | 新 workflow 改用 [动态 Pod/VM](gitea-dynamic-runner.md) 的明确 labels |
-| k3s | 集群 CoreDNS 定制 | `集群内 DNS` | 仅发现 DNS 配置 | `platform/k3s/Corefile.desired` | 缺组件 README |
+| [k3s DNS](k3s-dns.md) | 集群 CoreDNS 定制 | `集群内 DNS` | 仅发现 DNS 配置 | `platform/k3s/Corefile.desired` | 已有集群 DNS 使用与配置边界说明 |
 | [nats](nats.md) | 集群共享消息与 JetStream 队列 | `nats.ad.ddupan.top:4222` | 已部署；维护者说明目前唯一消费者为 Dynamic Runner | 维护者 2026-09-16 说明、`platform/nats/README.md` | runner 消息队列约定以独立项目文档为准 |
 | [observability / Grafana](grafana.md) | Grafana、指标、日志和追踪 | `grafana.ad.ddupan.top` | 记录已接管 Flux；9 月 16 日变更入口 | `platform/observability/README.md` | 已有看板、指标与日志查询指南 |
-| openebs | k3s 本地 ZFS 持久卷 | `localpv-zfs-ceph StorageClass` | 记录已接管 Flux | `platform/openebs/README.md` | 已有运维检查；补 PVC 使用边界 |
+| [openebs](openebs.md) | k3s 本地 ZFS 持久卷 | `localpv-zfs-ceph StorageClass` | 记录已接管 Flux | `platform/openebs/README.md` | 已有 PVC 示例、绑定与数据回收边界 |
 | [spire](spire.md) | 跨基础设施的统一机器身份入口 | `Workload API / spire-oidc.ad.ddupan.top` | #34 记录基础设施与最小 OpenBao PoC 已完成；后续集成进行中 | [#34](https://git.ddupan.top/panxiao81/homelab-infra/issues/34)、[RUNBOOK](https://git.ddupan.top/panxiao81/homelab-infra/src/branch/main/platform/spire/RUNBOOK.md) | 已有接入指南；动态任务以 ticket 为准 |
 
 ## 基础设施

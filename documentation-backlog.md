@@ -18,15 +18,17 @@
 - [Tailscale](services/tailscale.md)：客户端接入、子网路由和 operator Service 的区别。
 - [ps3netsrv](services/ps3netsrv.md)、[vlmcsd](services/vlmcsd.md)：客户端使用与配置入口。
 
+- [External Secrets](services/external-secrets.md)、[OpenEBS](services/openebs.md)：应用秘密与 PVC 消费示例。
+- [k3s DNS](services/k3s-dns.md)：Pod 解析路径、配置意图与排障入口。
+
 以上依据源码文档和上游说明整理，示例未在本轮执行，不作为现场验收记录。
 
 ## 后续使用说明
 
-1. k3s：补 CoreDNS 定制说明；目录缺少根 README。
-2. marker、openviking、smtp-relay、external-secrets、openebs 等：按服务总览逐步补齐消费示例。
+1. marker、openviking、smtp-relay 等：按服务总览逐步补齐消费示例。
 
 codex-proxy 已按维护者“应该是退役的”的说明移至归档范围，不再补新接入指南。
-本轮新增的四份使用指南已完成；其源码目录仍缺根 README，权威配置入口已在各页列出。
+LiteLLM、Tailscale、ps3netsrv、vlmcsd 与 k3s 的 wiki 指南已补；源码目录仍缺根 README，配置入口已在各页列出。
 
 ## 文档同步与来源链接
 
