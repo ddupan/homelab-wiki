@@ -45,16 +45,30 @@ Samba AD → 保留域 DNS 职责，相关配置已完成
 主机通过 DHCP 自动获取 DNS 配置：主 DNS 为 Blocky，副 DNS 为路由器。
 当前知识库以此作为 LAN 客户端配置口径，无需另行进行主机覆盖盘点。
 
+## NEC IX DHCP 地址池
+
+2026-09-14 将主 LAN 动态池从 `192.168.10.10–250` 收窄为
+`192.168.10.128–250`，并为 Buffalo AP（`d4:2c:46:09:07:b0`）固定分配
+`192.168.10.10`。`.251–.254` 保留，尚未分配；不能因为扫描无响应就将其用于新设备。
+DHCP 下发网关 `192.168.10.1`、主 DNS `192.168.10.127`、备用 DNS
+`192.168.10.1`，租期为 4 小时。
+
+地址池修改会清空 NEC IX 当前租约表，但终端可能继续使用旧地址直到续租。
+变更后 Kata LXC 实验节点已续租为 `.128`；迁移其他动态客户端前应先检查活动任务，
+并在续租后分别验证主机网络和其内部 k3s 等服务。地址池及预留段的声明同时维护在
+`apps/netbox/terraform/topology.yml`。
+
+回滚时不能直接恢复整份路由器配置；应先确认 `.10–.127` 没有静态占用，再在 DHCP
+profile 中恢复原范围并移除 AP 固定绑定，保存后重新核对租约、DNS 和 NetBox 声明。
+
 ## 维护入口与待补充范围
 
 以下路径相对于 homelab-infra，保留部署与操作细节的原有归属：
 
 - `apps/blocky/README.md`：Blocky 部署、分流和检查方法。
 - `infrastructure/samba-ad/README.md`：域 DNS 与 Samba 配置。
-- `infrastructure/samba-ad/router-dhcp-nec-ix.md`：路由器 DHCP 记录。
 - `infrastructure/samba-ad/router-dns-nec-ix.md`：路由器 DNS 记录。
 - `infrastructure/dns/README.md`、`records.yml`：跨视图 DNS 声明与所有权。
 
-本次只更新知识库；原工作区中“Blocky 未成为正式 resolver”的旧描述尚待同步。
 路由器自身的更上游和 AD/DN42 条件转发明细未在本次补充，也不因此自动产生核查任务。
 需要进一步查询时，先向维护者确认当前工作和范围，不因旧文档差异直接发起现场检查。

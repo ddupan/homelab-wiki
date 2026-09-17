@@ -68,7 +68,20 @@ sudo samba-tool group listmembers YOUR_GROUP
 ## 故障与维护边界
 
 入域失败先区分 DNS/SRV、时间、连通性与账号权限；已有成员认证异常再看信任关系及 winbind。
-`runbook-winbind-rpcd.md` 保存 laptop 文件服务器的相关排障记录，不将该问题直接套用所有成员。
+### Laptop 上的 Winbind RPC 子进程堆积
+
+2026-09-14，`laptop` 的 `winbind.service` 下曾堆积 1677 个 `rpcd_lsad`。现场日志同时显示
+SAMR/LSARPC pipe 断连，以及 AppArmor `samba-rpcd` profile 拒绝
+`/run/samba/ncalrpc/np/samr` 和 `lsarpc` 的写访问。仅重启 winbind 会暂时释放内存，
+但拒绝仍会触发新的 worker，因此不应把重启视为根治。
+
+已在 `/etc/apparmor.d/local/samba-rpcd` 精确允许这两个 pipe 的 `rw` 权限，重载 profile
+并重启 winbind。修复后 `wbinfo -t` 及域/BUILTIN 名称查询通过，短期复测没有新增拒绝；
+该结论只适用于 laptop 的 Samba member，不应套用到 `dc1`。
+
+复发时先采集 `free -h`、`pgrep -xc rpcd_lsad`、winbind cgroup 内存、内核 AppArmor
+拒绝和 Samba 日志，再决定是否重启。不要关闭 AppArmor 或放宽整个目录；出现新路径时
+应按审计日志逐项分析。此规则仍应纳入 `samba_member` Ansible role，避免主机重建后丢失。
 
 静态 DNS 声明入口为 `infrastructure/dns/records.yml`，只管理明确列出的 RRset，
 不清理 Samba 自动维护的域控制器 locator、Kerberos 等记录。

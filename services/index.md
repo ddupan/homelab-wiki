@@ -51,13 +51,13 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 |---|---|---|---|---|---|
 | cloudflared | 公网 Tunnel 与 DNS | `Cloudflare 边缘配置` | 有现有资源接管记录 | `infrastructure/cloudflared/terraform/README.md` | 明确配置权威位置与服务发布流程 |
 | [dns](lan-dns.md) | 跨视图 DNS 声明 | `records.yml` | LAN 角色已按维护者说明对齐；声明接管范围未重查 | `infrastructure/dns/README.md`、维护者说明 | 同步旧描述；补新增记录流程 |
-| docker | 宿主 Docker 网络管理 | `laptop` | 记录已迁移地址池 | `infrastructure/docker/README.md` | 已有 DN42 与挂载路径约束 |
+| docker | 宿主 Docker 网络管理 | `laptop` | 记录已迁移地址池 | [架构约束](../architecture/constraints.md) 与 IaC | Docker bridge 使用 `172.28.0.0/16`，避免 DN42 |
 | kata-lab | Kata VM 试验环境 | `历史 VMID 147` | 记录 9 月 14 日已销毁 | `infrastructure/kata-lab/README.md` | 保留验证历史，勿当现役 VM |
 | kata-lxc-lab | LXC 内 Kata worker 试验 | `pve2 / 记录地址 192.168.10.128` | 记录 PoC 验证；非正式生产服务 | `infrastructure/kata-lxc-lab/README.md` | 明确与 microVM runner 的职责 |
 | microvm-runner（历史目录名） | 动态 runner 的 homelab 基础设施记录 | 当前项目接口见 [Dynamic Runner](gitea-dynamic-runner.md) | 独立项目已更名并扩展到 Pod/VM，正在积极开发 | `infrastructure/microvm-runner/README.md`、独立项目文档 | 具体启用范围和实现进度以独立项目文档为准 |
 | [oci](oci.md) | 云主机、网络与站点互联 | `OCI ap-osaka-1` | 有恢复、接管与网络实施记录 | `infrastructure/oci/README.md` | 已有登录、站点网络与维护入口 |
 | [openbao](openbao.md) | 秘密管理与内部 CA | `bao.ad.ddupan.top` | 有部署与接管记录 | `infrastructure/openbao/README.md` | 已有登录、取密与运维入口指南 |
-| [proxmox](proxmox.md) | PVE、虚拟化与主机基础设施 | `PVE 管理入口` | 已有基础设施；README 混有设计设想 | `infrastructure/proxmox/README.md` | 已有管理入口；历史身份设想与当前原则分开 |
+| [proxmox](proxmox.md) | PVE、虚拟化与主机基础设施 | `PVE 管理入口` | 已有基础设施 | `infrastructure/proxmox/ansible/` 与 `README-ha.md` | 已有管理入口；身份与 runner 设计见独立项目 |
 | [samba-ad](samba-ad.md) | AD 身份、域 DNS 与域成员管理 | `dc1 / 192.168.10.5` | 有部署记录；维护者说明 DNS 部分已完成 | `infrastructure/samba-ad/README.md`、[LAN DNS](lan-dns.md) | 已有入域、目录浏览与日常管理入口 |
 
 ## 集群
