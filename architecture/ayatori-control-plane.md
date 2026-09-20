@@ -19,6 +19,11 @@ Kubernetes workload 集群只是与 OpenSandbox、Proxmox 等并列的 backend/e
 领域 API 不得默认依赖同集群 Pod、Job、Service、NetworkPolicy、namespace 共置或 owner
 reference；跨后端能力必须由领域 API 和 adapter 契约明确表达。
 
+Kubernetes 内置资源也只是可选择复用的 API contract，不绑定其传统实现组件。例如 Ayatori
+可以让 Compute Agent 更新 `core/v1 Node` 和 Lease，并由自有 controller 调度 VM，而不部署
+kubelet、Pod、CRI 或 kube-scheduler。每个复用资源都必须单独明确 producer、consumer、
+ownership、采用字段和有意舍弃的上游语义。
+
 当前选择继续使用 kube-apiserver + CRD。generic-apiserver 或聚合 API Server 不会替代领域
 controller，只会让项目额外接管资源服务端、watch、RBAC、API 兼容和存储迁移责任。只有 CRD
 或 kube-apiserver 的限制形成经过验证的阻碍时，才重新评估自建 API Server。
