@@ -23,7 +23,14 @@ reference；跨后端能力必须由领域 API 和 adapter 契约明确表达。
 controller，只会让项目额外接管资源服务端、watch、RBAC、API 兼容和存储迁移责任。只有 CRD
 或 kube-apiserver 的限制形成经过验证的阻碍时，才重新评估自建 API Server。
 
+Ayatori 不按传统私有云产品目录建设。当前已确认的首要管理缺口是 Database、LoadBalancer 与
+Bucket/Object Storage；VirtualMachine 同样具有明确价值，但需要组合 Proxmox API、节点受限
+Agent/CLI 和人工任务。当前 Job controller 是控制循环与 adapter 的验证切片，长期只可能收敛为
+内部 Run 能力，不构成 FaaS、Cloud Run 或应用托管承诺。KaaS 只有出现实际需求时才评估，不是
+产品路线的必达终点。
+
 详细设计以 Ayatori 仓库的
 [ADR-0001](https://git.ddupan.top/panxiao81/ayatori/src/branch/main/docs/decisions/0001-kubernetes-api-machinery.md)
+、[ADR-0006](https://git.ddupan.top/panxiao81/ayatori/src/branch/main/docs/decisions/0006-demand-driven-resource-scope.md)
 和[总体架构](https://git.ddupan.top/panxiao81/ayatori/src/branch/main/docs/architecture/overview.md)为准。
 本页记录跨 homelab 的稳定边界，不表示 Ayatori 已部署或达到生产可用状态。
