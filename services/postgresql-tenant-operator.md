@@ -55,6 +55,10 @@ adapter 和 controller 的纵向切片进入 Ayatori；暂停中的两个未提�
 删除，API 与实现可以在 `v1alpha1` 阶段按代码质量、恢复语义和测试需要重构。需要保留的是已批准
 规格中仍成立的安全、所有权、幂等和删除行为，而不是未投入使用的旧实现结构。
 
+原 `database.ddupan.top/v1alpha1` API group 也不保留。Ayatori 中的目标 API 使用
+`database.ayatori.ddupan.top/v1alpha1`，并纳入统一的 `api/database/v1alpha1` 与 Database 模块
+结构；由于不存在已部署消费者，不建立 alias 或 conversion 入口。
+
 合并边界记录在 Ayatori PR
 [#2 的 ADR-0008](https://git.ddupan.top/panxiao81/ayatori/src/branch/feat/kubernetes-job-controller/docs/decisions/0008-merge-postgresql-tenant-operator.md)；
 该链接当前指向未合并分支，合并后应改为 main 固定来源。
