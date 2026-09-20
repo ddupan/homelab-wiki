@@ -9,6 +9,7 @@
 | Ayatori 复用 Kubernetes API machinery，不复用其容器编排产品边界 | kube-apiserver/etcd 提供 API、watch、RBAC 与状态协调；领域调度、生命周期、恢复和 GC 属于 Ayatori controllers；Kubernetes workload 只是可替换 backend | [Ayatori 控制面边界](ayatori-control-plane.md) |
 | Kubernetes 内置资源不绑定上游实现组件 | 可由 Ayatori Agent/controller 实现和消费 Node、Lease 等 API；使用 Node 不推导必须部署 kubelet、Pod 或 kube-scheduler | [Ayatori 控制面边界](ayatori-control-plane.md) |
 | Ayatori 只为已验证的管理缺口新增北向资源 | 当前优先 Database、LoadBalancer、Bucket/Object Storage；VM 价值已确认但南向较重；Run 是内部切片，KaaS 按需，FaaS/PaaS 默认不做 | [Ayatori 控制面边界](ayatori-control-plane.md) |
+| Ayatori Compute 复用 Node/Lease API，但不引入 Kubernetes workload plane | Compute Agent 实现 Node 状态；libvirt 是长期候选主路径，PVE 是 brownfield 过渡；Kata microVM 属于 Sandbox backend | [Ayatori 控制面边界](ayatori-control-plane.md) |
 | Samba AD、OCI、Proxmox 优先 IaC，以代码为准 | Ansible/Terraform 声明及任务优先于旧 README；声明不等于已验证部署 | 维护者于 2026-09-16 明确、各服务使用指南 |
 | 服务独立部署，Terraform root/state 按服务隔离 | 避免认证和变更影响范围绑在一起 | `AGENTS.md`、`CLAUDE.md` |
 | OpenBao 恢复不能依赖 k3s 或读取自己内部的恢复凭据 | 先恢复信任根，再恢复消费者 | `infrastructure/openbao/README.md`、`CLAUDE.md` |

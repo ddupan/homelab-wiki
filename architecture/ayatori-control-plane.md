@@ -34,6 +34,11 @@ Agent/CLI 和人工任务。当前 Job controller 是控制循环与 adapter 的
 内部 Run 能力，不构成 FaaS、Cloud Run 或应用托管承诺。KaaS 只有出现实际需求时才评估，不是
 产品路线的必达终点。
 
+Compute 方向已被记录但延后实施：选择性复用 `core/v1 Node` 与 Lease，由 Ayatori Compute Agent
+实现节点状态并由自有 controller 调度，不引入 kubelet、Pod 或 kube-scheduler。长期 VM 主路径
+可以是普通 Linux 节点上的 libvirt/QEMU；Proxmox 用于 brownfield adopt 和过渡。OpenSandbox/Kata
+microVM 属于 Run/Sandbox 的隔离实现，不因此成为 VirtualMachine 资源。
+
 详细设计以 Ayatori 仓库的
 [ADR-0001](https://git.ddupan.top/panxiao81/ayatori/src/branch/main/docs/decisions/0001-kubernetes-api-machinery.md)
 、[ADR-0006](https://git.ddupan.top/panxiao81/ayatori/src/branch/main/docs/decisions/0006-demand-driven-resource-scope.md)

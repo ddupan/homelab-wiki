@@ -2,7 +2,7 @@
 title: PostgreSQL Tenant Operator（计划中的 DBaaS）
 lifecycle: planned
 evidence: documented
-last_reviewed: 2026-09-16
+last_reviewed: 2026-09-20
 last_verified: null
 sources:
   - https://git.ddupan.top/panxiao81/postgresql-tenant-operator
@@ -30,6 +30,16 @@ homelab 资源有限，为每个应用维护一套数据库会浪费资源。绝
 与架构文档时，项目记录为 **API 骨架阶段，尚未对 PostgreSQL 或 OpenBao 执行写操作**。
 已批准的设计合同不等于已经实现的功能，本文不表示 DBaaS 已上线。
 项目首页还注明 `config/samples` 保留旧 API 骨架，不能将其直接当作最终使用接口。
+
+2026-09-20，维护者决定将该项目合并为 Ayatori 的 Database 领域模块。已批准的规格、领域模型、
+状态机和测试继续作为迁移合同；不会把独立仓库的 manager、生成文件和当前工作树整仓复制。
+迁移须等待正在进行的 Instance 工作形成可引用 source commit，再按领域层、API、adapter 和
+controller 的纵向切片进入 Ayatori。旧仓库在迁移完成并验收前仍是现有设计与代码的来源，
+本决定不表示 DBaaS 已上线。
+
+合并边界记录在 Ayatori PR
+[#2 的 ADR-0008](https://git.ddupan.top/panxiao81/ayatori/src/branch/feat/kubernetes-job-controller/docs/decisions/0008-merge-postgresql-tenant-operator.md)；
+该链接当前指向未合并分支，合并后应改为 main 固定来源。
 
 ## 计划中的使用方式
 
@@ -63,5 +73,6 @@ GitOps、Terraform、kubectl 和未来 Backstage 计划共用这套 Kubernetes A
 - [部署](https://git.ddupan.top/panxiao81/postgresql-tenant-operator/src/branch/main/docs/deployment.md)与[安全](https://git.ddupan.top/panxiao81/postgresql-tenant-operator/src/branch/main/docs/security.md)：依赖和权限。
 - [迁移](https://git.ddupan.top/panxiao81/postgresql-tenant-operator/src/branch/main/docs/migration.md)与[运维](https://git.ddupan.top/panxiao81/postgresql-tenant-operator/src/branch/main/docs/operations.md)：现有数据库、删除和恢复合同。
 
-具体实现进度回到[项目仓库](https://git.ddupan.top/panxiao81/postgresql-tenant-operator)查询，
-后续查询前先向维护者对齐当前工作与 ticket。本页保留设计定位和带日期的阶段摘要。
+迁移前的具体实现进度仍回到[项目仓库](https://git.ddupan.top/panxiao81/postgresql-tenant-operator)
+查询；迁移后的实现与发布进度转到 Ayatori。后续查询前先向维护者对齐当前工作与 ticket。
+本页保留设计定位和带日期的阶段摘要。
