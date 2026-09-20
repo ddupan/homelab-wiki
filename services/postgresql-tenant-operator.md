@@ -26,16 +26,34 @@ homelab 资源有限，为每个应用维护一套数据库会浪费资源。绝
 
 ## 当前进度
 
-2026-09-16 查阅[项目 README](https://git.ddupan.top/panxiao81/postgresql-tenant-operator/src/branch/main/README.md)
-与架构文档时，项目记录为 **API 骨架阶段，尚未对 PostgreSQL 或 OpenBao 执行写操作**。
-已批准的设计合同不等于已经实现的功能，本文不表示 DBaaS 已上线。
-项目首页还注明 `config/samples` 保留旧 API 骨架，不能将其直接当作最终使用接口。
+维护者于 2026-09-20 提供的阶段状态如下：
+
+- 已合并 Instance 的 Endpoint、凭据引用、身份/版本、定义与观测目标等值对象；
+- 已合并扩展支持能力模型，以及 Instance 最小生命周期与状态 checkpoint；
+- CI PR #14 已合并：lint/test 使用 Pod runner，e2e 使用 VM runner；当前没有开放 PR；
+- 上述领域基础尚未接入实际运行链路，不能理解为新设计已经可用；
+- 仍缺完整 Ready 判定、Kubernetes Secret 管理凭据与连接刷新、应用层/数据库 adapter/controller
+  接入、CRD 与批准规格对齐及集成验证；
+- Tenant 的完整创建、凭据交付和 Retain/Delete 生命周期仍未完成；
+- 旧运行链路仍包含直接读取 OpenBao 管理凭据的逻辑。
+
+本地暂停在 `feature/instance-extension-observations`，有两个未提交文件，实现 Instance 接收扩展
+观测及其测试。该部分此前只通过领域包 lint，未运行本地测试、未提交、未推送；分支仍基于 #13，
+未包含刚合并的 CI 改动。该工作区必须原样保留，不能作为已合并能力或迁移来源。
+
+已批准的设计合同不等于已经实现的功能，本文不表示 DBaaS 已上线。生成的 CRD/API 与 samples
+仍可能落后于批准规格，不能直接作为最终使用接口。
 
 2026-09-20，维护者决定将该项目合并为 Ayatori 的 Database 领域模块。已批准的规格、领域模型、
 状态机和测试继续作为迁移合同；不会把独立仓库的 manager、生成文件和当前工作树整仓复制。
-迁移须等待正在进行的 Instance 工作形成可引用 source commit，再按领域层、API、adapter 和
-controller 的纵向切片进入 Ayatori。旧仓库在迁移完成并验收前仍是现有设计与代码的来源，
-本决定不表示 DBaaS 已上线。
+首个迁移基线使用包含已合并 Instance 领域基础与 CI #14 的最新 main commit，再按领域层、API、
+adapter 和 controller 的纵向切片进入 Ayatori；暂停中的两个未提交文件不进入首个切片。旧仓库
+在迁移完成并验收前仍是现有设计与代码的来源，本决定不表示 DBaaS 已上线。
+
+维护者同时确认目前没有可用版本，也没有 PostgreSQL 实例或 Tenant 被该 operator 托管。因此
+合并不承担旧运行链路、旧 CRD/status 或数据的兼容责任：直接读取 OpenBao 管理凭据的旧路径可以
+删除，API 与实现可以在 `v1alpha1` 阶段按代码质量、恢复语义和测试需要重构。需要保留的是已批准
+规格中仍成立的安全、所有权、幂等和删除行为，而不是未投入使用的旧实现结构。
 
 合并边界记录在 Ayatori PR
 [#2 的 ADR-0008](https://git.ddupan.top/panxiao81/ayatori/src/branch/feat/kubernetes-job-controller/docs/decisions/0008-merge-postgresql-tenant-operator.md)；
