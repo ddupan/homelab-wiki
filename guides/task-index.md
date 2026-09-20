@@ -1,6 +1,6 @@
 ---
 title: 按任务查找文档
-last_reviewed: 2026-09-18
+last_reviewed: 2026-09-20
 ---
 
 # 按任务查找文档
@@ -10,6 +10,7 @@ last_reviewed: 2026-09-18
 
 | 要做什么 | 先读 | 需要时再读 |
 |---|---|---|
+| 设计或实现 Ayatori 控制面能力 | [Ayatori 控制面边界](../architecture/ayatori-control-plane.md) | Ayatori 仓库 ADR、对应领域 API 与 adapter 文档 |
 | 发布新的 LAN Web 服务 | [发布新服务](publish-service.md) | [DNS](../services/lan-dns.md)、[Authelia](../services/authelia.md) |
 | 写 CI 或选择 Pod/VM runner | [Gitea / Actions](../services/gitea.md) | [Dynamic Runner](../services/gitea-dynamic-runner.md)、[SPIFFE](../services/spire.md) |
 | 为 CI 缓存 Ansible/Go 依赖 | [Nexus POC](../services/nexus.md) | [Dynamic Runner](../services/gitea-dynamic-runner.md)、[OpenBao](../services/openbao.md) |
