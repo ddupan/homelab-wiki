@@ -52,8 +52,11 @@ adapter 和 controller 的纵向切片进入 Ayatori；暂停中的两个未提�
 
 维护者同时确认目前没有可用版本，也没有 PostgreSQL 实例或 Tenant 被该 operator 托管。因此
 合并不承担旧运行链路、旧 CRD/status 或数据的兼容责任：直接读取 OpenBao 管理凭据的旧路径可以
-删除，API 与实现可以在 `v1alpha1` 阶段按代码质量、恢复语义和测试需要重构。需要保留的是已批准
-规格中仍成立的安全、所有权、幂等和删除行为，而不是未投入使用的旧实现结构。
+删除，未投入使用且落后于规范的 CRD/samples/实现结构不保留兼容层。
+
+源项目已批准的系统规格、API 语义、Instance/Tenant 领域模型、状态机、ownership registry、
+凭据交付、Retain/Delete、恢复和测试设计整体直接复用为 Ayatori DBaaS 合同。大胆重构针对旧运行
+实现和项目装配，不表示可以静默改变这些已批准行为；合同变化仍须先修订规格并单独评审。
 
 原 `database.ddupan.top/v1alpha1` API group 也不保留。Ayatori 中的目标 API 使用
 `database.ayatori.ddupan.top/v1alpha1`，并纳入统一的 `api/database/v1alpha1` 与 Database 模块
