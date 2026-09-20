@@ -9,9 +9,9 @@ sources: []
 
 # Nexus Repository POC
 
-Nexus Repository Community Edition POC 为一次性 CI runner 提供共享的 Ansible Galaxy 与
-Go Modules 缓存，减少每个 job 从公网重新下载依赖的时间。GitOps 已部署，两个代理链路已
-完成现场冷/热缓存验证；OCI/BuildKit 尚未纳入本轮验收，现役 zot 保持不变。
+Nexus Repository Community Edition POC 为一次性 CI runner 提供共享的 Ansible Galaxy、
+Go Modules、OCI 与 BuildKit 缓存，减少每个 job 从公网重新下载依赖的时间。GitOps 已部署，
+上述代理与缓存链路均已完成现场验证；数据库和备份仍是 POC，现役 zot 保持不变。
 
 ## 从哪里使用
 
@@ -20,7 +20,8 @@ Go Modules 缓存，减少每个 job 从公网重新下载依赖的时间。GitO
   后续正式化优先使用 Samba AD LDAP。Community
   Edition 不提供原生 OIDC/SAML，因此不能把 Authelia OIDC 写成已支持入口。
 - CI 读取：`ansible-public`、Ansible 返回制品 URL 使用的成员 proxy 与 `go-public` 已开放
-  LAN 匿名只读；Terraform 明确收窄权限，未使用默认的全仓库匿名角色。
+  LAN 匿名只读；`oci-public` 与其 `oci-proxy` 成员同样匿名只读，`oci-hosted` 不开放匿名。
+  Terraform 明确收窄权限，未使用默认的全仓库匿名角色。
 - CI 发布：目标是少量按信任边界划分的本地 service account，凭据由 OpenBao 保存；
   当前 POC 尚未创建 publisher 或授予写权限。
 
@@ -63,15 +64,27 @@ GOPROXY=https://nexus.ad.ddupan.top/repository/go-public/ go mod download
 2026-09-20 使用两个全新 Go module cache 下载 `golang.org/x/text@v0.30.0`：冷缓存
 2.92 秒、热缓存 1.51 秒，均通过 `go-public` 匿名入口完成。
 
+OCI 使用 path-based routing。公共镜像从
+`nexus.ad.ddupan.top/oci-public/<namespace>/<image>:<tag>` 匿名拉取；写入使用
+`nexus.ad.ddupan.top/oci-hosted/<namespace>/<image>:<tag>` 并要求认证。2026-09-20 验证：
+
+- Alpine 代理冷拉 4.75 秒、热拉 0.80 秒，digest 一致；
+- hosted push/pull 成功，匿名 pull 返回 401；
+- amd64/arm64 OCI image index 可 push 与 inspect；
+- Helm OCI chart push/pull digest 及本地 tarball SHA-256 一致；
+- Cosign 签名和公钥验证成功，OCI 1.1 referrers 返回一个 Sigstore bundle；
+- BuildKit `mode=max` registry cache 成功导出；销毁首个 builder 后，新 builder 从 Nexus
+  导入缓存，两个 `RUN` step 均命中 `CACHED`。
+
 ## POC 限制
 
 - 单副本、50 GiB OpenEBS RWO PVC，资源上限 2 CPU / 4 GiB。
 - 当前使用 embedded H2，仅用于 POC；正式保存唯一制品前迁移至外部 PostgreSQL。
 - 当前没有独立备份或恢复验收，PVC 不能被视为备份。
-- Terraform provider 已声明 Ansible 与 Go proxy/group；provider 1.17.0 尚未暴露 Nexus
-  3.94 新增的原生 OCI repository resource。
-- OCI 必须在补齐声明式 REST/provider 管理后再测试，不保留仅通过 UI 创建的长期配置。
-- BuildKit registry cache 有待单独验证，普通 OCI image push 成功不能替代该测试。
+- Terraform provider 管理 Ansible/Go、Realm 与权限；provider 1.17.0 尚未暴露 Nexus 3.94
+  新增的原生 OCI repository resource，因此 OCI 仓库由实例 Swagger 固定 schema 的幂等 REST
+  调和器管理，不通过 UI 留下非声明式配置。
+- 尚未创建正式 publisher service account；本轮写入测试临时使用受管管理员凭据。
 
 ## 出问题时
 
@@ -100,6 +113,8 @@ WAN，不以重建 PVC 作为排障手段。
 
 2026-09-20 现场确认 Flux Kustomization Ready、Nexus Pod Ready、50 GiB PVC Bound，HTTPRoute
 经 HTTPS 状态 API 返回 200；Samba DNS apply 后复查 `changed=0`。Terraform 已创建 Ansible、
-Go proxy/group 和最小匿名只读角色，二次 plan 为 `No changes`；上述客户端冷/热测试成功。
-实现来源为 homelab-infra PR #103。尚未验证 OCI、BuildKit cache、备份恢复或外部 PostgreSQL，
-也未修改或迁移 zot，因此本页的 `live-verified` 仅覆盖已明确列出的 POC 范围。
+Go proxy/group、OCI Bearer Token Realm 和最小匿名只读角色，二次 plan 为 `No changes`；OCI
+REST 调和器复查三个仓库均为 `in sync`。Ansible、Go、OCI、Helm、Cosign/referrers 与
+BuildKit cache 的上述客户端测试均成功。实现来源为 homelab-infra PR #103、#108 与 #109。
+尚未验证备份恢复或外部 PostgreSQL，也未创建正式 publisher account、修改或迁移 zot，
+因此本页的 `live-verified` 仅覆盖已明确列出的 POC 范围。

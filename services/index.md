@@ -22,7 +22,7 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 | [marker](marker.md) | GPU 文档转换 API | `集群内端口 8001` | 配置与部署指南；未附上线记录 | `apps/marker/README.md` | 已有转换示例；部署镜像仍为占位符 |
 | netboot | PXE 与系统安装 | `192.168.10.127` | 有部署及使用记录 | `apps/netboot/README.md` | 已有客户端启动说明 |
 | [netbox](netbox.md) | 网络资产与地址管理评估 | `netbox.ad.ddupan.top` | 记录已部署；评估用途 | `apps/netbox/README.md` | 已有浏览与 Git 修改入口指南 |
-| [nexus](nexus.md) | CI 包代理与统一制品仓库 POC | `nexus.ad.ddupan.top` | 2026-09-20 已部署并现场验证 Ansible/Go 冷热缓存 | `apps/nexus/README.md` | 补 OCI 声明式管理、BuildKit 与备份恢复测试 |
+| [nexus](nexus.md) | CI 包代理与统一制品仓库 POC | `nexus.ad.ddupan.top` | 2026-09-20 已现场验证 Ansible、Go、OCI 与 BuildKit cache | `apps/nexus/README.md` | 补 publisher account、外部 PostgreSQL 与备份恢复测试 |
 | [openviking](openviking.md) | 上下文检索服务 | `记录端口 1933 / 8020` | 配置与部署指南；未附上线记录 | `apps/openviking/README.md` | 已有导入、任务查询、检索与原文读取指南 |
 | [ps3netsrv](ps3netsrv.md) | PS3 网络内容服务 | `宿主 TCP 38008；地址未记录` | Docker 运维文档记录运行 | `apps/ps3netsrv/docker-compose.yml` | 已有客户端与内容目录指南 |
 | [seaweedfs](seaweedfs.md) | S3 对象存储 | `s3.ad.ddupan.top` | zot 文档记录已使用 | `apps/seaweedfs/README.md` | 已有客户端读写指南与备份边界说明 |
