@@ -1,24 +1,26 @@
 ---
 title: Nexus Repository POC
 lifecycle: experimental
-evidence: configuration
-last_reviewed: 2026-09-18
-last_verified: null
+evidence: live-verified
+last_reviewed: 2026-09-20
+last_verified: 2026-09-20
 sources: []
 ---
 
 # Nexus Repository POC
 
-Nexus Repository Community Edition POC 计划为一次性 CI runner 提供共享的 Ansible Galaxy、
-Go Modules 与 OCI/BuildKit 缓存，减少每个 job 从公网重新下载依赖的时间。当前只有未提交的
-GitOps 与 Terraform 配置，尚未部署、初始化或完成端到端验证；现役 zot 保持不变。
+Nexus Repository Community Edition POC 为一次性 CI runner 提供共享的 Ansible Galaxy 与
+Go Modules 缓存，减少每个 job 从公网重新下载依赖的时间。GitOps 已部署，两个代理链路已
+完成现场冷/热缓存验证；OCI/BuildKit 尚未纳入本轮验收，现役 zot 保持不变。
 
 ## 从哪里使用
 
-- 计划入口：`https://nexus.ad.ddupan.top`，仅 LAN。
-- 人类管理：POC 首次使用本地管理员；后续正式化优先使用 Samba AD LDAP。Community
+- 入口：`https://nexus.ad.ddupan.top`，仅 LAN。
+- 人类管理：当前使用本地管理员，凭据受管于 OpenBao `kv/infra/nexus`；尚未配置 LDAP。
+  后续正式化优先使用 Samba AD LDAP。Community
   Edition 不提供原生 OIDC/SAML，因此不能把 Authelia OIDC 写成已支持入口。
-- CI 读取：目标是对 public/group repository 开放 LAN 匿名只读。
+- CI 读取：`ansible-public`、Ansible 返回制品 URL 使用的成员 proxy 与 `go-public` 已开放
+  LAN 匿名只读；Terraform 明确收窄权限，未使用默认的全仓库匿名角色。
 - CI 发布：目标是少量按信任边界划分的本地 service account，凭据由 OpenBao 保存；
   当前 POC 尚未创建 publisher 或授予写权限。
 
@@ -45,8 +47,9 @@ ansible-galaxy collection install -r collections/requirements.yml \
   -p .ansible/collections
 ```
 
-预期首次请求从上游获取 collection，第二次在全新 runner 中由 Nexus 返回已缓存内容。
-该预期尚未现场验证；验证时同时记录冷/热耗时和 Nexus 日志，不能只看命令退出码。
+2026-09-20 使用两个全新客户端目录下载 `community.general:11.2.0`：冷缓存 8.49 秒、
+热缓存 1.89 秒，两份 tarball SHA-256 一致。Nexus Ansible format 返回的制品 URL 指向
+成员 proxy，因此匿名角色必须同时具备 group 与该 proxy 的只读权限。
 
 Go POC 使用：
 
@@ -56,6 +59,9 @@ GOPROXY=https://nexus.ad.ddupan.top/repository/go-public/ go mod download
 
 私有 module 的 `GOPRIVATE`、认证和 fallback 需由实际 workflow 明确配置，不能把内部 module
 路径意外发送到公共 proxy。
+
+2026-09-20 使用两个全新 Go module cache 下载 `golang.org/x/text@v0.30.0`：冷缓存
+2.92 秒、热缓存 1.51 秒，均通过 `go-public` 匿名入口完成。
 
 ## POC 限制
 
@@ -83,8 +89,8 @@ WAN，不以重建 PVC 作为排障手段。
 
 ## 运维入口
 
-实现入口为 homelab-infra 工作区中尚未提交的 `apps/nexus/` 与
-`clusters/homelab/apps/nexus.yaml`。DNS 期望记录位于 `infrastructure/dns/records.yml`。
+实现入口为 homelab-infra 已合并的 `apps/nexus/` 与
+`clusters/homelab/apps/nexus.yaml`。DNS 记录位于 `infrastructure/dns/records.yml`。
 源码 README 维护部署、初始化、Terraform、验收与恢复边界。
 
 部署依赖 Envoy Gateway、OpenEBS 和 LAN DNS；Terraform 管理依赖 Nexus 初始化后的受限管理
@@ -92,6 +98,8 @@ WAN，不以重建 PVC 作为排障手段。
 
 ## 当前状态与证据
 
-2026-09-18 已准备未提交的 Kubernetes、Flux、DNS 与 Terraform POC 配置，并完成本地渲染和
-schema 检查后方可交付；未访问现场、未部署 Nexus、未申请凭据，也未修改或迁移 zot。
-后续状态必须以合并记录、Flux 状态和客户端冷/热缓存验收分别更新，不能仅凭本页推断上线。
+2026-09-20 现场确认 Flux Kustomization Ready、Nexus Pod Ready、50 GiB PVC Bound，HTTPRoute
+经 HTTPS 状态 API 返回 200；Samba DNS apply 后复查 `changed=0`。Terraform 已创建 Ansible、
+Go proxy/group 和最小匿名只读角色，二次 plan 为 `No changes`；上述客户端冷/热测试成功。
+实现来源为 homelab-infra PR #103。尚未验证 OCI、BuildKit cache、备份恢复或外部 PostgreSQL，
+也未修改或迁移 zot，因此本页的 `live-verified` 仅覆盖已明确列出的 POC 范围。
