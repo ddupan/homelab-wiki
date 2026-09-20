@@ -63,7 +63,7 @@ adapter 和 controller 的纵向切片进入 Ayatori；暂停中的两个未提�
 结构；由于不存在已部署消费者，不建立 alias 或 conversion 入口。
 
 合并边界记录在 Ayatori PR
-[#2 的 ADR-0008](https://git.ddupan.top/panxiao81/ayatori/src/branch/feat/kubernetes-job-controller/docs/decisions/0008-merge-postgresql-tenant-operator.md)；
+[#3 的 ADR-0008](https://git.ddupan.top/panxiao81/ayatori/src/branch/docs/ayatori-architecture/docs/decisions/0008-merge-postgresql-tenant-operator.md)；
 该链接当前指向未合并分支，合并后应改为 main 固定来源。
 
 ## 计划中的使用方式
