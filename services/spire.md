@@ -2,11 +2,12 @@
 title: SPIFFE/SPIRE 使用入口与阶段状态
 lifecycle: active
 evidence: documented
-last_reviewed: 2026-09-16
+last_reviewed: 2026-09-21
 last_verified: null
 sources:
   - https://git.ddupan.top/panxiao81/homelab-infra/issues/34
   - https://git.ddupan.top/panxiao81/homelab-infra/src/branch/main/platform/spire/RUNBOOK.md
+  - https://git.ddupan.top/panxiao81/ci-actions/src/tag/v1/spiffe-openbao-login
 ---
 
 # SPIFFE/SPIRE
@@ -55,7 +56,7 @@ SPIFFE/SPIRE 取代了原计划中由 **workload-sts 承担统一 IAM 平台**�
 维护者指定以 [homelab-infra #34](https://git.ddupan.top/panxiao81/homelab-infra/issues/34)
 为主要状态依据。2026-09-16 查阅时 issue 为 open，最后更新时间为
 2026-09-14 12:43:54 UTC；本页是该次查阅的阶段摘要，不替代 ticket 的动态进度。
-本轮没有访问运行环境，以下完成结论均为 ticket 记录。
+基础设施阶段结论来自 ticket；2026-09-21 另对下表中的可复用 Action 做了现场验证。
 
 | 已完成阶段 | 记录依据 |
 |---|---|
@@ -63,6 +64,7 @@ SPIFFE/SPIRE 取代了原计划中由 **workload-sts 承担统一 IAM 平台**�
 | OIDC HTTPS、DNS、TLS、discovery/JWKS 验证；OpenBao JWT backend/role/policy 创建 | [9 月 14 日端到端验收](https://git.ddupan.top/panxiao81/homelab-infra/issues/34#issuecomment-301)，对应 #52、#53 |
 | 测试 Pod 获得 aud=openbao 的 JWT-SVID，交换为仅含 spire-poc policy、TTL 300 秒的 Bao token；lookup-self/revoke-self 验证完成 | 同上；临时 workload 与 registration entries 已清理，最终 Terraform plan 为 No changes |
 | 新 workload 接入、故障排查和恢复说明已合并 | [9 月 14 日文档记录](https://git.ddupan.top/panxiao81/homelab-infra/issues/34#issuecomment-308)，对应 #54 |
+| `spiffe-openbao-login@v1` 使用本机 Workload API 获取 JWT-SVID、交换短期 token 并在 post 阶段 `revoke-self` | 2026-09-21 现场验证；Action 未向 stdout/stderr 输出 JWT-SVID 或 token |
 
 ## 如何使用
 
@@ -82,6 +84,13 @@ SPIFFE/SPIRE 取代了原计划中由 **workload-sts 承担统一 IAM 平台**�
 [Dynamic Runner](gitea-dynamic-runner.md) 提供 Pod/VM 执行环境及获取自身 SPIFFE 身份的能力，
 不将 OpenBao 或其他服务的业务登录流程内置为 runner 职责。
 
+Gitea workflow 可使用
+[`panxiao81/ci-actions/spiffe-openbao-login@v1`](https://git.ddupan.top/panxiao81/ci-actions/src/tag/v1/spiffe-openbao-login)
+完成 JWT-SVID 交换与退出吊销。Action 会按 Actions 协议把短期 token 写入
+`GITHUB_ENV`/`GITHUB_STATE` 临时文件，因此只允许用于 job 后销毁的一次性 Pod/VM
+runner；不能用于共享或持久 runner。runner 仍只提供 Node.js 20、`spire-agent` 和
+Workload API socket，role、audience 与调用时机必须由受审查的 workflow 声明。
+
 可直接沿用的配置模板、交换示例和排障步骤见
 [权威 RUNBOOK](https://git.ddupan.top/panxiao81/homelab-infra/src/branch/main/platform/spire/RUNBOOK.md)
 的第 4–8 节。这里不复制第二份操作脚本。接入需要新增身份和授权配置，不是挂载 socket 后
@@ -94,7 +103,7 @@ OIDC issuer 为 `https://spire-oidc.ad.ddupan.top`，其 discovery/JWKS 用于�
 
 ## 仍在 ticket 中跟踪
 
-截至本次查阅，后续范围包括真实 Gitea CI/AI Agent 的 OpenBao 接入、credential-exec、
+截至本次查阅，后续范围包括在真实 Gitea CI/AI Agent 中验收已发布的登录 Action、
 SeaweedFS Web Identity/STS、非 Kubernetes 主机与临时 VM 的证明和回收、
 Compute/DBaaS 消费身份，以及 HA、备份恢复和多 issuer 约定。
 这些是 #34 的开放范围；单个消费者已有其他 PoC，不等于整项已完成。
