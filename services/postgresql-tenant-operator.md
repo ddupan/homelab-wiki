@@ -63,8 +63,8 @@ adapter 和 controller 的纵向切片进入 Ayatori；暂停中的两个未提�
 结构；由于不存在已部署消费者，不建立 alias 或 conversion 入口。
 
 合并边界记录在 Ayatori PR
-[#3 的 ADR-0008](https://git.ddupan.top/panxiao81/ayatori/src/branch/docs/ayatori-architecture/docs/decisions/0008-merge-postgresql-tenant-operator.md)；
-该链接当前指向未合并分支，合并后应改为 main 固定来源。
+[#3 的 ADR-0008](https://git.ddupan.top/panxiao81/ayatori/src/commit/33fb3ec9725dca8a10f2ad4bcd71cf83413932ee/docs/decisions/0008-merge-postgresql-tenant-operator.md)；
+该决定已于 2026-09-21 合并 main，链接固定到合并版本；设计合并不表示 Database 实现已完成。
 
 ## 计划中的使用方式
 
