@@ -2,10 +2,12 @@
 title: Gitea Dynamic Runner
 lifecycle: experimental
 evidence: documented
-last_reviewed: 2026-09-16
+last_reviewed: 2026-09-21
 last_verified: null
 sources:
   - https://git.ddupan.top/panxiao81/gitea-dynamic-runner/src/branch/main/README.md
+  - https://git.ddupan.top/panxiao81/homelab-infra/src/branch/main/platform/dynamic-runner/README.md
+  - https://git.ddupan.top/panxiao81/ci-actions/src/tag/v1
 ---
 
 # Gitea Dynamic Runner
@@ -94,6 +96,16 @@ workflow 决定如何消费身份：登录哪个服务、请求哪个 audience�
 不属于 runner 内置的业务流程。向其他服务请求 token 也遵循同一边界；
 runner 不应替 workflow 选择下游 role/policy，或统一代理其业务凭据交换。
 
+通用实现已发布为 [`panxiao81/ci-actions@v1`](https://git.ddupan.top/panxiao81/ci-actions/src/tag/v1)：
+`spiffe-openbao-login` 负责获取 JWT-SVID、交换 Bao token 和退出吊销，`setup-nexus`
+负责匿名配置 Ansible Galaxy、Go module proxy 与 OCI endpoint。后者读取 Nexus public
+repository 时不需要 Bao 登录；发布制品应另建 repository service account 和最小权限
+policy。
+
+这些 Action 不扩大 runner 权限。runner 只提供 Node.js 20、`spire-agent` 与 Workload
+API socket，workflow 明确声明 role、audience 和用途，目标服务 policy 做最终授权。
+由于短期 token 会进入 Actions job 临时文件，只能在一次性 Pod/VM executor 使用。
+
 因此，身份相关的环境验收应关注 Pod/VM 能否取得各自身份和是否保持隔离；
 具体服务的登录与 token 使用由对应 workflow 验收。
 本段记录设计职责，不表示获取身份的能力已经在所有 backend 完成实现或现场验证。
@@ -115,6 +127,7 @@ runner 不应替 workflow 选择下游 role/policy，或统一代理其业务凭
 - [设计原则](https://git.ddupan.top/panxiao81/gitea-dynamic-runner/src/branch/main/docs/design-principles.md)：README 指向的完整设计约束，本轮未逐篇复核。
 - [Runner 协议路线](https://git.ddupan.top/panxiao81/gitea-dynamic-runner/src/branch/main/docs/runner-protocol-roadmap.md)：README 指向的长期调度路线与迁移边界，本轮未逐篇复核。
 - [SPIFFE/SPIRE](spire.md)：统一机器身份的设计定位与阶段依据。
+- [`ci-actions@v1`](https://git.ddupan.top/panxiao81/ci-actions/src/tag/v1)：workflow 可复用的 SPIFFE/OpenBao 登录与 Nexus 配置 Action。
 
 实际启用范围、workflow 验收、排障及消息队列约定在项目文档中维护。
 开发中的变化直接以项目文档为准，知识库不另列“启用范围待核实”任务。

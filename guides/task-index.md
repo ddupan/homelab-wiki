@@ -1,6 +1,6 @@
 ---
 title: 按任务查找文档
-last_reviewed: 2026-09-18
+last_reviewed: 2026-09-21
 ---
 
 # 按任务查找文档
@@ -11,7 +11,7 @@ last_reviewed: 2026-09-18
 | 要做什么 | 先读 | 需要时再读 |
 |---|---|---|
 | 发布新的 LAN Web 服务 | [发布新服务](publish-service.md) | [DNS](../services/lan-dns.md)、[Authelia](../services/authelia.md) |
-| 写 CI 或选择 Pod/VM runner | [Gitea / Actions](../services/gitea.md) | [Dynamic Runner](../services/gitea-dynamic-runner.md)、[SPIFFE](../services/spire.md) |
+| 写 CI 或选择 Pod/VM runner | [Gitea / Actions](../services/gitea.md) | [Dynamic Runner](../services/gitea-dynamic-runner.md)、[SPIFFE](../services/spire.md)、[`ci-actions@v1`](https://git.ddupan.top/panxiao81/ci-actions/src/tag/v1) |
 | 为 CI 缓存 Ansible/Go 依赖 | [Nexus POC](../services/nexus.md) | [Dynamic Runner](../services/gitea-dynamic-runner.md)、[OpenBao](../services/openbao.md) |
 | 拉取或发布容器镜像 | [zot](../services/zot.md) | [SPIFFE](../services/spire.md)；S3 后端维护才读 SeaweedFS |
 | 使用 S3 对象存储 | [SeaweedFS](../services/seaweedfs.md) | [OpenBao](../services/openbao.md) |
