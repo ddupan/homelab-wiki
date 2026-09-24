@@ -83,11 +83,13 @@ Retain 在申请删除后保留 Database 对象和外部数据，进入 Released
 身份、绑定和进度；普通失败幂等重试，无法确认外部创建结果时报告足够人工诊断的冲突。
 不引入 CSI 协议、存储调度或通用 Claim。资源 scope、绑定字段和凭据重新交付协议仍需细化。
 
-本轮依据为维护者设计讨论和 Ayatori 本地提交
-`6db8a495fb9f8981d336c9e6288253628ab478b6` 中的
-`docs/decisions/0009-database-resource-and-claim.md` 与 `docs/database/specification.md`。
-该提交尚未推送；旧 registry 实现尚未撤除，新三资源链路尚未完成。
-远端来源链接待发布后补齐，见 [同步记录](../verification.md#ayatori-database-设计修订同步)。
+本轮依据为维护者设计讨论和 Ayatori 已推送的
+[ADR-0009](https://git.ddupan.top/panxiao81/ayatori/src/commit/6db8a495fb9f8981d336c9e6288253628ab478b6/docs/decisions/0009-database-resource-and-claim.md)、
+[系统规格](https://git.ddupan.top/panxiao81/ayatori/src/commit/6db8a495fb9f8981d336c9e6288253628ab478b6/docs/database/specification.md)。
+registry 实现、迁移与 Instance 初始化依赖已在
+[23a2d81](https://git.ddupan.top/panxiao81/ayatori/commit/23a2d81b5041f8589baab1c234136cd2c701bb06)
+撤除；本地测试与真实 PostgreSQL/API server 集成验证通过，但新三资源链路尚未完成。
+这些是分支提交，不表示已合并或部署；见 [同步记录](../verification.md#ayatori-database-设计修订同步)。
 
 ## 计划中的使用方式
 
