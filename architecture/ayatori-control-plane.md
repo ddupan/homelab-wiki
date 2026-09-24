@@ -1,6 +1,6 @@
 ---
 title: Ayatori 控制面边界
-last_reviewed: 2026-09-20
+last_reviewed: 2026-09-24
 ---
 
 # Ayatori 控制面边界
@@ -38,6 +38,14 @@ Compute 方向已被记录但延后实施：选择性复用 `core/v1 Node` 与 L
 实现节点状态并由自有 controller 调度，不引入 kubelet、Pod 或 kube-scheduler。长期 VM 主路径
 可以是普通 Linux 节点上的 libvirt/QEMU；Proxmox 用于 brownfield adopt 和过渡。OpenSandbox/Kata
 microVM 属于 Run/Sandbox 的隔离实现，不因此成为 VirtualMachine 资源。
+
+Database 资源模型于 2026-09-24 明确采用官方 PV/PVC 的资源/申请分离模式：Instance 提供
+管理入口，独立 Database 表示实际资源，Tenant 表示用户申请。Retain 保留资源对象，支持
+人工导入和明确授权后的重新绑定；不维护 PostgreSQL ownership registry，不为创建结果不确定
+提供自动认领保证。详见 [DBaaS 设计](../services/postgresql-tenant-operator.md#当前资源模型2026-09-24-已确认)。
+
+新增 Kubernetes 资源生命周期前须核对官方设计方式，记录采用与偏离的语义；参考模式不意味着
+部署对应上游组件，也不意味着复制全部字段与抽象。
 
 详细设计以 Ayatori 仓库的
 [ADR-0001](https://git.ddupan.top/panxiao81/ayatori/src/branch/main/docs/decisions/0001-kubernetes-api-machinery.md)

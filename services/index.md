@@ -75,7 +75,7 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 
 - [e5renew、research-auto](external-consumers.md)：GitHub 上的外部消费者，不属于 homelab 基础设施；仅保留归属入口。
 - [Gitea Dynamic Runner](gitea-dynamic-runner.md)：正在积极开发的动态 Pod/VM runner，原名 gitea-microvm-runner；具体启用范围、调度和队列约定以项目文档为准。
-- [PostgreSQL Tenant Operator](postgresql-tenant-operator.md)：计划中的 DBaaS 中间层，管理共享实例中的数据库与账号；README 记录为 API 骨架阶段，不代表服务已上线。
+- [PostgreSQL Tenant Operator](postgresql-tenant-operator.md)：计划中的 DBaaS 中间层，管理共享实例中的数据库与账号；现转入 Ayatori Database，采用独立 Database 资源与 Tenant 申请；设计修订不代表服务上线。
 - [workload-sts](../architecture/workload-sts-history.md)：已归档的早期机器身份方案；停止开发、不部署 PoC，由 SPIFFE/SPIRE 替代。
 - Backstage：规划中的服务目录与文档入口；本轮未发现独立部署目录。
 - Keycloak、Casdoor：`archive/` 下有明确退役记录，替代入口为 Authelia。

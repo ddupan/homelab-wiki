@@ -63,3 +63,14 @@ SPIFFE/SPIRE 按维护者指定，以 [#34](https://git.ddupan.top/panxiao81/hom
 - Backstage 为计划中的统一入口，不作为已部署服务记录。
 
 后续出现新的状态问题时，先向维护者对齐，再按授权范围更新对应服务文档。
+
+## Ayatori Database 设计修订同步
+
+2026-09-24，维护者批准 Instance → Database → Tenant 资源/申请分离，替代原 PostgreSQL
+registry 与自动所有权恢复合同。源仓库设计和 wiki 已在本地同步；Ayatori 设计已提交为
+`6db8a495fb9f8981d336c9e6288253628ab478b6`，本记录随 wiki 设计同步提交，双方尚未推送。
+新资源 API 与旧实现撤换未完成，不属于部署或现场验证。
+
+源设计：`/tmp/ayatori-database-domain/docs/decisions/0009-database-resource-and-claim.md`；
+wiki 权威摘要：[DBaaS 设计](services/postgresql-tenant-operator.md#当前资源模型2026-09-24-已确认)。
+后续推送/合并后补正式来源链接；旧仓库固定基线及受保护工作树不修改。

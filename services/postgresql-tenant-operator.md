@@ -2,7 +2,7 @@
 title: PostgreSQL Tenant Operator（计划中的 DBaaS）
 lifecycle: planned
 evidence: documented
-last_reviewed: 2026-09-20
+last_reviewed: 2026-09-24
 last_verified: null
 sources:
   - https://git.ddupan.top/panxiao81/postgresql-tenant-operator
@@ -54,9 +54,9 @@ adapter 和 controller 的纵向切片进入 Ayatori；暂停中的两个未提�
 合并不承担旧运行链路、旧 CRD/status 或数据的兼容责任：直接读取 OpenBao 管理凭据的旧路径可以
 删除，未投入使用且落后于规范的 CRD/samples/实现结构不保留兼容层。
 
-源项目已批准的系统规格、API 语义、Instance/Tenant 领域模型、状态机、ownership registry、
-凭据交付、Retain/Delete、恢复和测试设计整体直接复用为 Ayatori DBaaS 合同。大胆重构针对旧运行
-实现和项目装配，不表示可以静默改变这些已批准行为；合同变化仍须先修订规格并单独评审。
+2026-09-20 的迁移决定原要求整体沿用源设计。2026-09-24，维护者明确批准下述资源/申请
+分离修订，替代 registry、自动所有权恢复与原 Retain 合同；管理凭据、TLS、OpenBao/ESO 和
+其他适用安全边界继续保留。这是显式设计修订，不是已完成运行验证。
 
 原 `database.ddupan.top/v1alpha1` API group 也不保留。Ayatori 中的目标 API 使用
 `database.ayatori.ddupan.top/v1alpha1`，并纳入统一的 `api/database/v1alpha1` 与 Database 模块
@@ -66,11 +66,34 @@ adapter 和 controller 的纵向切片进入 Ayatori；暂停中的两个未提�
 [#3 的 ADR-0008](https://git.ddupan.top/panxiao81/ayatori/src/commit/33fb3ec9725dca8a10f2ad4bcd71cf83413932ee/docs/decisions/0008-merge-postgresql-tenant-operator.md)；
 该决定已于 2026-09-21 合并 main，链接固定到合并版本；设计合并不表示 Database 实现已完成。
 
+## 当前资源模型（2026-09-24 已确认）
+
+参考 [Kubernetes 官方 PV/PVC](https://kubernetes.io/docs/concepts/storage/persistent-volumes/) 的
+资源/申请分离：Instance 是资源来源与管理入口；独立 Database 类似 PV；Tenant 是类似 PVC
+的用户申请。Instance 一对多 Database，每个 Database 同时最多绑定一个 Tenant。
+
+Database 自带 instanceRef，手工登记不依赖 Tenant；动态申请由 Tenant 选择 Instance，
+引用已有 Database 时从资源获取 Instance，不重复声明另一份来源。
+
+Retain 在申请删除后保留 Database 对象和外部数据，进入 Released，等待管理员处理数据、
+旧访问权限和凭据后显式授权重新绑定。已有数据库可由管理员显式登记导入，初始验证不改密、
+不改 owner；发现未知同名资源仍报 Conflict。回收策略位于资源侧，Database 不随 Tenant GC。
+
+撤销 PostgreSQL ownership registry 和任意 status 丢失自动重建所有权的要求。CR 记录持久
+身份、绑定和进度；普通失败幂等重试，无法确认外部创建结果时报告足够人工诊断的冲突。
+不引入 CSI 协议、存储调度或通用 Claim。资源 scope、绑定字段和凭据重新交付协议仍需细化。
+
+本轮依据为维护者设计讨论和 Ayatori 本地提交
+`6db8a495fb9f8981d336c9e6288253628ab478b6` 中的
+`docs/decisions/0009-database-resource-and-claim.md` 与 `docs/database/specification.md`。
+该提交尚未推送；旧 registry 实现尚未撤除，新三资源链路尚未完成。
+远端来源链接待发布后补齐，见 [同步记录](../verification.md#ayatori-database-设计修订同步)。
+
 ## 计划中的使用方式
 
 1. 平台管理员通过 `PostgreSQLInstance` 注册已有 PostgreSQL 实例及管理连接。
-2. 下游以 namespaced `PostgreSQLTenant` 声明所需 database、login owner 和扩展。
-3. controller 校验所有权与冲突，幂等创建凭据、role、database 和授权等资源。
+2. 下游以 namespaced `PostgreSQLTenant` 申请数据库，或显式引用管理员登记的 Database。
+3. controller 建立独立 Database 记录与排他绑定，供应或验证资源；未知同名及不确定创建报冲突。
 4. 应用凭据以 OpenBao KV 为事实来源，由 ESO 投射为 Kubernetes Secret。
    非 Kubernetes 消费者使用提供的 OpenBao API URL，并通过自身授权获取凭据。
 5. ESO 投射成功且应用凭据实际登录成功后，Tenant 才能进入 Ready。
@@ -82,7 +105,8 @@ GitOps、Terraform、kubectl 和未来 Backstage 计划共用这套 Kubernetes A
 
 - operator 管理实例内的租户资源，不运行 PostgreSQL/OpenBao，也不管理 VM、存储、备份或 OpenBao PKI。
 - 应用密码写入 OpenBao，不进入 CR、Event 或日志；ESO 负责向 Kubernetes 消费者投射。
-- 默认删除策略为 `Retain`，删除声明不会默认删除业务数据；显式 `Delete` 需重新校验所有权。
+- Database 默认 Retain；删除 Tenant 保留资源对象与数据，Released 不自动重新分配。
+- 资源侧 Delete 需明确授权、finalizer 与实际管理范围检查，导入不隐含删除或改密授权。
 - 遇到未知 database/role 等资源报告 Conflict，不能自动接管、覆盖或删除；现有数据库迁移需遵循迁移合同。
 - namespace 是 Kubernetes 身份与 RBAC 边界；database/role 名称在一个 PostgreSQL Instance 内仍全局唯一。
 
