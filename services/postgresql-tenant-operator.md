@@ -89,7 +89,8 @@ Retain 在申请删除后保留 Database 对象和外部数据，进入 Released
 registry 实现、迁移与 Instance 初始化依赖已在
 [23a2d81](https://git.ddupan.top/panxiao81/ayatori/commit/23a2d81b5041f8589baab1c234136cd2c701bb06)
 撤除；本地测试与真实 PostgreSQL/API server 集成验证通过，但新三资源链路尚未完成。
-这些是分支提交，不表示已合并或部署；见 [同步记录](../verification.md#ayatori-database-设计修订同步)。
+上述设计与撤除已随 [PR #9](https://git.ddupan.top/panxiao81/ayatori/pulls/9) 合并 main，
+合并版本为 `347a667`；不表示三资源链路已实现或部署。见 [同步记录](../verification.md#ayatori-database-设计修订同步)。
 
 ## 计划中的使用方式
 

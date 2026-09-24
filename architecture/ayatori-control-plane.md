@@ -60,4 +60,5 @@ Database 资源模型于 2026-09-24 明确采用官方 PV/PVC 的资源/申请�
 不能把分支 head 的成功当成任何合并结果的成功。测试项目未减少，不修改分支保护设置。
 配置与边界见 Ayatori
 [f347ee5 的环境文档](https://git.ddupan.top/panxiao81/ayatori/src/commit/f347ee5292ecf39ac0ecbb21e162ee406d8ce382/docs/concepts/environments.md)，
-随 [PR #9](https://git.ddupan.top/panxiao81/ayatori/pulls/9) 交付；不是整个 homelab 的统一 CI 策略。
+已随 [PR #9](https://git.ddupan.top/panxiao81/ayatori/pulls/9) 合并 main；合并后未触发重复全量验证。
+这不是整个 homelab 的统一 CI 策略。

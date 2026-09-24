@@ -75,4 +75,8 @@ registry 撤除通过本地全量测试、lint 及真实 API server/PostgreSQL �
 源设计：[6db8a49](https://git.ddupan.top/panxiao81/ayatori/commit/6db8a495fb9f8981d336c9e6288253628ab478b6)；
 代码撤除：[23a2d81](https://git.ddupan.top/panxiao81/ayatori/commit/23a2d81b5041f8589baab1c234136cd2c701bb06)；
 wiki 权威摘要：[DBaaS 设计](services/postgresql-tenant-operator.md#当前资源模型2026-09-24-已确认)。
-来源链接固定到分支提交，不视为已合并。旧仓库固定基线及受保护工作树未修改。
+来源链接固定到实现提交；相关设计、registry 撤除与 CI 去重修复已随
+[PR #9](https://git.ddupan.top/panxiao81/ayatori/pulls/9) 合并为
+[347a667](https://git.ddupan.top/panxiao81/ayatori/commit/347a667c0c1737bc4e2703dec5f11358f0425e43)。
+最新 head 的 CI #781 已全部通过；无日志启动失败的 test 单项重试后通过。
+旧仓库固定基线及受保护工作树未修改。
