@@ -52,3 +52,12 @@ Database 资源模型于 2026-09-24 明确采用官方 PV/PVC 的资源/申请�
 、[ADR-0006](https://git.ddupan.top/panxiao81/ayatori/src/branch/main/docs/decisions/0006-demand-driven-resource-scope.md)
 和[总体架构](https://git.ddupan.top/panxiao81/ayatori/src/branch/main/docs/architecture/overview.md)为准。
 本页记录跨 homelab 的稳定边界，不表示 Ayatori 已部署或达到生产可用状态。
+
+## CI 验证约定
+
+2026-09-24 维护者决定：全量验证自动在 PR 执行，main push 不再重复运行；保留手动入口。
+直接推送 main 不会自动验证，常规变更仍应经 PR；基线有实质变化时需更新分支并重验，
+不能把分支 head 的成功当成任何合并结果的成功。测试项目未减少，不修改分支保护设置。
+配置与边界见 Ayatori
+[f347ee5 的环境文档](https://git.ddupan.top/panxiao81/ayatori/src/commit/f347ee5292ecf39ac0ecbb21e162ee406d8ce382/docs/concepts/environments.md)，
+随 [PR #9](https://git.ddupan.top/panxiao81/ayatori/pulls/9) 交付；不是整个 homelab 的统一 CI 策略。
