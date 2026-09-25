@@ -197,7 +197,7 @@ Testcontainers、UnboundID、Lombok、配置处理器、DevTools 与 Native 插�
 
 页面与 Spring 后端同仓库维护，前端资源构建后随 Native 应用交付。生产不增加 Node/BFF、
 嵌入式 JavaScript 运行时或 FreeMarker；首轮接受客户端首屏渲染，不实现 React SSR/RSC。
-浏览器交互原型已经维护者体验认可。正在接入 AD 密码因素与直接所属组查询，
+浏览器交互原型已经维护者体验认可。AD 密码因素与直接所属组查询已通过维护者浏览器验收，
 密码成功后停在待 MFA 状态，不接受 Hydra challenge，也不替换现役入口。
 原型启动、实现与验证见 [iam-login PR #3](https://git.ddupan.top/panxiao81/iam-login/pulls/3)
 及其浏览器流程文档；AD 接入见
