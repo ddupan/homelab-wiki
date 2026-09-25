@@ -95,5 +95,6 @@ Gitea 接入见 [PR #143](https://git.ddupan.top/panxiao81/homelab-infra/pulls/1
 本轮开发验证通过 JVM 测试，并从 JVM 通过 CA/域名验证读取真实 AD RootDSE。
 人类密码和实际组结果仍待维护者验收，新增路径尚未跑 Native；日常迭代不要求每轮
 原生编译。开发入口使用受限 Tailscale HTTPS，属于临时验收实例，不是生产入口。
+实现见 [iam-login PR #4](https://git.ddupan.top/panxiao81/iam-login/pulls/4)，
 配置、边界与使用方式见
 [iam-login AD 接入文档（开发分支）](https://git.ddupan.top/panxiao81/iam-login/src/branch/feat/ad-login/docs/ad-login.md)。

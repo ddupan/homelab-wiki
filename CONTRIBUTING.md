@@ -69,10 +69,10 @@ accepted 不代表部署完成，implemented 必须附实现和验收依据。
 无需每次修改都更新首页、所有服务页或整个来源索引。
 原仓库 README 同步按维护者要求暂缓，不阻塞 wiki 的维护。
 
-按维护者于 2026-09-25 的约定，纯文档变更检查通过后直接提交并推送 main，不另开 PR。
-含代码、配置或检查器行为变更时仍使用 PR；PR 使用
-[.gitea/PULL_REQUEST_TEMPLATE.md](.gitea/PULL_REQUEST_TEMPLATE.md)，简述问题、最终变化、依据与验证。
-直接提交仍遵循相同的检查与证据规则，不跳过检查或覆盖 main 上的其他更新。
+按维护者最新约定，后续修改均新建分支并提交 PR，纯文档变更也适用；未经明确指示，
+不直接推送 main、不自行合并。此约定取代此前纯文档直接推 main 的规则。
+PR 使用 [.gitea/PULL_REQUEST_TEMPLATE.md](.gitea/PULL_REQUEST_TEMPLATE.md)，
+简述问题、最终变化、依据与验证；不得跳过检查或覆盖其他工作区修改。
 
 ## 本地与 CI 检查
 
