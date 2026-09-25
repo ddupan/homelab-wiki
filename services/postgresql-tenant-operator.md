@@ -159,14 +159,24 @@ Instance 观测、Secret watch 与删除引用保护已在 CI 通过后，经维
 [模块说明](https://git.ddupan.top/panxiao81/ayatori/src/commit/f4deb98a7fcf61fb97ce52bbf190beb816d0141a/docs/database/README.md)
 与安全文档为准；合并不表示部署或完整供应链路已完成。
 
-后续应用凭据存储切片已签名提交为
-[f6bb9e4](https://git.ddupan.top/panxiao81/ayatori/commit/f6bb9e4599afca49a9cdc3d40789e11d118db9c5)，
-由 [PR #12](https://git.ddupan.top/panxiao81/ayatori/pulls/12) 跟踪，尚未合并。
+应用凭据存储切片及测试准备修复已通过三项 CI，并经维护者批准合并
+[PR #12](https://git.ddupan.top/panxiao81/ayatori/pulls/12)，合并提交为
+[22ab72e](https://git.ddupan.top/panxiao81/ayatori/commit/22ab72ec60dd5a0bf852e4563e107597dd56e81f)。
 复用 OpenBao 官方 Go SDK 的 KV v2 CAS=0、回读七键与版本，禁止覆盖
 或自动认领；明确权限拒绝等待依赖恢复，写入结果不确定则停止并人工处理。本地真实
-OpenBao 测试已覆盖并发、软删除、固定前缀权限和响应丢失，尚未接入 manager、Kubernetes
-auth、Database 供应或 ESO。源码模块文档与 wiki 已关联，见
+OpenBao 测试已覆盖并发、软删除、固定前缀权限和响应丢失，尚未接入 manager、
+Database 供应或 ESO。源码模块文档与 wiki 已关联，见
 [同步记录](../verification.md)。
+
+Kubernetes 认证会话的后续实现位于
+[PR #13](https://git.ddupan.top/panxiao81/ayatori/pulls/13)，提交
+[dcf9ab5](https://git.ddupan.top/panxiao81/ayatori/commit/dcf9ab50dffab2740b1801a560d47b1a857374b1)，尚未合并。
+使用官方 SDK 登录与 LifetimeWatcher，不自行实现续期算法；重新登录重读指定 SA token，
+缺失或空文件不回退其他身份，续期失败及停止时清空本地 token。真实 envtest/OpenBao 测试
+验证 TokenReview、续期、撤销恢复与 namespace/audience 拒绝，三轮 race、本地全量测试和
+两种 lint 通过。manager 配置、生命周期/健康检查装配与生产 auth 配置仍未接入，不代表已部署。
+具体使用边界见该提交的
+[认证会话说明](https://git.ddupan.top/panxiao81/ayatori/src/commit/dcf9ab50dffab2740b1801a560d47b1a857374b1/docs/database/README.md#openbao-kubernetes-认证会话)。
 
 - operator 管理实例内的租户资源，不运行 PostgreSQL/OpenBao，也不管理 VM、存储、备份或 OpenBao PKI。
 - 应用密码写入 OpenBao，不进入 CR、Event 或日志；ESO 负责向 Kubernetes 消费者投射。

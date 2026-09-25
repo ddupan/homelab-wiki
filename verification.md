@@ -107,11 +107,14 @@ controller、目标固定、finalizer 保留与生成 RBAC，真实 API server �
 [f4deb98](https://git.ddupan.top/panxiao81/ayatori/commit/f4deb98a7fcf61fb97ce52bbf190beb816d0141a)；
 未部署或进行现场验收。
 
-后续凭据存储切片已签名提交并推送为
-[f6bb9e4](https://git.ddupan.top/panxiao81/ayatori/commit/f6bb9e4599afca49a9cdc3d40789e11d118db9c5)，
-由 [PR #12](https://git.ddupan.top/panxiao81/ayatori/pulls/12) 跟踪 CI 与 review。
-全量测试、真实 PostgreSQL/API server/OpenBao 集成测试及两种 lint 本地通过；源码模块文档
-和 wiki 已同步实现边界与正式链接。尚未合并或接入供应流程，不把本地验证等同于远端 CI。
+凭据存储切片及冷缓存准备修复已通过 CI #815 的 test、lint、database-integration，
+维护者批准后合并 [PR #12](https://git.ddupan.top/panxiao81/ayatori/pulls/12)，合并提交
+[22ab72e](https://git.ddupan.top/panxiao81/ayatori/commit/22ab72ec60dd5a0bf852e4563e107597dd56e81f)。
+后续 Kubernetes 认证与短期会话续期已提交为
+[dcf9ab5](https://git.ddupan.top/panxiao81/ayatori/commit/dcf9ab50dffab2740b1801a560d47b1a857374b1)，
+由 [PR #13](https://git.ddupan.top/panxiao81/ayatori/pulls/13) 跟踪 CI 与 review。
+本地全量测试、三轮真实 OpenBao/TokenReview race 测试及两种 lint 通过；源码模块文档与 wiki
+已同步边界和正式链接。认证尚未合并或装配到 manager，不把本地验证等同于远端 CI 或服务上线。
 
 ## 2026-09-25 sandbox 存储故障复盘的来源边界
 
