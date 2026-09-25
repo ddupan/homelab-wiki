@@ -100,9 +100,15 @@ controller、目标固定、finalizer 保留与生成 RBAC，真实 API server �
 尚未实现 finalizer 清理、供应与交付，不宣称完成三资源生命周期或现场验收。
 
 同日确认原生非 superuser + CREATEDB/CREATEROLE 管理方案，已同步至
-[DBaaS 职责边界](services/postgresql-tenant-operator.md#职责边界)。后续 Instance 观测链路在
-`feat/database-instance-observation` 分支，已签名提交并推送为
-[bc227bf](https://git.ddupan.top/panxiao81/ayatori/commit/bc227bfdb4b2f5b027fe522b8dcf72db17b84d26)；本地已通过
+[DBaaS 职责边界](services/postgresql-tenant-operator.md#职责边界)。Instance 观测链路的实现提交
+[bc227bf](https://git.ddupan.top/panxiao81/ayatori/commit/bc227bfdb4b2f5b027fe522b8dcf72db17b84d26) 本地已通过
 全量测试、三轮 controller/application race、真实 PostgreSQL/API server 集成测试及普通/integration lint。
-源码文档和远端链接已经同步，由 [PR #11](https://git.ddupan.top/panxiao81/ayatori/pulls/11)
-跟踪 CI 与 review；不代表已合并、部署或现场验收。
+[PR #11](https://git.ddupan.top/panxiao81/ayatori/pulls/11) 的三项 CI 均通过，维护者批准后已合并为
+[f4deb98](https://git.ddupan.top/panxiao81/ayatori/commit/f4deb98a7fcf61fb97ce52bbf190beb816d0141a)；
+未部署或进行现场验收。
+
+后续凭据存储切片已签名提交并推送为
+[f6bb9e4](https://git.ddupan.top/panxiao81/ayatori/commit/f6bb9e4599afca49a9cdc3d40789e11d118db9c5)，
+由 [PR #12](https://git.ddupan.top/panxiao81/ayatori/pulls/12) 跟踪 CI 与 review。
+全量测试、真实 PostgreSQL/API server/OpenBao 集成测试及两种 lint 本地通过；源码模块文档
+和 wiki 已同步实现边界与正式链接。尚未合并或接入供应流程，不把本地验证等同于远端 CI。

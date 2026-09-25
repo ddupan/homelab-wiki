@@ -152,12 +152,21 @@ GitOps、Terraform、kubectl 和未来 Backstage 计划共用这套 Kubernetes A
 CREATEDB/CREATEROLE，不引入 SECURITY DEFINER 接口。扩展安装按实际权限逐请求验证，
 可用列表不等于任意扩展均可安装；基础管理能力不授予导入或接管他人资源的权限。
 这项决定沿用原安全文档的非 superuser 原则，并明确了此前未选定的实施方式。
-Instance 观测、Secret watch 与删除引用保护的后续实现目前位于 Ayatori
-`feat/database-instance-observation` 分支，已签名提交并推送为
-[bc227bf](https://git.ddupan.top/panxiao81/ayatori/commit/bc227bfdb4b2f5b027fe522b8dcf72db17b84d26)，
-由 [PR #11](https://git.ddupan.top/panxiao81/ayatori/pulls/11) 跟踪，尚未合并。权限矩阵、启用方式和测试边界
-以该提交的 [模块说明](https://git.ddupan.top/panxiao81/ayatori/src/commit/bc227bfdb4b2f5b027fe522b8dcf72db17b84d26/docs/database/README.md)
-与安全文档为准，不能把 main 的旧实现当成已具备该能力。
+Instance 观测、Secret watch 与删除引用保护已在 CI 通过后，经维护者批准合并
+[PR #11](https://git.ddupan.top/panxiao81/ayatori/pulls/11)，main 合并提交为
+[f4deb98](https://git.ddupan.top/panxiao81/ayatori/commit/f4deb98a7fcf61fb97ce52bbf190beb816d0141a)。
+权限矩阵、启用方式和测试边界以该提交的
+[模块说明](https://git.ddupan.top/panxiao81/ayatori/src/commit/f4deb98a7fcf61fb97ce52bbf190beb816d0141a/docs/database/README.md)
+与安全文档为准；合并不表示部署或完整供应链路已完成。
+
+后续应用凭据存储切片已签名提交为
+[f6bb9e4](https://git.ddupan.top/panxiao81/ayatori/commit/f6bb9e4599afca49a9cdc3d40789e11d118db9c5)，
+由 [PR #12](https://git.ddupan.top/panxiao81/ayatori/pulls/12) 跟踪，尚未合并。
+复用 OpenBao 官方 Go SDK 的 KV v2 CAS=0、回读七键与版本，禁止覆盖
+或自动认领；明确权限拒绝等待依赖恢复，写入结果不确定则停止并人工处理。本地真实
+OpenBao 测试已覆盖并发、软删除、固定前缀权限和响应丢失，尚未接入 manager、Kubernetes
+auth、Database 供应或 ESO。源码模块文档与 wiki 已关联，见
+[同步记录](../verification.md)。
 
 - operator 管理实例内的租户资源，不运行 PostgreSQL/OpenBao，也不管理 VM、存储、备份或 OpenBao PKI。
 - 应用密码写入 OpenBao，不进入 CR、Event 或日志；ESO 负责向 Kubernetes 消费者投射。
