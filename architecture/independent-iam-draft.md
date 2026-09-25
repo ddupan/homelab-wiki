@@ -4,6 +4,7 @@ status: draft
 last_reviewed: 2026-09-25
 last_verified: null
 sources:
+  - https://git.ddupan.top/panxiao81/iam-login/pulls/3
   - https://git.ddupan.top/panxiao81/iam-login/commit/9cf2d235dff0cd33f98012b0a114f14a8f9bfcda
   - 维护者于 2026-09-25 的架构讨论与草案记录要求
 ---
@@ -184,6 +185,19 @@ Testcontainers、UnboundID、Lombok、配置处理器、DevTools 与 Native 插�
 明确现役 issuer/sub 哈希主体到新主体的连续性映射。MFA 首先验证官方 WebAuthn 集成，
 恢复与已有凭据迁移方式仍待实现。维护者接受必要时并存多个登录前端。
 现役 Go/Authelia PoC 保留为已验收基线，尚未切换生产认证路径。
+
+### 人类浏览器登录界面
+
+已确定先借鉴 Keycloakify 的交互方式：React + Vite 开发界面，Spring 在首个 HTML 响应中
+带齐当前步骤和必要上下文，浏览器渲染组件，默认用原生表单 POST，由服务端认证流程
+决定下一步页面或重定向。局部交互按需使用 JavaScript；后续根据实际体验决定哪些步骤
+使用 fetch，避免将整个认证流程都搬到客户端路由和状态机。
+
+页面与 Spring 后端同仓库维护，前端资源构建后随 Native 应用交付。生产不增加 Node/BFF、
+嵌入式 JavaScript 运行时或 FreeMarker；首轮接受客户端首屏渲染，不实现 React SSR/RSC。
+当前仅验证浏览器交互原型，不表示 AD、MFA 或 Hydra 登录链路已完成，也不替换现役入口。
+原型启动、实现与验证见 [iam-login PR #3](https://git.ddupan.top/panxiao81/iam-login/pulls/3)
+及其浏览器流程文档；后续机器 API 独立设计。
 
 ### 目录与 DNS 迁移
 
