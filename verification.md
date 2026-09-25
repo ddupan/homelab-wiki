@@ -101,7 +101,8 @@ controller、目标固定、finalizer 保留与生成 RBAC，真实 API server �
 
 同日确认原生非 superuser + CREATEDB/CREATEROLE 管理方案，已同步至
 [DBaaS 职责边界](services/postgresql-tenant-operator.md#职责边界)。后续 Instance 观测链路在
-`/tmp/ayatori-database-domain` 的 `feat/database-instance-observation` 分支，已本地签名提交为
-`bc227bfdb4b2f5b027fe522b8dcf72db17b84d26`，尚未推送；本地已通过
+`feat/database-instance-observation` 分支，已签名提交并推送为
+[bc227bf](https://git.ddupan.top/panxiao81/ayatori/commit/bc227bfdb4b2f5b027fe522b8dcf72db17b84d26)；本地已通过
 全量测试、三轮 controller/application race、真实 PostgreSQL/API server 集成测试及普通/integration lint。
-源码文档已经同步，但远端 commit/PR 链接待推送后补齐，不代表已合并、部署或现场验收。
+源码文档和远端链接已经同步，由 [PR #11](https://git.ddupan.top/panxiao81/ayatori/pulls/11)
+跟踪 CI 与 review；不代表已合并、部署或现场验收。
