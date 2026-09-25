@@ -103,7 +103,8 @@ reconcile 核对身份后补齐，不回滚资源侧绑定。绑定不等于 Rea
 Delete 即为删除授权，不加第二次审批。动态凭据路径按 Database UID 确定，导入显式关联
 已有凭据位置；Released 不自动改密，重新开放前由管理员处理旧访问。
 对应 Ayatori `docs/database/specification.md`、`domain-model.md` 与 `api-reference.md`
-已随本地提交 `7e9e8e828bfcbdc8d4e2fcb6bc3d13727712a82c` 保存；尚未推送或合并。
+已推送为 [7e9e8e8](https://git.ddupan.top/panxiao81/ayatori/commit/7e9e8e828bfcbdc8d4e2fcb6bc3d13727712a82c)，
+由 [Ayatori PR #10](https://git.ddupan.top/panxiao81/ayatori/pulls/10) 跟踪；尚未合并。
 
 Ayatori 的 `feat/database-resource-api` 工作区已加入三资源 Go 类型、生成 CRD、Scheme 注册
 与 YAML 示例，已包含在上述本地提交，尚未发布。`make test` 使用真实 API server 验证作用域、默认值、声明
@@ -114,13 +115,14 @@ Tenant UID 命名，先写资源侧绑定，再回读补齐 Tenant status；进�
 Bound 仍为 Ready=False，尚无供应或凭据投射。已有 finalizer 保护，但删除清理未实现：
 Tenant 删除保持 DeletionPending，资源和申请的 finalizer 不自动移除，不能视为可用的
 Retain/Delete 生命周期或部署为业务 DBaaS。具体字段和未完成边界见
-源码 `docs/database/api-reference.md` 的“当前 API 切片”；远端 commit 链接待推送后补齐。
+源码 [API 合同](https://git.ddupan.top/panxiao81/ayatori/src/commit/7e9e8e828bfcbdc8d4e2fcb6bc3d13727712a82c/docs/database/api-reference.md)
+的“当前 API 切片”。
 
 绑定代码按维护者要求分层：领域层负责纯规则，application service 协调绑定步骤和回读，
 Kubernetes adapter 负责 CR 映射、版本保护及 Conditions/status/finalizer 呈现，controller
 只连接事件、用例与重试。service 和领域层不依赖 Kubernetes 类型，不新增通用事务或
 Repository 框架；该重构不扩展上述运行能力。对应源码 `docs/database/domain-model.md`
-已随上述本地提交保存，远端链接待推送后补齐。
+已随上述提交保存，见 [领域模型](https://git.ddupan.top/panxiao81/ayatori/src/commit/7e9e8e828bfcbdc8d4e2fcb6bc3d13727712a82c/docs/database/domain-model.md)。
 
 本轮依据为维护者设计讨论和 Ayatori 已推送的
 [ADR-0009](https://git.ddupan.top/panxiao81/ayatori/src/commit/6db8a495fb9f8981d336c9e6288253628ab478b6/docs/decisions/0009-database-resource-and-claim.md)、

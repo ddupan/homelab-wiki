@@ -86,10 +86,12 @@ wiki 权威摘要：[DBaaS 设计](services/postgresql-tenant-operator.md#当前
 删除前策略可改与 Database UID 凭据定位的决定已同步到
 [DBaaS 设计](services/postgresql-tenant-operator.md#当前资源模型2026-09-24-已确认)。
 依据维护者当日确认；Ayatori 已提交为 `7e9e8e828bfcbdc8d4e2fcb6bc3d13727712a82c`，
-wiki 随本记录提交同步。两仓库尚未推送，远端 commit/PR 来源链接待补齐。
+源码已推送至 [Ayatori PR #10](https://git.ddupan.top/panxiao81/ayatori/pulls/10)，
+wiki 随本记录同步至 [wiki PR #3](https://git.ddupan.top/panxiao81/homelab-wiki/pulls/3)。
+关联源码：[7e9e8e8](https://git.ddupan.top/panxiao81/ayatori/commit/7e9e8e828bfcbdc8d4e2fcb6bc3d13727712a82c)。
 这只是第一版 API 范围确认，不表示新资源链路已实现。
 
 后续 `feat/database-resource-api` 工作区已实现三资源 schema 与真实 API server 校验，
-本地 `make test` 通过；实现已包含在上述本地提交，正式远端来源待推送。已接入绑定
+本地 `make test` 通过；实现已包含在上述提交，远端 CI 结果以 PR 为准。已接入绑定
 controller、目标固定、finalizer 保留与生成 RBAC，真实 API server 验证并发、补写及 watch。
 尚未实现 finalizer 清理、供应与交付，不宣称完成三资源生命周期或现场验收。
