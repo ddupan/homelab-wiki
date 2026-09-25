@@ -112,3 +112,15 @@ controller、目标固定、finalizer 保留与生成 RBAC，真实 API server �
 由 [PR #12](https://git.ddupan.top/panxiao81/ayatori/pulls/12) 跟踪 CI 与 review。
 全量测试、真实 PostgreSQL/API server/OpenBao 集成测试及两种 lint 本地通过；源码模块文档
 和 wiki 已同步实现边界与正式链接。尚未合并或接入供应流程，不把本地验证等同于远端 CI。
+
+## 2026-09-25 sandbox 存储故障复盘的来源边界
+
+维护者报告 VyOS 到 sandbox 的 LB 故障并授权恢复。现场确认 LB 配置未在故障当天更改，
+故障来自 DRBD quorum 丢失后 sandbox1 根卷进入只读；已离线修复并恢复数据库、双 API 与 Pod。
+后续按维护者给出的 PostgreSQL/Alertmanager 会话核对，发现新 HDD 数据卷初始同步重叠与
+多个既有资源故障的时间关联，尚未证明具体网络或磁盘瓶颈。长期恢复方法见
+[Proxmox](services/proxmox.md#sandbox-lb-与根文件系统恢复)。
+
+事故报告与恢复手册在 wiki 统一维护，见[完整事故报告](incidents/2026-09-25-drbd-quorum-sandbox.md)。
+取证引用的 etcd/shared-postgresql 源码当时尚未提交，固定版本关联待源码合并后补齐；
+服务恢复不等于全部整改完成。
