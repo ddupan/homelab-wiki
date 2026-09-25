@@ -4,6 +4,7 @@ status: draft
 last_reviewed: 2026-09-25
 last_verified: null
 sources:
+  - https://git.ddupan.top/panxiao81/iam-login/commit/9cf2d235dff0cd33f98012b0a114f14a8f9bfcda
   - 维护者于 2026-09-25 的架构讨论与草案记录要求
 ---
 
@@ -36,7 +37,7 @@ Ayatori 是其消费者，依赖关系类似 OpenStack 其他服务对 Keystone 
 
 | 部分 | 拟承担的职责 |
 |---|---|
-| 人类认证后端 | 人类登录、MFA、账号生命周期；可选 ZITADEL，过渡期保留 Samba AD |
+| 人类认证后端 | 人类登录与 MFA；已选择 Spring Native 方向，首轮 AD 仍为用户与组权威 |
 | SPIRE | workload 身份证明与 SVID 签发，可辅助 machine 或 agent 认证 |
 | Login / Consent 与身份授权服务 | 验证不同主体的证明，映射稳定身份，处理登录、授权、组和必要的动态审批 |
 | Hydra | OAuth2/OIDC 流程、client 与 token 签发 |
@@ -134,14 +135,14 @@ Agent 的动态授权需要落到应用可识别的 scope、角色、账号权�
 映射稳定主体并接受 Hydra login challenge；面向下游的 OAuth2/OIDC 仍由 Hydra 提供。
 第一轮通过 Authelia OIDC 的 PoC 保留为已验收基线，尚未部署此替代路径。
 
-同日的上游接口与源码评估形成两个候选，尚未决定切换：
+早期上游接口与源码评估曾形成以下两个候选；后续决定见下方“已确定的实现方向”：
 
 | 候选 | 可复用能力 | 尚需承担的接入工作 |
 |---|---|---|
 | ZITADEL Session API + Login V2 | 逐步验证认证因素、会话、账号管理；Login V2 有登录编排与 UI | 将登录事务绑定到 Hydra challenge，服务端验证认证结果并接回 Hydra；按选定版本验证 LDAP、MFA 与完整恢复流程 |
 | Ory Kratos + self-service UI | 登录、MFA、恢复与会话流程；上游已有 Hydra login challenge 集成 | 部署和维护独立 UI，保留主体映射与 consent；Samba AD 不能假设存在开箱即用的 LDAP 认证接入 |
 
-Kratos 在认证与签发的职责分离上更直接，是值得优先验证的替代候选；但若必须继续使用
+早期评估认为 Kratos 在认证与签发的职责分离上更直接；但若必须继续使用
 Samba AD 密码登录，LDAP 过渡成本可能使 ZITADEL 更合适。Kratos 本身是 headless 服务，
 现成参考 UI 不等于无需维护的内置管理门户，亦不能把 Ory Network 的功能直接视为自托管
 开源版能力。此判断是方案评估，不是新的部署决定。
@@ -161,10 +162,33 @@ ZITADEL Session API 返回会话不等于已完成全部认证；需要确认已
 [Kratos self-service UI](https://github.com/ory/kratos-selfservice-ui-node)、
 [LDAP 功能请求](https://github.com/ory/kratos/issues/274)。
 
+### 已确定的实现方向
+
+维护者已选择 Java、Spring Security 与 GraalVM Native。阻碍 Java 的是 JVM 部署和运行
+开销；能够通过 Native 功能与资源验收时，Java 仍是优先选择，不引入 Kotlin。
+Quarkus、Micronaut 也有相应生态支持；最终选择 Spring 同时考虑了维护者的熟悉程度。
+Keycloak 可参考认证实现，但其服务端模型与 SPI 不直接复用，采用 Quarkus 也不证明
+Keycloak 有 Native 发行或完整原生兼容性。
+
+原先薄 OIDC 适配器在 homelab-infra 内维护；现在直接承担 AD、MFA、认证状态与 Native
+构建测试，因此按维护者决定拆为独立 [iam-login](https://git.ddupan.top/panxiao81/iam-login)
+仓库，独立于 Ayatori。环境部署仍归 homelab-infra。
+
+已按维护者提供的 start.spring.io 配置生成 Java 25、Spring Boot 4.1.1、Gradle 与 YAML
+项目骨架，包含 LDAP、WebAuthn、校验、Actuator/Prometheus、OpenTelemetry/追踪、
+Testcontainers、UnboundID、Lombok、配置处理器、DevTools 与 Native 插件。依赖存在不表示认证流程已实现；首次实现及 Native
+验证由 [issue #1](https://git.ddupan.top/panxiao81/iam-login/issues/1) 跟踪。需在原生二进制上
+验证 AD、MFA、Hydra、持久化及监控，实测资源成本；不能把编译成功等同完整验收。
+
+首轮保持 AD 用户与组权威并直接映射组名。LDAP 与 MFA 绑定同一稳定主体；切换前需要
+明确现役 issuer/sub 哈希主体到新主体的连续性映射。MFA 首先验证官方 WebAuthn 集成，
+恢复与已有凭据迁移方式仍待实现。维护者接受必要时并存多个登录前端。
+现役 Go/Authelia PoC 保留为已验收基线，尚未切换生产认证路径。
+
 ### 目录与 DNS 迁移
 
-人类同样使用这套独立 IAM。过渡期可以保留 Samba AD，通过 ZITADEL 连接 LDAP；
-后续可以把人类账号迁出 Samba。ZITADEL 是候选后端，不是本草案已经确定的依赖。
+人类同样使用这套独立 IAM。首轮由 iam-login 直接连接 Samba AD 验证密码、查询用户与组，
+按原组名直接映射；之后再推进统一粗粒度组模型与目录迁移，不要求同一步替换目录。
 更换认证后端时应保持稳定主体与下游账号关联，避免按可变邮箱或用户名重新识别账号。
 
 维护者认为 Samba AD 使用率较低，长期希望完全删除它。退役需处理 LDAP、Kerberos、

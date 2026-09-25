@@ -5,6 +5,7 @@ evidence: live-verified
 last_reviewed: 2026-09-25
 last_verified: 2026-09-25
 sources:
+  - https://git.ddupan.top/panxiao81/iam-login/commit/9cf2d235dff0cd33f98012b0a114f14a8f9bfcda
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/142
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/143
   - 2026-09-25 部署、discovery、重定向与网络隔离检查
@@ -17,8 +18,12 @@ sources:
 验证上游身份。当前配置的上游是 Authelia，它继续连接 Samba AD 并执行人类 MFA。
 适配器没有直接连接 LDAP，也不与 Authelia 专有认证协议绑定。
 
-本服务独立于 Ayatori。当前代码作为 homelab-infra 中的独立 Go module 保存，未新建
-独立仓库。完整的多主体 IAM 仍是[草案](../architecture/independent-iam-draft.md)；
+本服务独立于 Ayatori。现役 PoC 代码仍作为 homelab-infra 中的独立 Go module 保存。
+下一阶段直接连接 AD 的 Java/Spring 登录服务已建立独立仓库
+[iam-login](https://git.ddupan.top/panxiao81/iam-login)，目前仅生成 Spring Initializr 骨架，
+尚未替换现役 Go/Authelia 链路。应用代码、测试与 Native 构建发布归新仓库，环境部署归
+homelab-infra；首轮实现由 [issue #1](https://git.ddupan.top/panxiao81/iam-login/issues/1) 跟踪。
+完整的多主体 IAM 仍是[草案](../architecture/independent-iam-draft.md)；
 本轮不实现 SPIFFE 登录、agent 专用认证、动态授权或统一组迁移。
 
 ## 入口与首次使用
