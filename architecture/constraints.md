@@ -30,3 +30,9 @@
 
 通用变更约束：先做适用的 plan/check/diff，再操作现场；不将凭据和 Terraform state
 写入知识库；不更新 homelab-infra 的冻结 `CHANGELOG.md`。
+
+## 待评估草案
+
+[独立 IAM 与 agent 身份草案](independent-iam-draft.md)（2026-09-25，draft）提出以 Hydra
+解耦认证与签发，通过 OIDC 接入人类、machine 和 agent，并作为 Ayatori 的独立外部依赖。
+它尚未替代上表的人类身份、SPIFFE 或 DNS 约束；采纳时须显式修订这些边界。
