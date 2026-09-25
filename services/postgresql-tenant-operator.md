@@ -153,8 +153,9 @@ CREATEDB/CREATEROLE，不引入 SECURITY DEFINER 接口。扩展安装按实际�
 可用列表不等于任意扩展均可安装；基础管理能力不授予导入或接管他人资源的权限。
 这项决定沿用原安全文档的非 superuser 原则，并明确了此前未选定的实施方式。
 Instance 观测、Secret watch 与删除引用保护的后续实现目前位于 Ayatori
-`feat/database-instance-observation` 工作区，尚未提交/发布；权限矩阵、启用方式和测试边界
-以该工作区 `docs/database/README.md`、`security.md` 为准，不能把 main 的旧实现当成已具备该能力。
+`feat/database-instance-observation` 分支，已本地签名提交为
+`bc227bfdb4b2f5b027fe522b8dcf72db17b84d26`，尚未推送/合并；权限矩阵、启用方式和测试边界
+以该提交的 `docs/database/README.md`、`security.md` 为准，不能把 main 的旧实现当成已具备该能力。
 
 - operator 管理实例内的租户资源，不运行 PostgreSQL/OpenBao，也不管理 VM、存储、备份或 OpenBao PKI。
 - 应用密码写入 OpenBao，不进入 CR、Event 或日志；ESO 负责向 Kubernetes 消费者投射。
