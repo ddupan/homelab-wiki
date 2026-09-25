@@ -96,4 +96,4 @@ Prometheus telemetry。中央监控尚未接入 OpenBao 自身指标；ESO store
 匿名 403 不足以判断 telemetry 是否启用，下一步先做受鉴权预检。
 
 维护顺序、人工交接、验收和回滚以 [OpenBao 监控接入维护 runbook](../guides/openbao-monitoring-maintenance.md)
-为准。当前为准备阶段，尚未执行重启，也没有取得或读取解封材料。
+为准。当前为准备阶段，预检结果与 WIP 配置 PR 已记录在 runbook；尚未执行重启，也没有取得或读取解封材料。

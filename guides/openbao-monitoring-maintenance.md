@@ -95,7 +95,11 @@ HTTPS 使用正确域名/CA，不关闭校验；metrics path 为 `/v1/sys/metric
 放 query params，不能把问号串在 path 里。sealed 期间 metrics 不可用，因此还需独立 health/目标缺失检测，
 不能仅靠 Bao 内部指标证明 sealed 状态可被发现。
 
-本 runbook 编写时，最终采集身份、续期机制、配置 PR 与现场预检尚未完成，均为重启前置条件。
+候选配置见 [WIP PR #162](https://git.ddupan.top/panxiao81/homelab-infra/pulls/162)，尚未合并部署。
+使用绑定 monitoring/vmagent-main 的 Kubernetes auth metrics role，由 Bao Agent sidecar 自动登录/续期，
+token 仅存 Pod 内存卷供 vmagent 只读消费。采集用 ServiceMonitor + 外部 Service/Endpoints；
+现有 converter 的 Endpoints 发现保留，EndpointSlice 迁移另行处理。
+真实 role 权限、认证/续期及受鉴权 metrics 仍待管理员会话完成验收，不能只凭静态检查重启。
 使用现场版本支持的配置校验方式，先检查对应命令 help；禁止启动第二个 server 验证同一 Raft 数据目录。
 现有 Ansible 写配置会通知 restart，不能把正式 apply 当作无停机预演。
 
@@ -162,7 +166,26 @@ bao status
 ## 来源与证据边界
 
 维护者 2026-09-25 确认 VM 保存 GPG 加密解封材料，YubiKey 解密且需人工 unseal。
-本轮仅准备文档；没有读取解封材料、应用服务配置、设置静默或执行重启。
+本轮已进行只读预检及候选文件准备；没有读取解封材料、替换运行配置、设置静默或执行重启。
+
+### 2026-09-25 停机前预检
+
+- Bao API 与 VM 二进制均为 2.6.1，Shamir threshold/shares 为 1/1，initialized=true、sealed=false。
+- 管理入口为 `ssh ansible@192.168.10.8`，sudo 可用。按维护者明确要求，将管理工作站
+  panxiao81 的 authorized_keys 中两条受信任公钥追加到 VM 的 ansible 用户，保留原公钥，
+  修改前已在该账号 `.ssh/` 备份 authorized_keys；此次是现场授权变更，尚未纳入 cloud-init/IaC。
+- 运行配置未显式设置 telemetry。原配置与候选文件分别保存为 VM root-only 目录
+  `/etc/openbao/maintenance-monitoring-20260925/config.before.hcl`、`config.candidate.hcl`。
+  候选文件通过现场 `bao operator validate-config -config=...`；原运行配置未变。
+  若后续其他任务改动运行配置，必须重新比较后再使用，不能覆盖新改动。
+- 快照服务 9 月 23–25 日日志均为 403，9 月 25 日退出码 2；默认 `/var/backups/openbao`
+  未发现 .snap。尚未证明存在其他有效副本，此项阻止进入重启。
+- 源码快照使用 periodic token，但没有续期步骤。候选补丁增加每日续期、显式 rotate 开关、
+  私有 partial 文件及成功后原子更名；403 的精确原因仍需检查 token 状态，不能直接断言已过期。
+- 当前本地 Bao 管理员会话不可用；受鉴权 metrics、Terraform plan/apply、快照身份恢复待完成。
+- 候选通过 Kustomize、规则检查、server dry-run、Terraform fmt；Agent 只在关闭的本机端口验证
+  解析/启动，未做真实登录。快照模拟测试验证续期失败与写失败不删旧备份，成功才清理保留数量。
+
 源码：[OpenBao 部署与恢复入口](https://git.ddupan.top/panxiao81/homelab-infra/src/branch/main/infrastructure/openbao/README.md)，
 配置模板与 restart handler 位于同目录 `ansible/roles/openbao/`。
 命令依据：[人工 unseal](https://openbao.org/docs/2.6.x/commands/operator/unseal/)、
