@@ -13,6 +13,7 @@
 | Ayatori Compute 复用 Node/Lease API，但不引入 Kubernetes workload plane | Compute Agent 实现 Node 状态；libvirt 是长期候选主路径，PVE 是 brownfield 过渡；Kata microVM 属于 Sandbox backend | [Ayatori 控制面边界](ayatori-control-plane.md) |
 | Database 采用独立资源与用户申请分离 | Instance → Database → Tenant；Retain 保留资源并人工回收，显式导入，不维护 PG registry；替代旧所有权持久化合同 | [DBaaS 设计修订](../services/postgresql-tenant-operator.md#当前资源模型2026-09-24-已确认) |
 | Samba AD、OCI、Proxmox 优先 IaC，以代码为准 | Ansible/Terraform 声明及任务优先于旧 README；声明不等于已验证部署 | 维护者于 2026-09-16 明确、各服务使用指南 |
+| 新建 etcd 按全 homelab 共享基础设施设计，PostgreSQL 为首个消费者 | 替代 PostgreSQL 专属 DCS 定位，避免每个服务重复部署；三成员及消费者 RBAC 隔离已部署，不迁移现有 k3s datastore | [共享 etcd](../services/shared-etcd.md)，维护者于 2026-09-25 明确 |
 | 服务独立部署，Terraform root/state 按服务隔离 | 避免认证和变更影响范围绑在一起 | `AGENTS.md`、`CLAUDE.md` |
 | OpenBao 恢复不能依赖 k3s 或读取自己内部的恢复凭据 | 先恢复信任根，再恢复消费者 | `infrastructure/openbao/README.md`、`CLAUDE.md` |
 | Terraform 管 API 配置，Ansible 管主机及不能安全纳管的密钥材料 | 不可读回秘密和根密钥不能靠反复重建实现收敛 | `infrastructure/openbao/README.md` |

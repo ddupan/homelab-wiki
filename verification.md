@@ -124,3 +124,17 @@ controller、目标固定、finalizer 保留与生成 RBAC，真实 API server �
 事故报告与恢复手册在 wiki 统一维护，见[完整事故报告](incidents/2026-09-25-drbd-quorum-sandbox.md)。
 取证引用的 etcd/shared-postgresql 源码当时尚未提交，固定版本关联待源码合并后补齐；
 服务恢复不等于全部整改完成。
+
+## 共享 etcd 与 PostgreSQL 来源同步
+
+2026-09-25 shared etcd 三成员、新 PG 生产主从与开发实例、稳定入口、本地备份已部署，
+监控 CR 已现场应用。OIDC 恢复后，专用身份与 etcd/PG 每日续签均已启用；此前 Bao 权限阻塞已解除。
+真实 PG 自动切换、回切、SQL/TLS、备份恢复与配置幂等通过，边界见
+[共享 PostgreSQL](services/shared-postgresql.md#k3s-外实例的实现与验收边界2026-09-25)和
+[共享 etcd](services/shared-etcd.md)。
+
+源码 `infrastructure/etcd/`、`infrastructure/shared-postgresql/`、DNS 和监控已提交至 [IaC PR #159](https://git.ddupan.top/panxiao81/homelab-infra/pulls/159)，尚未合并，
+不能当作 Flux 已从 Git 接管。既有 CNPG 应用未迁移，异地备份后置；数据库细项告警仍待补齐。
+Ayatori 按维护者决定继续使用独立控制面，本轮只准备接入材料，尚未验收 controller/Instance Ready。
+两仓事实已同步，源码文档已直接推送 main：[文档 acd4b55](https://git.ddupan.top/panxiao81/homelab-infra/commit/acd4b55)；IaC 固定版本为
+[3a2fe5f](https://git.ddupan.top/panxiao81/homelab-infra/commit/3a2fe5f)。
