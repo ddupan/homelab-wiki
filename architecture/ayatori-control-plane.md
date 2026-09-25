@@ -1,6 +1,6 @@
 ---
 title: Ayatori 控制面边界
-last_reviewed: 2026-09-24
+last_reviewed: 2026-09-25
 ---
 
 # Ayatori 控制面边界
@@ -52,6 +52,19 @@ Database 资源模型于 2026-09-24 明确采用官方 PV/PVC 的资源/申请�
 、[ADR-0006](https://git.ddupan.top/panxiao81/ayatori/src/branch/main/docs/decisions/0006-demand-driven-resource-scope.md)
 和[总体架构](https://git.ddupan.top/panxiao81/ayatori/src/branch/main/docs/architecture/overview.md)为准。
 本页记录跨 homelab 的稳定边界，不表示 Ayatori 已部署或达到生产可用状态。
+
+## Controller 公共基础设施边界
+
+2026-09-25 维护者确认：OpenBao 认证、客户端及 Kubernetes 读写访问是整个 controller 的
+infra 能力，不属于第一个使用它们的 Database 领域。启动入口统一装配和注入；公共层不反向
+依赖产品领域，也不为复用而增加全局注册中心或统一包装所有后端的 reader/writer。
+优先使用官方 SDK 和 manager 已提供的接口；不同身份与权限范围仍须显式隔离。
+
+领域按用例需要定义 repository，adapter 保留对象映射、凭据格式、路径、冲突与恢复语义。
+例如 Database 七键凭据及 UID 路径不是通用 KV 规则。此次修订纠正原实现把 Bao 认证放在
+Database adapter 的归属，认证方式与部署位置约定不变。源码拆分由
+[PR #13](https://git.ddupan.top/panxiao81/ayatori/pulls/13) 跟踪，尚未合并；实现与详细约定见
+[65c60cc 的总体架构](https://git.ddupan.top/panxiao81/ayatori/src/commit/65c60cca4528bc8bf14783fb7b59922283059c02/docs/architecture/overview.md#进程内依赖边界)。
 
 ## CI 验证约定
 

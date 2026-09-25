@@ -180,6 +180,9 @@ manager 已增加显式 HTTPS/CA、auth role、目标 SA/audience 配置、Runna
 默认停用；controller 不自动创建身份或授予权限。真实受限 kubeconfig 启动 manager 的测试
 验证 TokenRequest、续期、跨 namespace/其他 SA 拒绝、RBAC 撤回恢复与 Bao audience 校验，
 三轮 race、本地全量测试和两种 lint 通过。生产 auth 配置与 Database 供应尚未接入，不代表已部署。
+认证客户端与生命周期按维护者确认的
+[公共 infra 边界](../architecture/ayatori-control-plane.md#controller-公共基础设施边界)整理，
+Database 保留凭据 repository/adapter 语义；重构继续由同一 PR 跟踪，不表示供应链路已完成。
 具体使用边界见该提交的
 [认证会话说明](https://git.ddupan.top/panxiao81/ayatori/src/commit/f0aa86f67673fbfb5f182f3ce35679c614be968d/docs/database/README.md#openbao-kubernetes-认证会话)。
 

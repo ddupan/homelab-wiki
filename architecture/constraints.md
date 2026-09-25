@@ -6,6 +6,7 @@
 
 | 约束 | 原因与边界 | 来源 |
 |---|---|---|
+| Ayatori 公共 infra 与领域 repository 分离 | 连接、认证和官方读写客户端统一装配；领域保留对象映射和业务语义，不引入万能仓储 | [Controller 公共基础设施边界](ayatori-control-plane.md#controller-公共基础设施边界) |
 | 新增监控配置优先使用 ServiceMonitor、PodMonitor、PrometheusRule | VictoriaMetrics Operator 负责转换，避免同一目标/规则维护两套声明；历史 VM 配置按需另行迁移 | 维护者 2026-09-25 明确要求；[基础监控运维](../guides/monitoring-foundation.md) |
 | Ayatori 复用 Kubernetes API machinery，不复用其容器编排产品边界 | kube-apiserver/etcd 提供 API、watch、RBAC 与状态协调；领域调度、生命周期、恢复和 GC 属于 Ayatori controllers；Kubernetes workload 只是可替换 backend | [Ayatori 控制面边界](ayatori-control-plane.md) |
 | Kubernetes 内置资源不绑定上游实现组件 | 可由 Ayatori Agent/controller 实现和消费 Node、Lease 等 API；使用 Node 不推导必须部署 kubelet、Pod 或 kube-scheduler | [Ayatori 控制面边界](ayatori-control-plane.md) |

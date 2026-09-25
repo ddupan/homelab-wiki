@@ -119,6 +119,14 @@ controller、目标固定、finalizer 保留与生成 RBAC，真实 API server �
 源码文档与 wiki 已同步边界和正式链接。认证尚未合并，不把本地验证等同于新 head 的远端 CI；
 未部署生产 auth/RBAC，也未接入 Database 供应或 ESO 交付。
 
+同一 PR 的公共 infra 拆分已提交为
+[65c60cc](https://git.ddupan.top/panxiao81/ayatori/commit/65c60cca4528bc8bf14783fb7b59922283059c02)。
+Bao client/TLS 与认证不再归 Database；Secret 凭据适配器注入 manager 的直连 reader，
+领域继续维护凭据格式和写入结果语义。分层约定已同步
+[控制面边界](architecture/ayatori-control-plane.md#controller-公共基础设施边界)及源码文档。
+全量单元/API 测试、真实 PostgreSQL/OpenBao 集成、公共 infra race 与两种 lint 本地通过；
+新 head 的远端 CI 仍由 PR 跟踪，不把本地验证或本次文档同步当成合并、部署完成。
+
 ## 2026-09-25 sandbox 存储故障复盘的来源边界
 
 维护者报告 VyOS 到 sandbox 的 LB 故障并授权恢复。现场确认 LB 配置未在故障当天更改，
