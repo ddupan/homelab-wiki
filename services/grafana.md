@@ -12,7 +12,8 @@ last_verified: null
 使用 Authelia OIDC 登录；远程访问需要到 LAN 的路由及内网 DNS。
 
 本页依据现有 observability README、Grafana 数据源配置、内存看板 JSON 和 exporter 说明整理，
-部分来源仍在源码工作区、尚未提交。本轮未打开网页或执行查询；以下结果描述是使用预期。
+部分来源仍在源码工作区、尚未提交。看板使用说明未逐项现场验证；
+2026-09-25 的通知链路与采集故障验证范围见下文。
 
 ## 先看主机内存与 Swap
 
@@ -102,6 +103,28 @@ VictoriaLogs 使用 LogsQL。上述 limit 限制返回数量，不保证返回�
 收不到通知时依次检查 ExternalSecret 状态、Alertmanager 配置加载与发送错误、
 bot 的频道发布权限以及手机频道通知设置。轮换 token 后需等待或触发 ESO 同步，
 并验证 Alertmanager 使用新 token；必要时重载或重启，不打印 Secret 内容。
+
+## 采集失败的定位与处理
+
+`TooManyScrapeErrors` 使用 vmagent 的采集失败计数判断最近 5 分钟是否出现错误，
+持续 15 分钟后触发。告警中的 `instance` 是 vmagent 自己，并非失败目标地址；
+先检查 vmagent `/api/v1/targets` 中非 up 目标的 `scrapeUrl` 与 `lastError`。
+目标恢复后还要等待 5 分钟回看窗口消退，Telegram 恢复通知另受组内间隔影响。
+
+- k3s 的 kubelet `/metrics` 还包含 apiserver/etcd 指标，实测约 16.1 MiB，
+  超过 vmagent 默认 16 MiB 限制。`VMNodeScrape/kubelet` 单独设置
+  `spec.max_scrape_size: "32MiB"`；其他采集任务保留默认值。
+  再次超限时先统计指标族和响应大小，不直接无限增大全局限制。
+- 独立 Docker cAdvisor 尚未部署，旧 `192.168.10.127:8080/metrics` 实际返回 nginx 404，
+  已从 `VMStaticScrape/docker-hosts` 移除。该配置仍保留已有 :9100 主机目标，
+  Kubernetes 容器指标继续由 `VMNodeScrape/cadvisor` 的 `/metrics/cadvisor` 提供。
+  后续需要 Docker 容器指标时，先部署 exporter 并验证端口，再增加采集目标。
+
+配置依据：[homelab-infra PR #148](https://git.ddupan.top/panxiao81/homelab-infra/pulls/148)，
+2026-09-25 已合并并由 Flux 应用 `a43b7d3c26f9724b9d5b2ad45058f2d1632741af`。
+现场确认 kubelet 恢复 up，旧 :8080 目标消失。此次验收期间另发现共享 etcd
+`10.60.0.20:2381` 拒绝连接，因此不能将本次两项修复等同于全部采集目标健康或
+`TooManyScrapeErrors` 已恢复；后续状态需重新检查 targets，etcd 的操作背景另行对齐。
 
 ## 出问题时与维护入口
 
