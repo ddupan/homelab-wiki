@@ -180,6 +180,8 @@ Keycloak 有 Native 发行或完整原生兼容性。
 Testcontainers、UnboundID、Lombok、配置处理器、DevTools 与 Native 插件。依赖存在不表示认证流程已实现；首次实现及 Native
 验证由 [issue #1](https://git.ddupan.top/panxiao81/iam-login/issues/1) 跟踪。需在原生二进制上
 验证 AD、MFA、Hydra、持久化及监控，实测资源成本；不能把编译成功等同完整验收。
+日常迭代以 JVM 测试为准，不再要求每轮 Native 编译；Native 留在阶段性验收时集中验证，
+新增路径未经过原生测试时须明确记录。
 
 首轮保持 AD 用户与组权威并直接映射组名。LDAP 与 MFA 绑定同一稳定主体；切换前需要
 明确现役 issuer/sub 哈希主体到新主体的连续性映射。MFA 首先验证官方 WebAuthn 集成，
@@ -195,9 +197,12 @@ Testcontainers、UnboundID、Lombok、配置处理器、DevTools 与 Native 插�
 
 页面与 Spring 后端同仓库维护，前端资源构建后随 Native 应用交付。生产不增加 Node/BFF、
 嵌入式 JavaScript 运行时或 FreeMarker；首轮接受客户端首屏渲染，不实现 React SSR/RSC。
-当前仅验证浏览器交互原型，不表示 AD、MFA 或 Hydra 登录链路已完成，也不替换现役入口。
+浏览器交互原型已经维护者体验认可。正在接入 AD 密码因素与直接所属组查询，
+密码成功后停在待 MFA 状态，不接受 Hydra challenge，也不替换现役入口。
 原型启动、实现与验证见 [iam-login PR #3](https://git.ddupan.top/panxiao81/iam-login/pulls/3)
-及其浏览器流程文档；后续机器 API 独立设计。
+及其浏览器流程文档；AD 接入见
+[iam-login AD 接入文档（开发分支）](https://git.ddupan.top/panxiao81/iam-login/src/branch/feat/ad-login/docs/ad-login.md)。
+后续机器 API 独立设计。
 
 ### 目录与 DNS 迁移
 

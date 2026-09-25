@@ -84,3 +84,16 @@ Gitea 接入见 [PR #143](https://git.ddupan.top/panxiao81/homelab-infra/pulls/1
 依赖共享 PostgreSQL、OpenBao/ESO、Authelia、Envoy、Samba DNS 与 zot。独立于 Ayatori
 不等于已完成共享基础设施之外的灾备；恢复需保留 Hydra 数据库和秘密。
 回退时先撤 Gitea 新登录源，沿用旧 Authelia 入口，不删除用户或原有认证配置。
+
+### 独立登录服务的 AD 接入
+
+`iam-login` 的人类界面沿用内联上下文与原生表单，新增 AD 第一因素验收入口；
+以用户身份 LDAPS bind，读取 objectGUID 和直接 `memberOf`，组名保持原样。
+当前不展开嵌套组或主组，不能视为已完成与 Authelia 的有效组集合等价验证。
+密码成功只进入待 MFA 事务；Gitea 仍使用上面已验收的 Go/Authelia 路径。
+
+本轮开发验证通过 JVM 测试，并从 JVM 通过 CA/域名验证读取真实 AD RootDSE。
+人类密码和实际组结果仍待维护者验收，新增路径尚未跑 Native；日常迭代不要求每轮
+原生编译。开发入口使用受限 Tailscale HTTPS，属于临时验收实例，不是生产入口。
+配置、边界与使用方式见
+[iam-login AD 接入文档（开发分支）](https://git.ddupan.top/panxiao81/iam-login/src/branch/feat/ad-login/docs/ad-login.md)。
