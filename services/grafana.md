@@ -2,7 +2,7 @@
 title: Grafana 与可观测性使用指南
 lifecycle: active
 evidence: documented
-last_reviewed: 2026-09-16
+last_reviewed: 2026-09-25
 last_verified: null
 ---
 
@@ -68,6 +68,40 @@ VictoriaLogs 使用 LogsQL。上述 limit 限制返回数量，不保证返回�
 | VictoriaTraces | Jaeger 兼容追踪查询；应用需要先接入追踪，不能仅凭数据源存在认为所有服务都有 trace |
 
 数据源名称来自 `platform/observability/grafana/values.yaml`。
+
+## Telegram 告警接入
+
+2026-09-25 已通过 [homelab-infra PR #147](https://git.ddupan.top/panxiao81/homelab-infra/pulls/147)
+合并并由 Flux 同步，替换原有全部 blackhole 的通知策略。配置来源为
+[VMAlertmanager](https://git.ddupan.top/panxiao81/homelab-infra/src/commit/c06c6f78572106586b9b55069dae654a35f4f6bf/platform/observability/metrics/vmalertmanager.yaml)
+及同目录的 `alertmanager-external-secret.yaml`、`kustomization.yaml`。
+已现场确认 Flux Ready、ExternalSecret SecretSynced、Alertmanager Pod Ready、
+配置加载成功。通过 Alertmanager API 注入的临时测试告警已触发 Telegram 发送，
+发送失败计数为 0，维护者已确认收到测试告警；测试在 60 秒后自动恢复。
+恢复通知按 5 分钟组内间隔发出，发送总计数从 2 增至 3，失败计数仍为 0。
+恢复消息的收件端确认未单独取得；总计数也包含一条既有 TooManyScrapeErrors 通知。
+本次验证限于通知链路，不刷新整个 Grafana 服务的 `last_verified`。
+
+- 接收频道：<https://t.me/ddupan_alerting>，数字 chat ID 为 `-1003956377923`。
+- bot：`@ddupan_alerting_bot`。2026-09-25 通过 Telegram `getChat` / `getChatMember`
+  确认频道 ID、管理员身份和发布消息权限；bot 直发的测试触发、恢复消息已由维护者确认收到。
+- OpenBao：KV v2 mount `kv`、路径 `k8s/alertmanager`、字段 `telegram_bot_token`。
+  ExternalSecret 使用 `ClusterSecretStore/openbao`，每小时同步到
+  `monitoring/alertmanager-telegram` Secret 的同名字段。
+- VMAlertmanager 挂载 Secret，使用 `bot_token_file` 读取，不在 Git 中保存 token。
+- critical 首次分组等待 10 秒，未恢复每小时提醒；warning 等待 1 分钟，
+  未恢复每 4 小时提醒。分组键为 `alertname, cluster, job, severity`，
+  组内变更通知间隔 5 分钟；两类均发送恢复通知。info、缺失或其他 severity 暂不推送。
+- 采用 Alertmanager 默认 Telegram 消息模板；本次没有新增抑制规则。
+
+配置变更通过既有 Flux 流程发布，先确认 ExternalSecret Ready 和目标 Secret
+投射成功，再确认 Alertmanager 加载配置及到 Telegram API 的出站网络。
+首次启用可能推送当时已有的 warning/critical 告警；发送测试告警需要维护者同意，
+并在频道确认故障与恢复消息均收到。静态检查不能代替这一步。
+
+收不到通知时依次检查 ExternalSecret 状态、Alertmanager 配置加载与发送错误、
+bot 的频道发布权限以及手机频道通知设置。轮换 token 后需等待或触发 ESO 同步，
+并验证 Alertmanager 使用新 token；必要时重载或重启，不打印 Secret 内容。
 
 ## 出问题时与维护入口
 
