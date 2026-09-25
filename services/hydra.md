@@ -5,6 +5,7 @@ evidence: live-verified
 last_reviewed: 2026-09-25
 last_verified: 2026-09-25
 sources:
+  - https://git.ddupan.top/panxiao81/iam-login/pulls/2
   - https://git.ddupan.top/panxiao81/iam-login/commit/9cf2d235dff0cd33f98012b0a114f14a8f9bfcda
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/142
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/143
@@ -20,7 +21,8 @@ sources:
 
 本服务独立于 Ayatori。现役 PoC 代码仍作为 homelab-infra 中的独立 Go module 保存。
 下一阶段直接连接 AD 的 Java/Spring 登录服务已建立独立仓库
-[iam-login](https://git.ddupan.top/panxiao81/iam-login)，目前仅生成 Spring Initializr 骨架，
+[iam-login](https://git.ddupan.top/panxiao81/iam-login)，已建立 Spring Native 构建验证基础，人类界面方向见
+[浏览器登录设计](../architecture/independent-iam-draft.md#人类浏览器登录界面)，
 尚未替换现役 Go/Authelia 链路。应用代码、测试与 Native 构建发布归新仓库，环境部署归
 homelab-infra；首轮实现由 [issue #1](https://git.ddupan.top/panxiao81/iam-login/issues/1) 跟踪。
 完整的多主体 IAM 仍是[草案](../architecture/independent-iam-draft.md)；
