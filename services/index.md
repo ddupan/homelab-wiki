@@ -14,6 +14,7 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 
 | 组件 | 用途 | 记录入口 | 状态依据 | 来源 | 文档缺口 / 下一步 |
 |---|---|---|---|---|---|
+| [hydra](hydra.md) | OIDC 签发与通用上游适配器，人类登录 PoC | `hydra.ad.ddupan.top / hydra-login.ad.ddupan.top` | experimental；9 月 25 日基础设施与到达 Authelia 的跳转已验证，真实登录待确认 | `apps/hydra/`、PR #142/#143 | 完成人类 Gitea 登录验收 |
 | [authelia](authelia.md) | 唯一主 OIDC broker、统一登录 | `auth.ddupan.top` | active；维护者于 2026-09-16 明确已在工作 | 维护者说明、`apps/authelia/` | 同步源码 README 中过时的 OIDC 阶段说明 |
 | [blocky](lan-dns.md) | LAN 主 DNS、广告过滤、分流 | `192.168.10.127:53` | 维护者说明已作为 DHCP 主 DNS，上游为路由器 | 维护者 2026-09-16 说明、`apps/blocky/README.md` | 无需逐台确认主机；旧源码说明待同步 |
 | [gitea](gitea.md) | 代码托管与 Actions | `git.ddupan.top` | 记录已部署 | `apps/gitea/README.md` | 已有登录、最小 CI 与 runner 选择指南 |

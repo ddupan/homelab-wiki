@@ -2,7 +2,7 @@
 title: Authelia
 lifecycle: active
 evidence: documented
-last_reviewed: 2026-09-16
+last_reviewed: 2026-09-25
 last_verified: null
 sources:
   - 维护者于 2026-09-16 确认当前状态
@@ -10,8 +10,10 @@ sources:
 
 # Authelia
 
-**Authelia 已作为 homelab 唯一的主 OIDC broker 工作，当前状态为 active。**
-此状态由维护者于 2026-09-16 明确，本轮未查询运行环境。
+**Authelia 继续作为 homelab 的主 OIDC 入口与人类认证后端工作，状态为 active。**
+基础状态由维护者于 2026-09-16 明确。2026-09-25 新增 [Hydra 人类登录 PoC](hydra.md)，
+以标准 OIDC client 复用 Authelia；其原有应用客户端、Samba AD 后端及 MFA 策略保留。
+该次仅验证新增配置有效和 Pod 就绪，未更新本页原有功能的整体验收日期。
 
 ## 用途与入口
 

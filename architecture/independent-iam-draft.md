@@ -9,8 +9,10 @@ sources:
 
 # 独立 IAM 草案：人类、机器与 AI Agent 的统一应用接入
 
-本页记录设计意图，状态为 **draft**；尚未采纳为现役架构，也未部署或完成端到端验证。
-名称、资源模型、接口及具体实现均未定。本次仅整理讨论，不表示已启动迁移。
+本页记录完整 IAM 的设计意图，状态仍为 **draft**。2026-09-25 维护者随后选择先实施
+[Hydra 人类登录 PoC](../services/hydra.md)：通用 OIDC 上游适配器暂用 Authelia，Gitea
+新增 Hydra 登录源；真实人类登录仍待验收。这不表示完整方案已采纳或开始全面迁移。
+长期名称、资源模型及 agent 接口尚未确定。
 
 ## 动机与首要目标
 
@@ -140,7 +142,8 @@ AD 存续期间保留其域记录权威与动态更新边界；普通记录的�
 
 现役记录仍以 [架构约束](constraints.md)、[Authelia](../services/authelia.md) 和
 [SPIFFE/SPIRE](../services/spire.md) 为准。当前文档中的 Authelia 主 OIDC 入口、
-服务直接验证 SPIFFE 后签发自身 token 的规则，未因本草案而被替换。
+服务直接验证 SPIFFE 后签发自身 token 的规则，仍是现役基础。第一轮人类 PoC 对
+Gitea 增加实验性 Hydra 签发入口的有限变更已在约束索引中单独记录。
 
 本草案提出的变化是：增加独立的多主体 IAM，通过 Hydra 解耦认证与签发，让尚不支持
 SPIFFE 的下游复用 OIDC；并为 agent 增加区别于传统 service account 的身份授权语义。

@@ -1,6 +1,6 @@
 # 架构约束索引
 
-审阅日期：2026-09-24。以下是现有仓库明确记录的约束摘要；Ayatori 条目来自其独立项目的
+审阅日期：2026-09-25。以下是现有仓库明确记录的约束摘要；Ayatori 条目来自其独立项目的
 已接受设计，其余来源路径相对于 homelab-infra。修改时必须读原文和对应代码，新出现的差异
 先向维护者确认；[首轮状态对齐](../verification.md)已完成。
 
@@ -16,7 +16,7 @@
 | OpenBao 恢复不能依赖 k3s 或读取自己内部的恢复凭据 | 先恢复信任根，再恢复消费者 | `infrastructure/openbao/README.md`、`CLAUDE.md` |
 | Terraform 管 API 配置，Ansible 管主机及不能安全纳管的密钥材料 | 不可读回秘密和根密钥不能靠反复重建实现收敛 | `infrastructure/openbao/README.md` |
 | LAN HTTP 入口为 Envoy Gateway；新增服务核对 parentRefs、DNS 和认证 | 不直接套用 archive 中的 Gateway 示例 | `platform/envoy-gateway/README.md`、`AGENTS.md` |
-| 人类身份由 Samba AD / Authelia 提供，Authelia 是 active 的唯一主 OIDC broker；workload 身份由 SPIRE 提供 | 身份签发不等于资源授权；SPIRE 基础设施与最小 PoC 已完成，后续集成以 #34 为准 | [Authelia](../services/authelia.md)、[SPIRE 状态与依据](../services/spire.md) |
+| 人类认证仍由 Samba AD / Authelia 提供；Hydra 作为 Gitea 的实验性签发入口，通过 OIDC 复用 Authelia；workload 身份由 SPIRE 提供 | 2026-09-25 第一轮人类 PoC 扩展了原单 broker 接入边界，未迁移主入口、机器身份或应用权限 | [Authelia](../services/authelia.md)、[Hydra PoC](../services/hydra.md)、[SPIRE](../services/spire.md) |
 | SPIFFE 提供跨基础设施的统一机器身份入口，替代 workload-sts 统一 IAM 平台方案 | 服务信任 SPIFFE 身份、签发自己的 token 并维护自身权限；非 Kubernetes 身份不依赖 Kubernetes ServiceAccount，优先复用服务现有接入机制 | [核心设计与取舍](../services/spire.md#核心设计与取舍)，维护者于 2026-09-16 补充 |
 | 已由 Flux 接管的资源通过 Git 修改；brownfield 不全局开启 prune | 防止漂移回滚与误删；未接管资源不能假定受 Flux 管理 | `clusters/homelab/README.md` |
 | DNS 各视图保留权威边界；只管理明确声明的 RRset | 不清理 Samba 自动维护的域记录；LAN 现状按维护者说明对齐，旧源码文档待同步 | `infrastructure/dns/README.md`、[LAN DNS](../services/lan-dns.md) |
@@ -35,4 +35,5 @@
 
 [独立 IAM 与 agent 身份草案](independent-iam-draft.md)（2026-09-25，draft）提出以 Hydra
 解耦认证与签发，通过 OIDC 接入人类、machine 和 agent，并作为 Ayatori 的独立外部依赖。
-它尚未替代上表的人类身份、SPIFFE 或 DNS 约束；采纳时须显式修订这些边界。
+完整方案仍为草案。2026-09-25 已按维护者要求先实施人类登录 PoC，上表显式记录其有限
+变更；SPIFFE、agent 动态授权、组模型及 DNS 迁移未随之实施。

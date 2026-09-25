@@ -2,7 +2,7 @@
 title: Gitea 与 Actions 使用指南
 lifecycle: active
 evidence: documented
-last_reviewed: 2026-09-16
+last_reviewed: 2026-09-25
 last_verified: null
 ---
 
@@ -22,6 +22,12 @@ Gitea 托管 homelab 的代码、文档、issue 和 PR；Actions 执行仓库声
 
 登录成功但看不到仓库时，先确认当前账号与仓库权限；OIDC 登录本身不会赋予所有项目的管理权。
 已有账号应沿用原账号关联，遇到关联问题交由管理员处理，不另建同名账号规避。
+
+## Hydra 实验性登录
+
+2026-09-25 按维护者要求新增 [Hydra 人类登录 PoC](hydra.md)，保留旧 Authelia 登录源。
+从 <https://git.ddupan.top/user/oauth2/hydra> 发起，需 LAN/Tailscale 连通 Hydra 内网入口。
+最终认证仍在 Authelia 完成；真实账号返回和权限验收结果见 Hydra 服务页。
 
 ## 创建与修改仓库
 
