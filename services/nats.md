@@ -45,5 +45,6 @@ Dynamic Runner 的 stream、subject、durable 名称、worker 配置和具体启
 
 2026-09-25 已现场确认既有 :7777 prom-exporter 经 PodMonitor → VMPodScrape 接入中央采集，
 job 为 `nats/nats`，target up 且 nats_* 指标有当前样本。已有采集不可用/整个 job 消失告警；
-JetStream 容量、consumer 积压等业务规则仍待第二批。
+已增加 JetStream 服务端容量与慢消费者规则；consumer 积压仍待后续。
+范围和阈值见 [数据服务监控](../guides/monitoring-data-services.md)。
 转换器故障处理与验证依据见 [基础监控运维](../guides/monitoring-foundation.md#nats-转换故障经验)。

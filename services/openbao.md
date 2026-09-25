@@ -2,7 +2,7 @@
 title: OpenBao 使用指南
 lifecycle: active
 evidence: documented
-last_reviewed: 2026-09-16
+last_reviewed: 2026-09-25
 last_verified: null
 ---
 
@@ -86,3 +86,21 @@ Dynamic Runner 提供执行环境和 workload 身份，具体向 OpenBao 请求�
 日常登录成功不等于已完成备份或灾难恢复验收。
 
 来源文件的固定版本与工作区差异见[来源追溯](../sources.md#openbao)。
+
+## 监控接入与维护窗口
+
+2026-09-25 只读核对：匿名 `/v1/sys/metrics?format=prometheus` 返回 403，仓库服务模板未声明
+Prometheus telemetry。中央监控尚未接入 OpenBao 自身指标；ESO store 状态只提供依赖侧间接检测。
+维护者要求先安排维护窗口，时间、时区和解封负责人待确认。本轮未修改或重启 OpenBao。
+
+窗口建议预留 30 分钟，执行顺序为：
+
+1. 核对现有 seal 类型、服务配置与 IaC 差异；确定人工解封负责人，密钥只由负责人自行使用。
+2. 准备 telemetry 配置差异、仅 sys/metrics 读取权限的采集身份及其续期方式；不为方便采集开放匿名管理指标。
+3. 核验最近快照及独立恢复凭据可用，保存可回滚配置；这些检查不能依赖重启后的 OpenBao 才能取到材料。
+4. 宣告窗口并为明确受影响告警设置有截止时间的静默；变更、重启、解封由同一窗口协调。
+5. 验证 TLS、健康状态、受鉴权 metrics、ESO 同步和现有认证链路，再接入 Prometheus 兼容监控 CR。
+6. 异常时恢复原配置；回滚后的重启也可能需要再次解封。清理维护静默，记录验证结果。
+
+以上为待执行步骤，不代表采集身份、快照恢复或 telemetry 已完成验收。
+当前 Ansible 写配置会触发 restart；若采用 Shamir，必须预期重启后重新 sealed。

@@ -2,7 +2,7 @@
 title: SeaweedFS S3 使用指南
 lifecycle: active
 evidence: documented
-last_reviewed: 2026-09-16
+last_reviewed: 2026-09-25
 last_verified: null
 ---
 
@@ -85,3 +85,8 @@ zot 的 S3 身份只允许相应 bucket 的 Read/Write/List/Tagging，不能访�
 其他应用的数据保留与恢复策略应由各自用途明确，不能从“已接入 S3”推断已经完成备份。
 
 来源文件的固定版本与工作区差异见[来源追溯](../sources.md#seaweedfs)。
+
+## 中央监控
+
+2026-09-25 已接入 master、filer、volume 指标与容量/写入故障规则；
+使用方式与验证边界见 [数据服务监控](../guides/monitoring-data-services.md)。

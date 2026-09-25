@@ -58,3 +58,6 @@ Samba AD、OCI、Proxmox 已明确以 IaC 为准，可直接核对其代码；�
 检索、转换或 AI 摘要用于定位原文；结论仍应关联到源码、维护者说明或 ticket。
 工作完成后，将持久使用方法写入服务页，将一次变化留在 commit/PR，动态进度回到原项目 ticket。
 原仓库 README 同步目前按维护者要求暂缓，不将其列为每次任务的前置条件。
+
+- [证书、秘密同步与 GitOps 监控](monitoring-controllers.md)：证书临期、ESO 同步与 Flux Ready 排障。
+- [CNPG、NATS 与 SeaweedFS 监控](monitoring-data-services.md)：数据库连接、消息容量与存储故障。
