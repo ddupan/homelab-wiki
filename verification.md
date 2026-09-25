@@ -63,3 +63,36 @@ SPIFFE/SPIRE 按维护者指定，以 [#34](https://git.ddupan.top/panxiao81/hom
 - Backstage 为计划中的统一入口，不作为已部署服务记录。
 
 后续出现新的状态问题时，先向维护者对齐，再按授权范围更新对应服务文档。
+
+## Ayatori Database 设计修订同步
+
+2026-09-24，维护者批准 Instance → Database → Tenant 资源/申请分离，替代原 PostgreSQL
+registry 与自动所有权恢复合同。源仓库设计和 wiki 已同步，Ayatori 设计与 registry 撤除
+已推送到 `feat/database-registry-inspection`；本记录随 wiki 来源同步提交发布。
+registry 撤除通过本地全量测试、lint 及真实 API server/PostgreSQL 集成测试；
+新资源 API 与三资源运行链路未完成，不属于部署或现场验证。
+
+源设计：[6db8a49](https://git.ddupan.top/panxiao81/ayatori/commit/6db8a495fb9f8981d336c9e6288253628ab478b6)；
+代码撤除：[23a2d81](https://git.ddupan.top/panxiao81/ayatori/commit/23a2d81b5041f8589baab1c234136cd2c701bb06)；
+wiki 权威摘要：[DBaaS 设计](services/postgresql-tenant-operator.md#当前资源模型2026-09-24-已确认)。
+来源链接固定到实现提交；相关设计、registry 撤除与 CI 去重修复已随
+[PR #9](https://git.ddupan.top/panxiao81/ayatori/pulls/9) 合并为
+[347a667](https://git.ddupan.top/panxiao81/ayatori/commit/347a667c0c1737bc4e2703dec5f11358f0425e43)。
+最新 head 的 CI #781 已全部通过；无日志启动失败的 test 单项重试后通过。
+旧仓库固定基线及受保护工作树未修改。
+
+2026-09-25 的单数据库、单登录 owner 与凭据生命周期边界，以及 Database 集群级作用域、
+引用与管理权限边界、资源侧先写的绑定顺序与部分写入重试规则，以及无绑定名单、
+删除前策略可改与 Database UID 凭据定位的决定已同步到
+[DBaaS 设计](services/postgresql-tenant-operator.md#当前资源模型2026-09-24-已确认)。
+依据维护者当日确认；Ayatori 已提交为 `7e9e8e828bfcbdc8d4e2fcb6bc3d13727712a82c`，
+源码已推送至 [Ayatori PR #10](https://git.ddupan.top/panxiao81/ayatori/pulls/10)，
+wiki 按维护者要求直接合入 main，原 [wiki PR #3](https://git.ddupan.top/panxiao81/homelab-wiki/pulls/3)
+保留为历史讨论入口；后续纯文档变更不另开 PR。
+关联源码：[7e9e8e8](https://git.ddupan.top/panxiao81/ayatori/commit/7e9e8e828bfcbdc8d4e2fcb6bc3d13727712a82c)。
+这只是第一版 API 范围确认，不表示新资源链路已实现。
+
+后续 `feat/database-resource-api` 工作区已实现三资源 schema 与真实 API server 校验，
+本地 `make test` 通过；实现已包含在上述提交，远端 CI 结果以 PR 为准。已接入绑定
+controller、目标固定、finalizer 保留与生成 RBAC，真实 API server 验证并发、补写及 watch。
+尚未实现 finalizer 清理、供应与交付，不宣称完成三资源生命周期或现场验收。

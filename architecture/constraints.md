@@ -1,10 +1,16 @@
 # 架构约束索引
 
-审阅日期：2026-09-16。以下是现有仓库明确记录的约束摘要，不是本轮新增的架构决策。
-来源路径相对于 homelab-infra；修改时必须读原文和对应代码，新出现的差异先向维护者确认；[首轮状态对齐](../verification.md)已完成。
+审阅日期：2026-09-24。以下是现有仓库明确记录的约束摘要；Ayatori 条目来自其独立项目的
+已接受设计，其余来源路径相对于 homelab-infra。修改时必须读原文和对应代码，新出现的差异
+先向维护者确认；[首轮状态对齐](../verification.md)已完成。
 
 | 约束 | 原因与边界 | 来源 |
 |---|---|---|
+| Ayatori 复用 Kubernetes API machinery，不复用其容器编排产品边界 | kube-apiserver/etcd 提供 API、watch、RBAC 与状态协调；领域调度、生命周期、恢复和 GC 属于 Ayatori controllers；Kubernetes workload 只是可替换 backend | [Ayatori 控制面边界](ayatori-control-plane.md) |
+| Kubernetes 内置资源不绑定上游实现组件 | 可由 Ayatori Agent/controller 实现和消费 Node、Lease 等 API；使用 Node 不推导必须部署 kubelet、Pod 或 kube-scheduler | [Ayatori 控制面边界](ayatori-control-plane.md) |
+| Ayatori 只为已验证的管理缺口新增北向资源 | 当前优先 Database、LoadBalancer、Bucket/Object Storage；VM 价值已确认但南向较重；Run 是内部切片，KaaS 按需，FaaS/PaaS 默认不做 | [Ayatori 控制面边界](ayatori-control-plane.md) |
+| Ayatori Compute 复用 Node/Lease API，但不引入 Kubernetes workload plane | Compute Agent 实现 Node 状态；libvirt 是长期候选主路径，PVE 是 brownfield 过渡；Kata microVM 属于 Sandbox backend | [Ayatori 控制面边界](ayatori-control-plane.md) |
+| Database 采用独立资源与用户申请分离 | Instance → Database → Tenant；Retain 保留资源并人工回收，显式导入，不维护 PG registry；替代旧所有权持久化合同 | [DBaaS 设计修订](../services/postgresql-tenant-operator.md#当前资源模型2026-09-24-已确认) |
 | Samba AD、OCI、Proxmox 优先 IaC，以代码为准 | Ansible/Terraform 声明及任务优先于旧 README；声明不等于已验证部署 | 维护者于 2026-09-16 明确、各服务使用指南 |
 | 服务独立部署，Terraform root/state 按服务隔离 | 避免认证和变更影响范围绑在一起 | `AGENTS.md`、`CLAUDE.md` |
 | OpenBao 恢复不能依赖 k3s 或读取自己内部的恢复凭据 | 先恢复信任根，再恢复消费者 | `infrastructure/openbao/README.md`、`CLAUDE.md` |

@@ -50,12 +50,22 @@ runs-on: [self-hosted, vm]
 
 | 接口 | 执行方式 | 使用时需要理解的边界 |
 |---|---|---|
-| `pod` | 动态 Kubernetes privileged Pod；workflow 使用 host executor | Docker、BuildKit、kind 等工具由 pipeline 按需 setup；这里的 host executor 指 Pod 内执行环境 |
+| `pod` | 动态 Kubernetes privileged Pod；workflow 使用 host executor | 旧 README 要求 pipeline 按需 setup Docker；Docker 的新约定见下文。host executor 指 Pod 内执行环境 |
 | `vm` | 动态 Cloud Hypervisor microVM | 每个任务创建独立 COW disk、seed 和 TAP，guest runner 执行一个 job 后关机并清理 |
 
 两种接口不能仅凭“环境一次性”就认定具有相同的隔离边界。
 接入前需要结合项目设计约束和实际部署确认任务的信任范围。
 旧 homelab-infra 文档中的 `kind-microvm` 是早期记录，不作为本项目当前 workflow 接口。
+
+### Docker 可用性约定更新
+
+维护者于 2026-09-21 明确：CI 后端正在修复，后续由 runner 保证 dockerd 默认可用。
+这取代旧说明中要求业务 workflow 自行启动 Docker daemon 的部分；不能据此推断 BuildKit、
+kind 等其他工具也默认就绪。数据库集成测试不因使用 Docker 而要求 VM。
+消费方 workflow 应检查 Docker 是否可用，而不重复启动 daemon、强制 storage driver 或
+覆盖 runner 提供的 endpoint。[Ayatori #6](https://git.ddupan.top/panxiao81/ayatori/pulls/6)
+正在按此约定调整。此处依据维护者说明，不表示后端修复已经部署或远端集成已经通过，
+`last_verified` 保持不变。
 
 ## 组件如何协作
 
