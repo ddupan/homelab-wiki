@@ -190,3 +190,17 @@ bao status
 配置模板与 restart handler 位于同目录 `ansible/roles/openbao/`。
 命令依据：[人工 unseal](https://openbao.org/docs/2.6.x/commands/operator/unseal/)、
 [telemetry 配置](https://openbao.org/docs/2.6.x/configuration/telemetry/)。
+
+### 人工解封准备确认
+
+维护者已在插有 YubiKey 的 working PC 成功验证解密。VM 的 `/home/ansible/unseal.txt`
+包含带 `Unseal Key 1:` 前缀的 base64 GPG 密文；正文不保存其内容。
+实际解封由维护者在 working PC 解密后通过 HTTPS 提交，不能将密文直接当作 unseal key。
+这次验证未执行解封或重启。
+
+随后只读确认：快照 token 的 lookup-self 也返回 403，VM root 没有可用的 Bao CLI 会话。
+需要维护者先登录管理会话，恢复快照身份并完成受鉴权预检后才能进入停机。
+若在 VM 使用 OIDC CLI 登录，应从 working PC 建立
+`ssh -t -L 8250:127.0.0.1:8250 ansible@192.168.10.8`，再在 VM 的 root shell 设置
+`BAO_ADDR=https://bao.ad.ddupan.top:8200` 并运行 `bao login -method=oidc -no-print role=admin`。
+登录网址在 working PC 浏览器打开，账号需符合现有 vault-admins 组约束；不把 token 发给 agent。
