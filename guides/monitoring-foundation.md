@@ -53,6 +53,8 @@ job 完全消失使用 absent(up) 检查，但未建立每个预期主机/成员
 
 warning/critical 及恢复消息沿用 [Telegram 路由](../services/grafana.md#telegram-告警接入)。
 新规则 annotations 中包含本 runbook 链接。
+告警 Source 的指标查询入口与 Grafana 中的 Alertmanager 静默管理入口见
+[从告警进入 Grafana](../services/grafana.md#从告警进入-grafana)。
 同一 namespace/pod/container 的 `KubePodCrashLooping` 只抑制 `KubePodFrequentRestarts`，
 不抑制 OOM，也不静默整个 namespace。工作负载副本不足仍独立可见。
 

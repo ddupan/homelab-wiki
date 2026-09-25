@@ -63,11 +63,12 @@ VictoriaLogs 使用 LogsQL。上述 limit 限制返回数量，不保证返回�
 关键字没有结果时可以放宽时间范围并回到第一步，区分“没有该关键字”与“没有采集数据”。
 语法依据见 [VictoriaLogs 查询说明](https://docs.victoriametrics.com/victorialogs/querying/)。
 
-## 三个数据源的分工
+## 数据源的分工
 
 | 数据源 | 用途 |
 |---|---|
 | VictoriaMetrics | Prometheus 兼容指标查询，例如内存、CPU、采集健康 |
+| Alertmanager | 现有告警通知状态与静默管理；Prometheus 实现，UID 为 `alertmanager` |
 | VictoriaLogs | LogsQL 日志查询 |
 | VictoriaTraces | Jaeger 兼容追踪查询；应用需要先接入追踪，不能仅凭数据源存在认为所有服务都有 trace |
 
@@ -107,6 +108,31 @@ VictoriaLogs 使用 LogsQL。上述 limit 限制返回数量，不保证返回�
 收不到通知时依次检查 ExternalSecret 状态、Alertmanager 配置加载与发送错误、
 bot 的频道发布权限以及手机频道通知设置。轮换 token 后需等待或触发 ESO 同步，
 并验证 Alertmanager 使用新 token；必要时重载或重启，不打印 Secret 内容。
+
+## 从告警进入 Grafana
+
+Telegram 新通知的 Source 指向 Grafana `/explore`，使用 VictoriaMetrics 数据源，
+携带原始告警表达式，时间范围从该告警触发时刻到现在。首次访问需要登录 Grafana；
+原有 Telegram 消息中的旧 Pod 地址不会被追溯修改。
+Source 查询指标不依赖 Alertmanager 数据源。
+
+Grafana 同时 provision `Alertmanager` 数据源，通过服务端代理连接
+`http://vmalertmanager-main.monitoring.svc:9093`，实现类型为 `prometheus`。
+进入 **Alerting**，在支持选择 Alertmanager 的页面切换到 **Alertmanager**，
+可查看通知策略、接收端并管理静默。Prometheus 实现的接收端、通知策略和模板为只读，
+持久修改仍通过 Git/Flux；告警规则继续优先使用 `PrometheusRule`，由 vmalert 执行。
+本数据源未启用转发 Grafana-managed alerts。
+
+配置来源：[homelab-infra PR #152](https://git.ddupan.top/panxiao81/homelab-infra/pulls/152)。
+2026-09-25 现场确认 Flux 已应用 `dbf66590acea4a681e2e3bb6965f9a19ece4190e`，
+Grafana HelmRelease Ready、两个 Deployment 就绪；68 条规则无评估错误。
+实际 Alertmanager 告警的 generatorURL 已指向 Grafana，解码后的表达式与 vmalert 原表达式一致。
+Grafana API 已确认 provisioned 数据源，并通过其代理成功读取 `/api/v2/status`、
+`/api/v2/alerts` 和 `/api/v2/silences`。现场插件的 Save & test 使用前端代理请求 status；
+通用 `/api/datasources/uid/alertmanager/health` 不适用于这个前端插件，会返回 Plugin unavailable。
+本轮没有执行浏览器 OIDC 登录与手工创建静默，不将 API 验证写作浏览器端验收。
+
+功能边界见 [Grafana Alertmanager 文档](https://grafana.com/docs/grafana/latest/datasources/alertmanager/)。
 
 ## 采集失败的定位与处理
 
