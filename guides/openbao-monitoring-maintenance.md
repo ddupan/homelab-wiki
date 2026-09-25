@@ -6,12 +6,38 @@ last_reviewed: 2026-09-25
 # OpenBao 监控接入维护 runbook
 
 用于本次 OpenBao 自身指标接入中央监控。2026-09-25 维护者要求现在开始准备维护，
-先完成顺序和 runbook；本文为待执行方案，不代表已经开启停机窗口或完成变更。
+先完成顺序和 runbook；本文同时保留执行顺序与最终验收，实际完成范围见下方“本次执行状态”。
 建议从明确宣布开始计时预留 30 分钟，实际起止记录 UTC，并注明维护者当地时区。
 
 维护者确认使用人工解封：解封材料保存在 Bao VM，经 GPG 加密，解密私钥由 YubiKey 持有。
 文件确切位置、封装格式以及是否另有残留明文未核实；agent 不搜索或读取这些材料。
 解密、PIN/触摸确认和提交 unseal share 由维护者在自己的终端完成。
+
+## 本次执行状态（2026-09-25）
+
+维护者已确认 YubiKey 解密可用并明确同意进入重启/人工解封交接。
+20:34:42 UTC 应用已校验 telemetry 配置并重启，随后维护者完成 unseal。
+现场确认 initialized=true、sealed=false、health=200、受鉴权 Prometheus metrics=200，
+cluster_id 与维护前一致，匿名 metrics 仍为 403。
+
+停机前已更换失效的快照 token，修正每日续期命令为现场支持的 `bao token renew`（不带 -self）。
+新快照 `openbao-20260925-203149.snap` 为 183334 bytes，VM 外副本保存在管理工作站
+`/home/panxiao81/.local/state/openbao-maintenance/`，权限 0600，SHA-256 一致。
+这是配置维护前的备份核验，不等于完成异机灾难恢复演练。
+快照 service Result=success、timer active；文件只在写入成功后更名，失败不清理旧快照。
+
+metrics policy/role 已按候选源配置应用：实际 vmagent-main SA 登录与 token 续期成功，
+无权读取业务 Secret，测试 token 已撤销；Terraform import blocks 已备好，主 state 纳管尚未执行。
+重启后 ClusterSecretStore 和 12 个 ExternalSecret Ready；monitoring/alertmanager-telegram
+已定向刷新，refreshTime 更新为 20:39:33 UTC，状态 SecretSynced。
+[PR #162](https://git.ddupan.top/panxiao81/homelab-infra/pulls/162) 已合并，Flux 应用
+`834f65494195ba5e139e1fc6ee0221fd705b9656`，vmagent 新 Pod 3/3 Ready。
+Bao Agent 日志确认自动登录成功、token 写入内存卷及首次自动续期成功；up{job="openbao"}=1，
+已观察连续三次 up=1，当前指标可查询，单次抓取约 636 个样本，OpenBaoMetricsUnavailable 规则已加载，无评估错误。
+本次未设置维护静默，无需清理 silence；没有撤销维护者自己的登录会话。
+真实长周期重新登录、快照未来定时运行和独立灾难恢复演练不包含在本次验收内。
+
+以下保留操作顺序和回滚方法；其中“待执行”描述须结合本节判断，不能重复重启。
 
 ## 目标、分工与影响
 
@@ -95,11 +121,11 @@ HTTPS 使用正确域名/CA，不关闭校验；metrics path 为 `/v1/sys/metric
 放 query params，不能把问号串在 path 里。sealed 期间 metrics 不可用，因此还需独立 health/目标缺失检测，
 不能仅靠 Bao 内部指标证明 sealed 状态可被发现。
 
-候选配置见 [WIP PR #162](https://git.ddupan.top/panxiao81/homelab-infra/pulls/162)，尚未合并部署。
+配置见 [PR #162](https://git.ddupan.top/panxiao81/homelab-infra/pulls/162)，已合并部署，状态以本次执行记录为准。
 使用绑定 monitoring/vmagent-main 的 Kubernetes auth metrics role，由 Bao Agent sidecar 自动登录/续期，
 token 仅存 Pod 内存卷供 vmagent 只读消费。采集用 ServiceMonitor + 外部 Service/Endpoints；
 现有 converter 的 Endpoints 发现保留，EndpointSlice 迁移另行处理。
-真实 role 权限、认证/续期及受鉴权 metrics 仍待管理员会话完成验收，不能只凭静态检查重启。
+role 权限、认证/首次续期与受鉴权 metrics 已验收；未来维护仍须重新核对现场，不只依靠历史记录。
 使用现场版本支持的配置校验方式，先检查对应命令 help；禁止启动第二个 server 验证同一 Raft 数据目录。
 现有 Ansible 写配置会通知 restart，不能把正式 apply 当作无停机预演。
 

@@ -19,9 +19,9 @@ last_reviewed: 2026-09-25
 下面的规模、矩阵和盲点保留初轮盘点基线，不能再当作第一批实施后的现状。
 第二批已补 [证书、ESO 与 Flux](monitoring-controllers.md) 的 15 条规则，
 以及 [CNPG、NATS 与 SeaweedFS](monitoring-data-services.md) 的 14 条规则和 12 个新采集目标。
-OpenBao telemetry 尚未实施：匿名 metrics 返回 403，现有配置未声明 Prometheus retention；
-维护者已要求现在准备维护，YubiKey 解密后人工 unseal，
-执行顺序见 [OpenBao 维护 runbook](openbao-monitoring-maintenance.md)；尚未开始停机。备份独立验收、NATS consumer 维度、外部探测和集群外心跳仍待补齐。
+OpenBao 已完成受鉴权 telemetry、ServiceMonitor 与采集不可用规则，维护者人工解封后验收通过；
+并修复快照续期、生成维护前快照及 VM 外副本，详见 [维护 runbook](openbao-monitoring-maintenance.md)。
+备份独立验收、NATS consumer 维度、外部探测和集群外心跳仍待补齐。
 
 ## 证据和范围
 

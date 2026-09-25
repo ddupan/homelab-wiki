@@ -89,11 +89,16 @@ Dynamic Runner 提供执行环境和 workload 身份，具体向 OpenBao 请求�
 
 ## 监控接入与维护窗口
 
-2026-09-25 只读核对：匿名 `/v1/sys/metrics?format=prometheus` 返回 403，仓库服务模板未声明
-Prometheus telemetry。中央监控尚未接入 OpenBao 自身指标；ESO store 状态只提供依赖侧间接检测。
-维护者于 2026-09-25 要求现在准备维护，先完成 runbook。解封材料由 VM 上的 GPG 加密文件保存，
-解密依赖维护者的 YubiKey，并由维护者人工 unseal；文件格式和位置未核实。
-匿名 403 不足以判断 telemetry 是否启用，下一步先做受鉴权预检。
+2026-09-25 已启用受鉴权 Prometheus telemetry，ServiceMonitor 通过现有 vmagent 采集，
+job 为 `openbao`。同 Pod 的 Bao Agent 使用 Kubernetes SA 登录 metrics role，自动续期，
+token 仅保存于内存卷；指标身份不能读取业务秘密，匿名 metrics 仍被拒绝。
+已有目标 down/消失持续 3 分钟的 critical 告警，通知沿用 Telegram。
+本次仅完成基础采集与可用性告警，不代表已覆盖全部 Raft、PKI 或备份新鲜度规则。
 
-维护顺序、人工交接、验收和回滚以 [OpenBao 监控接入维护 runbook](../guides/openbao-monitoring-maintenance.md)
-为准。当前为准备阶段，预检结果与 WIP 配置 PR 已记录在 runbook；尚未执行重启，也没有取得或读取解封材料。
+维护中已修复快照 token 失效及脚本缺少续期的问题，生成新快照并核对 VM 外副本。
+快照 timer 已启用，未来执行结果和恢复演练仍需独立监控/验收。
+
+维护者用 working PC 的 YubiKey 解密 VM 上保存的加密 unseal share，重启后人工解封。
+本次服务配置变更、采集上线与恢复验收已完成，详细操作与证据见
+[OpenBao 监控接入维护 runbook](../guides/openbao-monitoring-maintenance.md)。
+后续重启仍需同样的人在场解封流程；不能因本次恢复成功假定已经自动解封。
