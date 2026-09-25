@@ -9,6 +9,16 @@ last_reviewed: 2026-09-25
 “有 exporter”“有 PodMonitor”“数据库里曾出现过指标名”都不能代替当前采集成功和有效规则。
 本页用于接续覆盖建设，服务使用入口仍见 [Grafana](../services/grafana.md)。
 
+## 第一批补齐进展
+
+2026-09-25 已上线 kube-state-metrics，并恢复 NATS PodMonitor 转换与采集。
+新增集群状态 11 条、主机/ZFS 5 条、采集与通知 5 条规则，共 21 条；正式规则总数为 68。
+新增资源按维护者要求优先使用 ServiceMonitor/PodMonitor/PrometheusRule。
+具体阈值、降噪边界、声明转换关系与验收方法见 [基础监控与告警运维](monitoring-foundation.md)。
+
+下面的规模、矩阵和盲点保留初轮盘点基线，不能再当作第一批实施后的现状。
+第二批数据库/OpenBao/存储/备份、外部探测和集群外心跳尚未实施。
+
 ## 证据和范围
 
 2026-09-25 17:26–17:31 UTC，只读检查当前集群工作负载、采集 CR、vmagent 实际 targets、
@@ -24,7 +34,7 @@ vmalert 已加载规则、VictoriaMetrics 即时查询、CNPG 监控/备份声�
 共享 etcd 采集/规则另以本次现场 CR 为准（来源工作区尚有未提交配置）。
 审阅时主工作区落后于远端且有其他改动，不能拿本地旧 :8080 配置覆盖已合并修复。
 
-## 当前规模
+## 初轮盘点规模（实施前）
 
 - 69 个 Deployment/StatefulSet/DaemonSet 对象（44/13/12），不等同于服务数或全部实例数；CNPG 管理的数据库 Pod 不在此统计内。
 - vmagent 有 17 个目标、15 个 job；其中 node-exporter 与 docker-hosts 重复采集同一个 :9100 地址，实际唯一 URL 为 16 个。
@@ -34,7 +44,7 @@ vmalert 已加载规则、VictoriaMetrics 即时查询、CNPG 监控/备份声�
 - 严重性为 critical 16、warning 30、info 1；本次规则 API 未报告执行错误。41 条属于监控栈，6 条属于共享 etcd。
 - Telegram 已接 warning/critical 和恢复通知；info 不推送。通知接入验收见服务页。
 
-## 覆盖矩阵
+## 初轮覆盖矩阵（实施前）
 
 “无专用告警”指没有该服务的业务/运行告警；共享进程或错误日志规则可能部分命中，不能视为完整覆盖。
 
@@ -68,7 +78,7 @@ vmalert 已加载规则、VictoriaMetrics 即时查询、CNPG 监控/备份声�
 | Marker / OpenViking / LiteLLM 等源码服务 | 未见中央 target；运行范围需由各项目确认 | 无中央专用规则 | 先明确现役范围，再接业务指标；不为归档或未部署服务添加空目标 |
 | e5renew / research-auto | 有集群 workload，但未见专用目标 | 无中央专用规则 | 属外部消费者，业务规则由项目维护；平台提供通用 workload 健康覆盖 |
 
-## 已确认的盲点
+## 初轮发现的盲点（实施前）
 
 ### Kubernetes 对象状态
 
@@ -121,5 +131,5 @@ Samba AD 文档有备份操作示例，SeaweedFS/zot 文档也明确独立异机
 | 3：验证用户可用性 | LAN DNS、入口 HTTPS、Gitea/认证/S3/镜像等关键路径探测；集群外 Watchdog 接收 | 从独立位置发现站点/监控中断，探测不用暴露管理员凭据或制造业务写入 |
 | 4：扩展到其余基础设施和应用 | PVE/OCI/域控主机、Docker/Incus/libvirt/网络；按使用频率接入应用 | 按服务维护覆盖表，退役目标同步移除，采集开销和标签基数受控 |
 
-先落实第一批；第二批中的备份方案确认可并行推进。开始具体实施前对齐各服务进行中的工作，
+第一批基础补齐已实施，验收边界见上方链接；下一步对齐第二批关键依赖与备份方案。开始具体实施前对齐各服务进行中的工作，
 尤其是共享 etcd、数据库迁移与身份平台；本次盘点不授权自动修改这些项目。

@@ -16,6 +16,7 @@ last_verified: null
 2026-09-25 的通知链路与采集故障验证范围见下文。
 
 整体接入范围、已确认盲点和补齐顺序见 [监控覆盖与补齐计划](../guides/monitoring-coverage.md)。
+第一批已接入的规则、阈值、静默和排障方法见 [基础监控与告警运维](../guides/monitoring-foundation.md)。
 
 ## 先看主机内存与 Swap
 
@@ -95,7 +96,8 @@ VictoriaLogs 使用 LogsQL。上述 limit 限制返回数量，不保证返回�
 - critical 首次分组等待 10 秒，未恢复每小时提醒；warning 等待 1 分钟，
   未恢复每 4 小时提醒。分组键为 `alertname, cluster, job, severity`，
   组内变更通知间隔 5 分钟；两类均发送恢复通知。info、缺失或其他 severity 暂不推送。
-- 采用 Alertmanager 默认 Telegram 消息模板；本次没有新增抑制规则。
+- 采用 Alertmanager 默认 Telegram 消息模板；同容器 CrashLoop 抑制重复重启通知，
+  具体匹配范围见基础监控运维指南。
 
 配置变更通过既有 Flux 流程发布，先确认 ExternalSecret Ready 和目标 Secret
 投射成功，再确认 Alertmanager 加载配置及到 Telegram API 的出站网络。

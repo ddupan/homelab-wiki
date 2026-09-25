@@ -2,7 +2,7 @@
 title: NATS
 lifecycle: active
 evidence: documented
-last_reviewed: 2026-09-16
+last_reviewed: 2026-09-25
 last_verified: null
 sources:
   - 维护者于 2026-09-16 提供的部署与消费者说明
@@ -40,3 +40,10 @@ Dynamic Runner 的 stream、subject、durable 名称、worker 配置和具体启
 
 知识库只保留[Dynamic Runner 的用途与职责边界](gitea-dynamic-runner.md)。
 涉及 runner 的实际配置和实现进度时，先按项目文档接续工作；需要扩大查询范围时再向维护者确认。
+
+## 指标与告警
+
+2026-09-25 已现场确认既有 :7777 prom-exporter 经 PodMonitor → VMPodScrape 接入中央采集，
+job 为 `nats/nats`，target up 且 nats_* 指标有当前样本。已有采集不可用/整个 job 消失告警；
+JetStream 容量、consumer 积压等业务规则仍待第二批。
+转换器故障处理与验证依据见 [基础监控运维](../guides/monitoring-foundation.md#nats-转换故障经验)。

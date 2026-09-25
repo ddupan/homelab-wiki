@@ -19,7 +19,7 @@ last_reviewed: 2026-09-25
 | 使用 S3 对象存储 | [SeaweedFS](../services/seaweedfs.md) | [OpenBao](../services/openbao.md) |
 | 给应用分配数据库 | [共享 PostgreSQL](../services/shared-postgresql.md) | [计划中的 DBaaS](../services/postgresql-tenant-operator.md) |
 | 给应用提供秘密或存储 | [External Secrets](../services/external-secrets.md)、[OpenEBS](../services/openebs.md) | [OpenBao](../services/openbao.md) |
-| 盘点或补齐监控与告警 | [监控覆盖与补齐计划](monitoring-coverage.md) | [Grafana](../services/grafana.md)、对应服务 runbook |
+| 盘点或补齐监控与告警 | [监控覆盖与补齐计划](monitoring-coverage.md) | [基础监控运维](monitoring-foundation.md)、[Grafana](../services/grafana.md) |
 | 排查内存、日志或追踪 | [Grafana](../services/grafana.md) | 对应服务源码 runbook |
 | 排查域名解析 | [LAN DNS](../services/lan-dns.md)或[Pod DNS](../services/k3s-dns.md) | [Tailscale](../services/tailscale.md)，如果请求来自远程客户端 |
 | 排查登录或域权限 | [Authelia](../services/authelia.md)、[Samba AD](../services/samba-ad.md) | 具体应用的权限说明 |
