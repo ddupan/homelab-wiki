@@ -111,10 +111,13 @@ controller、目标固定、finalizer 保留与生成 RBAC，真实 API server �
 维护者批准后合并 [PR #12](https://git.ddupan.top/panxiao81/ayatori/pulls/12)，合并提交
 [22ab72e](https://git.ddupan.top/panxiao81/ayatori/commit/22ab72ec60dd5a0bf852e4563e107597dd56e81f)。
 后续 Kubernetes 认证与短期会话续期已提交为
-[dcf9ab5](https://git.ddupan.top/panxiao81/ayatori/commit/dcf9ab50dffab2740b1801a560d47b1a857374b1)，
+[f0aa86f](https://git.ddupan.top/panxiao81/ayatori/commit/f0aa86f67673fbfb5f182f3ce35679c614be968d)，
 由 [PR #13](https://git.ddupan.top/panxiao81/ayatori/pulls/13) 跟踪 CI 与 review。
-本地全量测试、三轮真实 OpenBao/TokenReview race 测试及两种 lint 通过；源码模块文档与 wiki
-已同步边界和正式链接。认证尚未合并或装配到 manager，不把本地验证等同于远端 CI 或服务上线。
+首版依赖投射 SA 文件的假设已按维护者意见撤除：集群外 kubeconfig 与集群内配置共用 manager
+客户端，通过受限 TokenRequest 获取登录 JWT。manager 显式配置、Runnable 与 readiness 已装配；
+三轮真实 API/OpenBao race、本地全量测试与两种 lint 通过，覆盖 RBAC 撤回/恢复和越权拒绝。
+源码文档与 wiki 已同步边界和正式链接。认证尚未合并，不把本地验证等同于新 head 的远端 CI；
+未部署生产 auth/RBAC，也未接入 Database 供应或 ESO 交付。
 
 ## 2026-09-25 sandbox 存储故障复盘的来源边界
 

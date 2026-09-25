@@ -170,13 +170,18 @@ Database 供应或 ESO。源码模块文档与 wiki 已关联，见
 
 Kubernetes 认证会话的后续实现位于
 [PR #13](https://git.ddupan.top/panxiao81/ayatori/pulls/13)，提交
-[dcf9ab5](https://git.ddupan.top/panxiao81/ayatori/commit/dcf9ab50dffab2740b1801a560d47b1a857374b1)，尚未合并。
-使用官方 SDK 登录与 LifetimeWatcher，不自行实现续期算法；重新登录重读指定 SA token，
-缺失或空文件不回退其他身份，续期失败及停止时清空本地 token。真实 envtest/OpenBao 测试
-验证 TokenReview、续期、撤销恢复与 namespace/audience 拒绝，三轮 race、本地全量测试和
-两种 lint 通过。manager 配置、生命周期/健康检查装配与生产 auth 配置仍未接入，不代表已部署。
+[f0aa86f](https://git.ddupan.top/panxiao81/ayatori/commit/f0aa86f67673fbfb5f182f3ce35679c614be968d)，尚未合并。
+维护者指出并纠正了首版的 Pod 文件假设：controller 可以是 systemd service；Kubernetes auth
+仍是正确路径，但应复用 manager 的标准 kubeconfig/in-cluster 配置，通过 RBAC 授权的指定
+ServiceAccount TokenRequest 申请短期 JWT。集群内外共用同一客户端路径，不另建机器身份。
+重新登录重新申请 JWT，申请失败不回退投射文件或静态 token；官方 SDK 负责 Bao 登录与
+LifetimeWatcher，续期失败及停止时清空本地 token。kubeconfig 的签发、更新与撤销属于部署管理。
+manager 已增加显式 HTTPS/CA、auth role、目标 SA/audience 配置、Runnable 与 readiness，
+默认停用；controller 不自动创建身份或授予权限。真实受限 kubeconfig 启动 manager 的测试
+验证 TokenRequest、续期、跨 namespace/其他 SA 拒绝、RBAC 撤回恢复与 Bao audience 校验，
+三轮 race、本地全量测试和两种 lint 通过。生产 auth 配置与 Database 供应尚未接入，不代表已部署。
 具体使用边界见该提交的
-[认证会话说明](https://git.ddupan.top/panxiao81/ayatori/src/commit/dcf9ab50dffab2740b1801a560d47b1a857374b1/docs/database/README.md#openbao-kubernetes-认证会话)。
+[认证会话说明](https://git.ddupan.top/panxiao81/ayatori/src/commit/f0aa86f67673fbfb5f182f3ce35679c614be968d/docs/database/README.md#openbao-kubernetes-认证会话)。
 
 - operator 管理实例内的租户资源，不运行 PostgreSQL/OpenBao，也不管理 VM、存储、备份或 OpenBao PKI。
 - 应用密码写入 OpenBao，不进入 CR、Event 或日志；ESO 负责向 Kubernetes 消费者投射。
