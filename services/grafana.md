@@ -15,6 +15,8 @@ last_verified: null
 部分来源仍在源码工作区、尚未提交。看板使用说明未逐项现场验证；
 2026-09-25 的通知链路与采集故障验证范围见下文。
 
+整体接入范围、已确认盲点和补齐顺序见 [监控覆盖与补齐计划](../guides/monitoring-coverage.md)。
+
 ## 先看主机内存与 Swap
 
 1. 打开 [Homelab 内存与 Swap](https://grafana.ad.ddupan.top/d/homelab-memory)。
