@@ -104,10 +104,11 @@ Delete 即为删除授权，不加第二次审批。动态凭据路径按 Databa
 已有凭据位置；Released 不自动改密，重新开放前由管理员处理旧访问。
 对应 Ayatori `docs/database/specification.md`、`domain-model.md` 与 `api-reference.md`
 已推送为 [7e9e8e8](https://git.ddupan.top/panxiao81/ayatori/commit/7e9e8e828bfcbdc8d4e2fcb6bc3d13727712a82c)，
-由 [Ayatori PR #10](https://git.ddupan.top/panxiao81/ayatori/pulls/10) 跟踪；尚未合并。
+已随 [Ayatori PR #10](https://git.ddupan.top/panxiao81/ayatori/pulls/10) 通过三项 CI 并合并 main，
+合并版本为 [55b269c](https://git.ddupan.top/panxiao81/ayatori/commit/55b269ce2eb40f6b44c1afe838389093efdac98e)。
 
-Ayatori 的 `feat/database-resource-api` 工作区已加入三资源 Go 类型、生成 CRD、Scheme 注册
-与 YAML 示例，已包含在上述本地提交，尚未发布。`make test` 使用真实 API server 验证作用域、默认值、声明
+Ayatori main 已加入三资源 Go 类型、生成 CRD、Scheme 注册与 YAML 示例，尚未部署为业务服务。
+`make test` 使用真实 API server 验证作用域、默认值、声明
 校验、status 隔离、绑定写入版本冲突与示例。绑定 controller 已接入 manager：动态资源按
 Tenant UID 命名，先写资源侧绑定，再回读补齐 Tenant status；进入 Binding 后固定申请目标，
 拒绝 Released、旧 UID 和陈旧 Ready 观察。真实 API server 覆盖部分写入故障后新 reconciler
@@ -146,6 +147,14 @@ GitOps、Terraform、kubectl 和未来 Backstage 计划共用这套 Kubernetes A
 当前没有可供日常申请数据库的已验证服务入口；接口和具体行为以项目规范为准。
 
 ## 职责边界
+
+2026-09-25 维护者确认第一版 PostgreSQL 管理账号使用原生非 superuser 方案，具有
+CREATEDB/CREATEROLE，不引入 SECURITY DEFINER 接口。扩展安装按实际权限逐请求验证，
+可用列表不等于任意扩展均可安装；基础管理能力不授予导入或接管他人资源的权限。
+这项决定沿用原安全文档的非 superuser 原则，并明确了此前未选定的实施方式。
+Instance 观测、Secret watch 与删除引用保护的后续实现目前位于 Ayatori
+`feat/database-instance-observation` 工作区，尚未提交/发布；权限矩阵、启用方式和测试边界
+以该工作区 `docs/database/README.md`、`security.md` 为准，不能把 main 的旧实现当成已具备该能力。
 
 - operator 管理实例内的租户资源，不运行 PostgreSQL/OpenBao，也不管理 VM、存储、备份或 OpenBao PKI。
 - 应用密码写入 OpenBao，不进入 CR、Event 或日志；ESO 负责向 Kubernetes 消费者投射。

@@ -86,13 +86,21 @@ wiki 权威摘要：[DBaaS 设计](services/postgresql-tenant-operator.md#当前
 删除前策略可改与 Database UID 凭据定位的决定已同步到
 [DBaaS 设计](services/postgresql-tenant-operator.md#当前资源模型2026-09-24-已确认)。
 依据维护者当日确认；Ayatori 已提交为 `7e9e8e828bfcbdc8d4e2fcb6bc3d13727712a82c`，
-源码已推送至 [Ayatori PR #10](https://git.ddupan.top/panxiao81/ayatori/pulls/10)，
+源码已通过 [Ayatori PR #10](https://git.ddupan.top/panxiao81/ayatori/pulls/10) 的三项 CI，
+并于同日按维护者要求合并为
+[55b269c](https://git.ddupan.top/panxiao81/ayatori/commit/55b269ce2eb40f6b44c1afe838389093efdac98e)。
 wiki 按维护者要求直接合入 main，原 [wiki PR #3](https://git.ddupan.top/panxiao81/homelab-wiki/pulls/3)
 保留为历史讨论入口；后续纯文档变更不另开 PR。
 关联源码：[7e9e8e8](https://git.ddupan.top/panxiao81/ayatori/commit/7e9e8e828bfcbdc8d4e2fcb6bc3d13727712a82c)。
 这只是第一版 API 范围确认，不表示新资源链路已实现。
 
-后续 `feat/database-resource-api` 工作区已实现三资源 schema 与真实 API server 校验，
-本地 `make test` 通过；实现已包含在上述提交，远端 CI 结果以 PR 为准。已接入绑定
+上述已合并实现包含三资源 schema 与真实 API server 校验，
+本地 `make test` 与远端 CI 均通过。已接入绑定
 controller、目标固定、finalizer 保留与生成 RBAC，真实 API server 验证并发、补写及 watch。
 尚未实现 finalizer 清理、供应与交付，不宣称完成三资源生命周期或现场验收。
+
+同日确认原生非 superuser + CREATEDB/CREATEROLE 管理方案，已同步至
+[DBaaS 职责边界](services/postgresql-tenant-operator.md#职责边界)。后续 Instance 观测链路在
+`/tmp/ayatori-database-domain` 的 `feat/database-instance-observation` 分支，尚未提交；本地已通过
+全量测试、三轮 controller/application race、真实 PostgreSQL/API server 集成测试及普通/integration lint。
+源码文档已经同步，但固定 commit/PR 链接待提交后补齐，不代表已合并、部署或现场验收。
