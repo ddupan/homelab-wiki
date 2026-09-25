@@ -59,7 +59,7 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 | kata-lxc-lab | LXC 内 Kata worker 试验 | `pve2 / 记录地址 192.168.10.128` | 记录 PoC 验证；非正式生产服务 | `infrastructure/kata-lxc-lab/README.md` | 明确与 microVM runner 的职责 |
 | microvm-runner（历史目录名） | 动态 runner 的 homelab 基础设施记录 | 当前项目接口见 [Dynamic Runner](gitea-dynamic-runner.md) | 独立项目已更名并扩展到 Pod/VM，正在积极开发 | `infrastructure/microvm-runner/README.md`、独立项目文档 | 具体启用范围和实现进度以独立项目文档为准 |
 | [oci](oci.md) | 云主机、网络与站点互联 | `OCI ap-osaka-1` | 有恢复、接管与网络实施记录 | `infrastructure/oci/README.md` | 已有登录、站点网络与维护入口 |
-| [openbao](openbao.md) | 秘密管理与内部 CA | `bao.ad.ddupan.top` | 有部署与接管记录 | `infrastructure/openbao/README.md` | 已有登录、取密与运维入口指南 |
+| [openbao](openbao.md) | 秘密管理与内部 CA | `bao.ad.ddupan.top` | 人工解封、中央采集与本地快照已验收 | `infrastructure/openbao/README.md` | 内部健康和快照新鲜度有告警；异地恢复演练待完成 |
 | [proxmox](proxmox.md) | PVE、虚拟化与主机基础设施 | `PVE 管理入口` | 已有基础设施 | `infrastructure/proxmox/ansible/` 与 `README-ha.md` | 已有管理入口；sandbox LB/根盘恢复流程见服务页；身份与 runner 设计见独立项目 |
 | [samba-ad](samba-ad.md) | AD 身份、域 DNS 与域成员管理 | `dc1 / 192.168.10.5` | 有部署记录；维护者说明 DNS 部分已完成 | `infrastructure/samba-ad/README.md`、[LAN DNS](lan-dns.md) | 已有入域、目录浏览与日常管理入口 |
 

@@ -1,9 +1,9 @@
 ---
 title: OpenBao 使用指南
 lifecycle: active
-evidence: documented
+evidence: live-verified
 last_reviewed: 2026-09-25
-last_verified: null
+last_verified: 2026-09-25
 ---
 
 # OpenBao
@@ -12,7 +12,8 @@ OpenBao 提供秘密管理与内部 CA，部署在 Kubernetes 之外的独立主
 日常使用是以自己的身份登录，按已有 policy 读取秘密或申请短期凭据。
 
 本页依据 homelab-infra 工作区 `infrastructure/openbao/README.md` 整理，
-CLI 语法参考下列官方文档。本轮未登录服务、读取秘密或验证现场。
+CLI 语法参考下列官方文档。登录和取密指南仍以文档为据；2026-09-25 已现场验证
+服务解封、中央指标、ESO 秘密刷新及本地快照监控，范围见本文末节。
 
 ## 人的登录入口
 
@@ -93,10 +94,14 @@ Dynamic Runner 提供执行环境和 workload 身份，具体向 OpenBao 请求�
 job 为 `openbao`。同 Pod 的 Bao Agent 使用 Kubernetes SA 登录 metrics role，自动续期，
 token 仅保存于内存卷；指标身份不能读取业务秘密，匿名 metrics 仍被拒绝。
 已有目标 down/消失持续 3 分钟的 critical 告警，通知沿用 Telegram。
-本次仅完成基础采集与可用性告警，不代表已覆盖全部 Raft、PKI 或备份新鲜度规则。
+内部健康规则另检查当前单节点的 active、unsealed、Raft autopilot node healthy，
+并单独告警健康 gauge 缺失。以后改为多节点时必须调整 active 判定；尚未覆盖全部 Raft 或 PKI 风险。
 
 维护中已修复快照 token 失效及脚本缺少续期的问题，生成新快照并核对 VM 外副本。
-快照 timer 已启用，未来执行结果和恢复演练仍需独立监控/验收。
+快照 timer 已启用；独立的 VM node_exporter 通过 textfile 上报最近结果、完成时间和最后成功时间，
+不依赖 Bao 解封或 API token。快照失败持续 5 分钟为 warning，超过 36 小时无成功快照
+或无成功记录持续 15 分钟为 critical；采集失联/损坏也有专用告警。
+标准主机指标复用现有主机规则。异地副本与恢复演练仍需独立验收。
 
 维护者用 working PC 的 YubiKey 解密 VM 上保存的加密 unseal share，重启后人工解封。
 本次服务配置变更、采集上线与恢复验收已完成，详细操作与证据见

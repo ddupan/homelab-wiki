@@ -27,7 +27,9 @@ cluster_id 与维护前一致，匿名 metrics 仍为 403。
 快照 service Result=success、timer active；文件只在写入成功后更名，失败不清理旧快照。
 
 metrics policy/role 已按候选源配置应用：实际 vmagent-main SA 登录与 token 续期成功，
-无权读取业务 Secret，测试 token 已撤销；Terraform import blocks 已备好，主 state 纳管尚未执行。
+无权读取业务 Secret，测试 token 已撤销。随后已将 `vault_policy.metrics` 与
+`vault_kubernetes_auth_backend_role.metrics` 导入现有 SeaweedFS S3 主远端 state，
+仅针对这两项的 plan 均为 no-op；这不代表整个 Terraform 配置已经全量 zero-diff。
 重启后 ClusterSecretStore 和 12 个 ExternalSecret Ready；monitoring/alertmanager-telegram
 已定向刷新，refreshTime 更新为 20:39:33 UTC，状态 SecretSynced。
 [PR #162](https://git.ddupan.top/panxiao81/homelab-infra/pulls/162) 已合并，Flux 应用
@@ -38,6 +40,36 @@ Bao Agent 日志确认自动登录成功、token 写入内存卷及首次自动�
 真实长周期重新登录、快照未来定时运行和独立灾难恢复演练不包含在本次验收内。
 
 以下保留操作顺序和回滚方法；其中“待执行”描述须结合本节判断，不能重复重启。
+
+## 内部健康和快照日常监控
+
+2026-09-25 后续部署未重启 Bao（启动时间仍为 20:34:43 UTC）。真实快照任务
+Result=success、退出码 0，新快照 194598 bytes；VM 指标报告 success=1、textfile scrape error=0。
+Flux 已应用 `7137426e8f5c99ca1514c508501e07c2066dd769`；API 和 VM exporter 两类 target 均为 up，
+快照结果与成功时间已进入 VictoriaMetrics。21:02:27 UTC 六条 OpenBao 规则均 inactive，
+部署初期缺数据 pending 已解除；全栈 108 条规则无评估错误。Ansible 部署后 check mode 零变更。
+本次通过 28 个告警语义场景及 4 个快照脚本测试，未通过制造真实故障验证 Telegram。
+
+[PR #163](https://git.ddupan.top/panxiao81/homelab-infra/pulls/163) 补齐内部健康、健康 gauge 缺失、
+快照失败、快照超时/无成功记录和快照采集失联五条规则；原有受鉴权采集不可用规则保留。
+仍由 ServiceMonitor 和 PrometheusRule 声明。内部 active 判定面向当前单节点，扩容为多节点前需修改。
+
+VM 使用 Ubuntu node_exporter，监听 `192.168.10.8:9100`；没有公共入口，当前 UFW 未启用，
+LAN 地址绑定不是逐来源 ACL。采集标签为 `job=node-exporter,node=bao1`，复用主机内存和文件系统规则。
+textfile 目录 `/var/lib/prometheus/node-exporter/` 只由 root 写入，指标不带 token 或快照内容。
+独立 exporter 在 Bao sealed 或快照 token 失效时仍能报告快照结果。
+
+每日任务失败会记录 result=0，保留旧的最后成功时间；只有完整快照原子更名后才更新成功时间并清理旧文件。
+失败持续 5 分钟为 warning，距最后成功超过 36 小时或没有成功指标持续 15 分钟为 critical；
+exporter 失联、textfile 解析错误、结果指标缺失持续 5 分钟为 warning。
+本地快照成功不等于已复制到独立故障域，更不等于恢复演练通过。
+
+部署和回滚使用独立的 `ansible/monitor-openbao.yml`，只处理 exporter、快照脚本和 timer；
+不改 Bao 服务配置，不轮换 token，不需要再次人工解封。首次部署必须执行一次真实快照建立基线。
+参数、验证命令与回滚边界见
+[源码监控运维说明](https://git.ddupan.top/panxiao81/homelab-infra/src/branch/main/infrastructure/openbao/MONITORING.md)。
+
+
 
 ## 目标、分工与影响
 

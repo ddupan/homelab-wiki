@@ -20,7 +20,8 @@ last_reviewed: 2026-09-25
 第二批已补 [证书、ESO 与 Flux](monitoring-controllers.md) 的 15 条规则，
 以及 [CNPG、NATS 与 SeaweedFS](monitoring-data-services.md) 的 14 条规则和 12 个新采集目标。
 OpenBao 已完成受鉴权 telemetry、ServiceMonitor 与采集不可用规则，维护者人工解封后验收通过；
-并修复快照续期、生成维护前快照及 VM 外副本，详见 [维护 runbook](openbao-monitoring-maintenance.md)。
+并修复快照续期、生成维护前快照及 VM 外副本；随后增加内部健康和独立 node_exporter
+快照失败/新鲜度/指标缺失告警，详见 [维护 runbook](openbao-monitoring-maintenance.md)。
 备份独立验收、NATS consumer 维度、外部探测和集群外心跳仍待补齐。
 
 ## 证据和范围
