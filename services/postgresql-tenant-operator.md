@@ -2,7 +2,7 @@
 title: PostgreSQL Tenant Operator（计划中的 DBaaS）
 lifecycle: planned
 evidence: documented
-last_reviewed: 2026-09-24
+last_reviewed: 2026-09-25
 last_verified: null
 sources:
   - https://git.ddupan.top/panxiao81/postgresql-tenant-operator
@@ -81,7 +81,46 @@ Retain 在申请删除后保留 Database 对象和外部数据，进入 Released
 
 撤销 PostgreSQL ownership registry 和任意 status 丢失自动重建所有权的要求。CR 记录持久
 身份、绑定和进度；普通失败幂等重试，无法确认外部创建结果时报告足够人工诊断的冲突。
-不引入 CSI 协议、存储调度或通用 Claim。资源 scope、绑定字段和凭据重新交付协议仍需细化。
+不引入 CSI 协议、存储调度或通用 Claim。绑定字段和凭据重新交付协议仍需细化。
+
+2026-09-25，维护者确认第一版 Database 的生命周期边界包含一个数据库、一个兼任 owner
+的登录账号及其应用凭据；Tenant 负责申请与交付。不预留多账号字段或新增 Role/Credential
+CRD；一库多账号若有实际需求，再通过后续 API 版本演进。此决定不扩大导入管理授权。
+同日确认 Instance 与 Database 为 cluster-scoped，Tenant 为 namespaced。Database 由平台
+管理员管理，不属于应用 namespace，也不需要资源专用 namespace。Tenant 按名称引用
+Database，资源侧绑定记录包含 Tenant namespace/name/UID；普通申请者不能自行修改回收
+策略或将 Released 资源重新开放。具体字段与 RBAC 规则仍待细化。
+
+绑定采用资源侧先写：动态 Database 名称由 Tenant UID 确定；先写 Database 的 Tenant
+namespace/name/UID，再写 Tenant status 的 Database name/UID，双向一致后才供应或交付。
+API 版本冲突重新读取判断，已被其他 Tenant 占用则报冲突；资源侧成功、申请侧失败由
+reconcile 核对身份后补齐，不回滚资源侧绑定。绑定不等于 Ready；外部数据库创建结果
+不确定仍交给人工处理，不增加事务队列或 registry。该顺序由维护者于同日确认。
+
+同日进一步明确：不增加允许绑定名单或逐 Tenant 审批，有权创建 Tenant 的申请者可显式
+申请未绑定且可用的 Database；Released 仍需管理员处理旧访问后重新开放。
+回收策略默认 Retain，资源管理者可在删除流程开始前修改；进入删除流程后固定，指定
+Delete 即为删除授权，不加第二次审批。动态凭据路径按 Database UID 确定，导入显式关联
+已有凭据位置；Released 不自动改密，重新开放前由管理员处理旧访问。
+对应 Ayatori `docs/database/specification.md`、`domain-model.md` 与 `api-reference.md`
+已随本地提交 `7e9e8e828bfcbdc8d4e2fcb6bc3d13727712a82c` 保存；尚未推送或合并。
+
+Ayatori 的 `feat/database-resource-api` 工作区已加入三资源 Go 类型、生成 CRD、Scheme 注册
+与 YAML 示例，已包含在上述本地提交，尚未发布。`make test` 使用真实 API server 验证作用域、默认值、声明
+校验、status 隔离、绑定写入版本冲突与示例。绑定 controller 已接入 manager：动态资源按
+Tenant UID 命名，先写资源侧绑定，再回读补齐 Tenant status；进入 Binding 后固定申请目标，
+拒绝 Released、旧 UID 和陈旧 Ready 观察。真实 API server 覆盖部分写入故障后新 reconciler
+补齐、双 Tenant 竞争及实际 manager 在生成 RBAC 角色下的 watch；绑定角色不能读取 Secret。
+Bound 仍为 Ready=False，尚无供应或凭据投射。已有 finalizer 保护，但删除清理未实现：
+Tenant 删除保持 DeletionPending，资源和申请的 finalizer 不自动移除，不能视为可用的
+Retain/Delete 生命周期或部署为业务 DBaaS。具体字段和未完成边界见
+源码 `docs/database/api-reference.md` 的“当前 API 切片”；远端 commit 链接待推送后补齐。
+
+绑定代码按维护者要求分层：领域层负责纯规则，application service 协调绑定步骤和回读，
+Kubernetes adapter 负责 CR 映射、版本保护及 Conditions/status/finalizer 呈现，controller
+只连接事件、用例与重试。service 和领域层不依赖 Kubernetes 类型，不新增通用事务或
+Repository 框架；该重构不扩展上述运行能力。对应源码 `docs/database/domain-model.md`
+已随上述本地提交保存，远端链接待推送后补齐。
 
 本轮依据为维护者设计讨论和 Ayatori 已推送的
 [ADR-0009](https://git.ddupan.top/panxiao81/ayatori/src/commit/6db8a495fb9f8981d336c9e6288253628ab478b6/docs/decisions/0009-database-resource-and-claim.md)、

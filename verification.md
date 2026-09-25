@@ -80,3 +80,16 @@ wiki 权威摘要：[DBaaS 设计](services/postgresql-tenant-operator.md#当前
 [347a667](https://git.ddupan.top/panxiao81/ayatori/commit/347a667c0c1737bc4e2703dec5f11358f0425e43)。
 最新 head 的 CI #781 已全部通过；无日志启动失败的 test 单项重试后通过。
 旧仓库固定基线及受保护工作树未修改。
+
+2026-09-25 的单数据库、单登录 owner 与凭据生命周期边界，以及 Database 集群级作用域、
+引用与管理权限边界、资源侧先写的绑定顺序与部分写入重试规则，以及无绑定名单、
+删除前策略可改与 Database UID 凭据定位的决定已同步到
+[DBaaS 设计](services/postgresql-tenant-operator.md#当前资源模型2026-09-24-已确认)。
+依据维护者当日确认；Ayatori 已提交为 `7e9e8e828bfcbdc8d4e2fcb6bc3d13727712a82c`，
+wiki 随本记录提交同步。两仓库尚未推送，远端 commit/PR 来源链接待补齐。
+这只是第一版 API 范围确认，不表示新资源链路已实现。
+
+后续 `feat/database-resource-api` 工作区已实现三资源 schema 与真实 API server 校验，
+本地 `make test` 通过；实现已包含在上述本地提交，正式远端来源待推送。已接入绑定
+controller、目标固定、finalizer 保留与生成 RBAC，真实 API server 验证并发、补写及 watch。
+尚未实现 finalizer 清理、供应与交付，不宣称完成三资源生命周期或现场验收。
