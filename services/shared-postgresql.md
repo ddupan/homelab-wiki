@@ -138,6 +138,6 @@ Kustomize 与专用 ESO 只读 policy，没有向现有 k3s 安装 controller/CR
 供应能力以 Ayatori 自身实施为准。不能把现有 SQL 验证当作 Ayatori 已接管。
 
 源码为 homelab-infra `infrastructure/shared-postgresql/README.md` 与
-`ayatori/README.md`；部署、切换、恢复、续签及凭据引用的具体入口在那里维护，文档已发布 main；IaC 见 [IaC PR #159](https://git.ddupan.top/panxiao81/homelab-infra/pulls/159)，合并及 GitOps 接管仍待完成。
+`ayatori/README.md`；部署、切换、恢复、续签及凭据引用的具体入口在那里维护，文档已发布 main；IaC 见 [IaC PR #159](https://git.ddupan.top/panxiao81/homelab-infra/pulls/159)，已合并；2026-09-25 核实 Flux observability 已应用 `f6d12d6`，四个监控对象均已进入 inventory。
 Terraform backend 已复用 `kv/k8s/seaweedfs-s3` 中受限 AK/SK；此前阻塞是 Bao 管理权限，已由
 维护者重新 OIDC 登录解决，不是 S3 凭据缺失。旧 Ansible Vault 迁移仍后置。

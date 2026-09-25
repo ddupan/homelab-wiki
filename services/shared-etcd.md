@@ -68,4 +68,4 @@ PVE 两个 LXC 已直接迁移底层 rootfs 到 `pve-rg`；逐成员停机迁卷
 证书签发、秘密创建、gateway 登录和机器身份续签均已在真实服务验证。
 
 来源为维护者指令、只读前置核查及 homelab-infra `infrastructure/etcd/`；
-文档已直接发布 main（[文档 acd4b55](https://git.ddupan.top/panxiao81/homelab-infra/commit/acd4b55)），实现见 [IaC PR #159](https://git.ddupan.top/panxiao81/homelab-infra/pulls/159)，尚未合并。与数据库的关系见[共享 PostgreSQL](shared-postgresql.md#共享-etcd-设计边界)。
+文档已直接发布 main（[文档 acd4b55](https://git.ddupan.top/panxiao81/homelab-infra/commit/acd4b55)），实现见 [IaC PR #159](https://git.ddupan.top/panxiao81/homelab-infra/pulls/159)，已合并。与数据库的关系见[共享 PostgreSQL](shared-postgresql.md#共享-etcd-设计边界)。
