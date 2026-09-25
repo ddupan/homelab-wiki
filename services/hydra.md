@@ -8,6 +8,7 @@ sources:
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/142
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/143
   - 2026-09-25 部署、discovery、重定向与网络隔离检查
+  - 维护者于 2026-09-25 确认 Hydra 登录成功返回原 Gitea 账号且仓库权限正常
 ---
 
 # Hydra 与 OIDC 上游适配器
@@ -46,10 +47,12 @@ HTTP 登录链路可从 Hydra 经适配器到达 Authelia 登录页。
 无效 login、callback、consent 请求返回 403。Gitea Pod 能访问公共 discovery，不能
 直连 Hydra admin Service；公共 HTTPS 入口的 admin API 返回 404。
 
-**以上不等于已完成人类端到端登录验收。** Gitea 的新增登录源经 PR #143 接入，Helm revision 19 UpgradeSucceeded、Pod Ready；
+Gitea 的新增登录源经 PR #143 接入，Helm revision 19 UpgradeSucceeded、Pod Ready；
 登录页同时显示 hydra/authelia，从真实 Gitea 入口到达 Authelia 的整段跳转已验证。
-人类实际完成 MFA、回到原 Gitea 账号及权限的结果仍待确认。
-`last_verified` 仅覆盖上述明确列出的基础设施与协议入口检查。
+**第一轮人类登录 PoC 已通过验收。** 维护者于 2026-09-25 实际使用 Hydra 登录入口后
+确认：“已成功返回原账号，仓库权限正常”。这补齐了人类认证后的回调、原账号关联与
+仓库权限验收；依据为维护者实际操作反馈，而非 agent 代为输入人类凭据。
+`last_verified` 覆盖上述明确列出的检查及维护者登录反馈，不表示机器或 agent 路径已验证。
 
 ## 实现与维护
 
