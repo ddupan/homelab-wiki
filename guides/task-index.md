@@ -61,3 +61,5 @@ Samba AD、OCI、Proxmox 已明确以 IaC 为准，可直接核对其代码；�
 
 - [证书、秘密同步与 GitOps 监控](monitoring-controllers.md)：证书临期、ESO 同步与 Flux Ready 排障。
 - [CNPG、NATS 与 SeaweedFS 监控](monitoring-data-services.md)：数据库连接、消息容量与存储故障。
+
+- [OpenBao 监控接入维护](openbao-monitoring-maintenance.md)：窗口准备、YubiKey 人工解封交接与回滚。
