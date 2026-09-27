@@ -159,6 +159,6 @@ Ayatori 按维护者决定继续使用独立控制面，本轮只准备接入材
 ## laptop ARC 预算（2026-09-27）
 
 维护者授权的 4 GiB 上限已在线应用并持久化，Ansible 复查零变更。
-源码 [PR #165](https://git.ddupan.top/panxiao81/homelab-infra/pulls/165) 尚待合并授权，
-因此现场配置已完成、main 纳管未完成。配置及验证范围见
-[ARC 内存预算](guides/laptop-arc-budget.md)。合并后更新本项，不重复应用或重启主机。
+源码 [PR #165](https://git.ddupan.top/panxiao81/homelab-infra/pulls/165) 已获授权并合并至 main，
+提交为 [06943d4](https://git.ddupan.top/panxiao81/homelab-infra/commit/06943d4c6583f1b62fea6176b56f237da54a12e7)，与已部署配置一致。
+配置及验证范围见 [ARC 内存预算](guides/laptop-arc-budget.md)。本次合并未重复应用或重启主机；下一次更新负载下的效果仍待观察。

@@ -18,9 +18,10 @@ laptop 同时运行 Kubernetes、数据库和 libvirt VM。维护者于 2026-09-
 
 配置源码和回滚操作见
 [PR #165](https://git.ddupan.top/panxiao81/homelab-infra/pulls/165) 的
-[Ansible play](https://git.ddupan.top/panxiao81/homelab-infra/src/commit/209ad5b/infrastructure/host-memory/laptop-arc.yml) 与
-[操作说明](https://git.ddupan.top/panxiao81/homelab-infra/src/commit/209ad5b/infrastructure/host-memory/README.md)。
-现场已部署，PR 尚待合并授权；不能将分支配置当作 main 已纳管。
+[Ansible play](https://git.ddupan.top/panxiao81/homelab-infra/src/commit/06943d4c6583f1b62fea6176b56f237da54a12e7/infrastructure/host-memory/laptop-arc.yml) 与
+[操作说明](https://git.ddupan.top/panxiao81/homelab-infra/src/commit/06943d4c6583f1b62fea6176b56f237da54a12e7/infrastructure/host-memory/README.md)。
+现场已部署，PR 已于 2026-09-27 合并至 main；合并提交为
+[06943d4](https://git.ddupan.top/panxiao81/homelab-infra/commit/06943d4c6583f1b62fea6176b56f237da54a12e7)。
 
 ## 为什么设置预算
 
