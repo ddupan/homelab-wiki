@@ -206,7 +206,9 @@ AD 接入与 Spring Security 重构统一见 [iam-login PR #4](https://git.ddupa
 [iam-login AD 接入文档（开发分支）](https://git.ddupan.top/panxiao81/iam-login/src/branch/feat/ad-login/docs/ad-login.md)。
 按维护者 2026-09-27 明确的边界，React 只替换 Spring Security 默认登录前端。
 认证、因素状态、SecurityContext、会话轮换与退出由 Spring Security 管理，不再维护
-自建 `LoginTransaction` 状态机。密码通过可以保存仅含密码因素的认证结果，但不能
+自建 `LoginTransaction` 状态机。HTTPS 跳转使用 Spring Security 配置；未启用 AD 时
+通过条件装配移除登录页面与密码处理链，由兜底安全链拒绝访问，不增加自定义 Filter。
+密码通过可以保存仅含密码因素的认证结果，但不能
 据此接受 Hydra challenge；MFA 未实现期间，其余应用入口仍拒绝访问。
 
 代码按 DDD 组织 `authentication` 限界上下文：领域层持有 `User`、`UserRepository`，
