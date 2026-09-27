@@ -2,7 +2,7 @@
 title: PostgreSQL Tenant Operator（计划中的 DBaaS）
 lifecycle: planned
 evidence: documented
-last_reviewed: 2026-09-25
+last_reviewed: 2026-09-27
 last_verified: null
 sources:
   - https://git.ddupan.top/panxiao81/postgresql-tenant-operator
@@ -186,6 +186,23 @@ Database 保留凭据 repository/adapter 语义；装配由独立 bootstrap 包�
 合并不表示供应链路已完成；合并时 CI 的状态边界见[同步记录](../verification.md)。
 具体使用边界见该提交的
 [认证会话说明](https://git.ddupan.top/panxiao81/ayatori/src/commit/6b2808ce91b03215f466746a15d0c3d7442bb9d4/docs/database/README.md#openbao-kubernetes-认证会话)。
+
+2026-09-27 维护者确认最小凭据记录合同：Database `status.credentialRef` 在首次外部写入前
+固定 mount/path，`status.credentialVersion` 只在创建并回读成功后保存版本；记录不可自动
+更改或清空，Conditions 独立表示当前可用性。已有值但无确认记录、已确认凭据消失或最新
+版本漂移均按 Conflict 人工处理，不认领、不生成替代密码，也不随部署参数搬迁。
+按维护者要求，字段切片已扩展为一个完整的凭据准备行为，见
+[凭据准备闭环](https://git.ddupan.top/panxiao81/ayatori/src/commit/35ada6d7eb58245c5214632282178b145489d0dc/docs/database/README.md#凭据准备闭环)，
+仍在 [PR #14](https://git.ddupan.top/panxiao81/ayatori/pulls/14) 审阅，未合并、未部署。
+显式设置 `--database-credential-mount` 后启用：校验双向绑定和 Instance，固定位置，
+创建并回读，保存确认版本。用例在 application，Kubernetes repository 负责状态写入，
+controller 只驱动 watch/重查；Bao client 与认证生命周期仍由公共 infra 统一装配。
+创建开始却没有成功确认时，重入转 Conflict，即使进程可能尚未实际发请求也保守停止；
+明确的权限拒绝可等待恢复。无关 Conditions 刷新不改变目标，相关绑定、generation、删除
+或 Ready 变化则停止旧操作。旧 CRD 裁剪新字段时拒绝继续外部写入，升级须先安装新 CRD。
+真实 API server、隔离 Bao 与实际 manager 已覆盖重启、并发、依赖恢复、状态保存失败及
+删除边界；完整集成回归通过，但这不是现场验证。只有 CredentialsReady 可以为 True，
+PostgreSQL 创建、ESO 交付和删除回收尚未接入，Database/Tenant 不能据此宣告 Ready。
 
 - operator 管理实例内的租户资源，不运行 PostgreSQL/OpenBao，也不管理 VM、存储、备份或 OpenBao PKI。
 - 应用密码写入 OpenBao，不进入 CR、Event 或日志；ESO 负责向 Kubernetes 消费者投射。
