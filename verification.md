@@ -167,6 +167,8 @@ Ayatori 按维护者决定继续使用独立控制面，本轮只准备接入材
 ## 共享数据维护告警接管边界
 
 2026-09-27 主机端采集、低开销 exporter 和三目标网络验证完成，6 项采集测试及 12 个新增规则场景通过。
-相关 [PR #166](https://git.ddupan.top/panxiao81/homelab-infra/pulls/166) 尚未合并；新增 VMStaticScrape/PrometheusRule
-尚未现场应用，不能把端点可达当作告警已启用。合并后需核实 Flux inventory、三个 up 目标及八条规则健康。
+相关 [PR #166](https://git.ddupan.top/panxiao81/homelab-infra/pulls/166) 已合并，版本
+[589c34e](https://git.ddupan.top/panxiao81/homelab-infra/commit/589c34e)。现场确认 Flux observability Ready，
+VMStaticScrape/PrometheusRule 已入 inventory；converter 生成的 VMRule 为 operational。
+三个目标均 up=1，八条规则 health=ok、inactive，新增告警已启用。
 详细事实见[维护告警](services/shared-postgresql.md#维护告警2026-09-27)。现有 PR #159 的接管验收不受影响。
