@@ -200,22 +200,29 @@ Testcontainers、UnboundID、Lombok、配置处理器、DevTools 与 Native 插�
 应用只保留真实登录流程；用于选型的演示入口、演示状态机与演示码已移除。
 AD 密码因素与直接所属组查询在重构前已通过维护者浏览器验收；此前 Spring Data LDAP 版本
 已通过 JVM 与浏览器回归；Spring Security 重构后的真实人类复验仍待反馈。
-密码成功后停在待 MFA 状态，不接受 Hydra challenge，也不替换现役入口。
+密码成功仅建立第一因素；WebAuthn 开发链路可继续完成第二因素，仍不接受 Hydra challenge，也不替换现役入口。
 界面方案的早期验证见 [iam-login PR #3](https://git.ddupan.top/panxiao81/iam-login/pulls/3)；
 AD 接入与 Spring Security 重构统一见 [iam-login PR #4](https://git.ddupan.top/panxiao81/iam-login/pulls/4)，使用方式见
-[iam-login AD 接入文档（开发分支）](https://git.ddupan.top/panxiao81/iam-login/src/branch/feat/ad-login/docs/ad-login.md)。
+[iam-login AD 接入文档](https://git.ddupan.top/panxiao81/iam-login/src/branch/main/docs/ad-login.md)。
 按维护者 2026-09-27 明确的边界，React 只替换 Spring Security 默认登录前端。
 认证、因素状态、SecurityContext、会话轮换与退出由 Spring Security 管理，不再维护
 自建 `LoginTransaction` 状态机。HTTPS 跳转使用 Spring Security 配置；未启用 AD 时
 通过条件装配移除登录页面与密码处理链，由兜底安全链拒绝访问，不增加自定义 Filter。
 密码通过可以保存仅含密码因素的认证结果，但不能
-据此接受 Hydra challenge；MFA 未实现期间，其余应用入口仍拒绝访问。
+据此接受 Hydra challenge；尚未实现的应用入口仍拒绝访问。
 
 代码按 DDD 组织 `authentication` 限界上下文：领域层持有 `User`、`UserRepository`，
 应用层编排目录密码验证和用户查询，AD 基础设施使用 Spring Data LDAP 实现用户仓储，
 Security Provider 将结果接入框架，Web 层只渲染页面。仓储复用本次用户 bind 的连接，
 查询完成即关闭，不增加独立读取账号，也不把密码或连接保存在浏览器会话中。
 后续机器 API 独立设计。
+
+WebAuthn 采用 Spring Security 官方 JDBC 仓储与 PostgreSQL，开发先使用本地容器和持久卷；
+生产共享 PostgreSQL 在部署阶段接入。首次注册要求近期 AD 密码，已有凭据后的注册还需
+已有 WebAuthn 因素；注册本身不算第二因素通过。凭据删除、自助恢复与已有凭据迁移暂未开放。
+认证器验证、因素合并与会话轮换复用框架，应用扩展只约束目录主体、凭据归属与 challenge
+时效/单次消费。实现与验证范围见 [iam-login PR #6](https://git.ddupan.top/panxiao81/iam-login/pulls/6)；
+2026-09-27 已通过 JVM 与虚拟认证器浏览器验证，真实人类 passkey 与 Native 验收待完成。
 
 ### 目录与 DNS 迁移
 

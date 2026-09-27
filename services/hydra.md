@@ -92,8 +92,7 @@ Gitea 接入见 [PR #143](https://git.ddupan.top/panxiao81/homelab-infra/pulls/1
 当前不展开嵌套组或主组，不能视为已完成与 Authelia 的有效组集合等价验证。
 密码成功仅代表第一因素通过；Gitea 仍使用上面已验收的 Go/Authelia 路径。
 按 2026-09-27 明确的实现边界，React 只替换 Spring Security 默认 UI，密码 POST、
-因素状态和认证会话交由框架管理。待 MFA 页面要求近期密码因素，其他应用入口在
-MFA 接入前拒绝访问。监控 Basic 认证与人类登录会话隔离。
+因素状态和认证会话交由框架管理。待 MFA 页面要求近期密码因素，尚未实现的应用入口拒绝访问。监控 Basic 认证与人类登录会话隔离。
 
 本轮开发验证通过 JVM 测试，并从 JVM 通过 CA/域名验证读取真实 AD RootDSE。
 2026-09-25 维护者已在 HTTPS 开发入口完成真实密码验证，成功进入待 MFA 页面，
@@ -102,4 +101,21 @@ MFA 接入前拒绝访问。监控 Basic 认证与人类登录会话隔离。
 AD 接入与 Spring Security 重构统一见 [iam-login PR #4](https://git.ddupan.top/panxiao81/iam-login/pulls/4)；
 2026-09-27 通过 18 项 JVM 测试和 1 项浏览器回归，新版本真实人类复验仍待反馈。
 配置、边界与使用方式见
-[iam-login AD 接入文档（开发分支）](https://git.ddupan.top/panxiao81/iam-login/src/branch/feat/ad-login/docs/ad-login.md)。
+[iam-login AD 接入文档](https://git.ddupan.top/panxiao81/iam-login/src/branch/main/docs/ad-login.md)。
+
+### WebAuthn 开发验证
+
+2026-09-27 的 [iam-login PR #6](https://git.ddupan.top/panxiao81/iam-login/pulls/6) 将第二因素接入
+Spring Security 官方 WebAuthn 流程，并以官方 JDBC 仓储和本地 PostgreSQL 持久卷保存凭据。
+该实现仍在开发 PR，生产 Go/Authelia 链路未切换。
+
+开发入口仍为 `https://laptop.tail7e769.ts.net:18082/signin`，限 Tailscale 可达。
+先验证 AD 密码，首次使用注册 passkey，再实际验证 passkey；注册成功本身不通过 MFA。
+已有凭据后的新增注册要求现有 MFA；本轮 UI 不开放凭据管理、删除或自助恢复。
+`/signin/complete` 显示双因素结果，目前不向 Hydra 接受授权。
+
+22 项 JVM 测试与 Chromium 虚拟认证器流程通过，覆盖再次登录、注册限制、会话轮换、
+challenge 过期/消费、断言重放及跨主体凭据拒绝。真实开发 HTTPS 页面的证书与表单回归
+已检查；这些不是实际用户的 MFA 验收，也不构成 Native 或重启恢复验收。
+数据库开发操作、数据卷保留与失败边界见
+[WebAuthn 文档（开发分支）](https://git.ddupan.top/panxiao81/iam-login/src/branch/feat/webauthn-mfa/docs/webauthn.md)。
