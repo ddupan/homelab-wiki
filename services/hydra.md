@@ -99,7 +99,7 @@ Gitea 接入见 [PR #143](https://git.ddupan.top/panxiao81/homelab-infra/pulls/1
 并反馈目录标识、邮箱及六个直接所属组的查询结果。此人类验收只覆盖 AD 第一因素与
 属性读取，不包括 MFA 或 Hydra 登录。新增路径尚未跑 Native；日常迭代不要求每轮原生编译。开发入口使用受限 Tailscale HTTPS，属于临时验收实例，不是生产入口。
 AD 接入与 Spring Security 重构统一见 [iam-login PR #4](https://git.ddupan.top/panxiao81/iam-login/pulls/4)；
-2026-09-27 通过 18 项 JVM 测试和 1 项浏览器回归，新版本真实人类复验仍待反馈。
+2026-09-27 通过 18 项 JVM 测试和 1 项浏览器回归，后续真实人类验证反馈见下方 WebAuthn 开发验证。
 配置、边界与使用方式见
 [iam-login AD 接入文档](https://git.ddupan.top/panxiao81/iam-login/src/branch/main/docs/ad-login.md)。
 
@@ -116,6 +116,8 @@ Spring Security 官方 WebAuthn 流程，并以官方 JDBC 仓储和本地 Postg
 
 22 项 JVM 测试与 Chromium 虚拟认证器流程通过，覆盖再次登录、注册限制、会话轮换、
 challenge 过期/消费、断言重放及跨主体凭据拒绝。真实开发 HTTPS 页面的证书与表单回归
-已检查；这些不是实际用户的 MFA 验收，也不构成 Native 或重启恢复验收。
+已检查。维护者随后在该开发入口完成验收，反馈“我验收完了，看样子能工作”；
+据此记录 AD + passkey 人类浏览器路径已获维护者确认。此反馈不构成 Native、数据库
+重启恢复或 Hydra/Gitea 新链路验收，也未限定认证器型号与跨设备兼容范围。
 数据库开发操作、数据卷保留与失败边界见
 [WebAuthn 文档（开发分支）](https://git.ddupan.top/panxiao81/iam-login/src/branch/feat/webauthn-mfa/docs/webauthn.md)。

@@ -199,7 +199,7 @@ Testcontainers、UnboundID、Lombok、配置处理器、DevTools 与 Native 插�
 嵌入式 JavaScript 运行时或 FreeMarker；首轮接受客户端首屏渲染，不实现 React SSR/RSC。
 应用只保留真实登录流程；用于选型的演示入口、演示状态机与演示码已移除。
 AD 密码因素与直接所属组查询在重构前已通过维护者浏览器验收；此前 Spring Data LDAP 版本
-已通过 JVM 与浏览器回归；Spring Security 重构后的真实人类复验仍待反馈。
+已通过 JVM 与浏览器回归；后续 Spring Security + WebAuthn 开发路径已获维护者实际验收确认（见下文）。
 密码成功仅建立第一因素；WebAuthn 开发链路可继续完成第二因素，仍不接受 Hydra challenge，也不替换现役入口。
 界面方案的早期验证见 [iam-login PR #3](https://git.ddupan.top/panxiao81/iam-login/pulls/3)；
 AD 接入与 Spring Security 重构统一见 [iam-login PR #4](https://git.ddupan.top/panxiao81/iam-login/pulls/4)，使用方式见
@@ -222,7 +222,8 @@ WebAuthn 采用 Spring Security 官方 JDBC 仓储与 PostgreSQL，开发先使�
 已有 WebAuthn 因素；注册本身不算第二因素通过。凭据删除、自助恢复与已有凭据迁移暂未开放。
 认证器验证、因素合并与会话轮换复用框架，应用扩展只约束目录主体、凭据归属与 challenge
 时效/单次消费。实现与验证范围见 [iam-login PR #6](https://git.ddupan.top/panxiao81/iam-login/pulls/6)；
-2026-09-27 已通过 JVM 与虚拟认证器浏览器验证，真实人类 passkey 与 Native 验收待完成。
+2026-09-27 已通过 JVM 与虚拟认证器浏览器验证；维护者随后反馈已完成开发入口验收、
+看起来能够工作，据此确认真实人类 AD + passkey 路径。Native、重启恢复与 Hydra 新链路仍待验收。
 
 ### 目录与 DNS 迁移
 
