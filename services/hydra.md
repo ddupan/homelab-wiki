@@ -2,7 +2,7 @@
 title: Hydra 与 OIDC 上游适配器
 lifecycle: experimental
 evidence: live-verified
-last_reviewed: 2026-09-25
+last_reviewed: 2026-09-27
 last_verified: 2026-09-25
 sources:
   - https://git.ddupan.top/panxiao81/iam-login/pulls/2
@@ -90,12 +90,17 @@ Gitea 接入见 [PR #143](https://git.ddupan.top/panxiao81/homelab-infra/pulls/1
 `iam-login` 的人类界面沿用内联上下文与原生表单，新增 AD 第一因素验收入口；
 以用户身份 LDAPS bind，读取 objectGUID 和直接 `memberOf`，组名保持原样。
 当前不展开嵌套组或主组，不能视为已完成与 Authelia 的有效组集合等价验证。
-密码成功只进入待 MFA 事务；Gitea 仍使用上面已验收的 Go/Authelia 路径。
+密码成功仅代表第一因素通过；Gitea 仍使用上面已验收的 Go/Authelia 路径。
+按 2026-09-27 明确的实现边界，React 只替换 Spring Security 默认 UI，密码 POST、
+因素状态和认证会话交由框架管理。待 MFA 页面要求近期密码因素，其他应用入口在
+MFA 接入前拒绝访问。监控 Basic 认证与人类登录会话隔离。
 
 本轮开发验证通过 JVM 测试，并从 JVM 通过 CA/域名验证读取真实 AD RootDSE。
 2026-09-25 维护者已在 HTTPS 开发入口完成真实密码验证，成功进入待 MFA 页面，
 并反馈目录标识、邮箱及六个直接所属组的查询结果。此人类验收只覆盖 AD 第一因素与
 属性读取，不包括 MFA 或 Hydra 登录。新增路径尚未跑 Native；日常迭代不要求每轮原生编译。开发入口使用受限 Tailscale HTTPS，属于临时验收实例，不是生产入口。
-实现见 [iam-login PR #4](https://git.ddupan.top/panxiao81/iam-login/pulls/4)，
+AD 接入见 [iam-login PR #4](https://git.ddupan.top/panxiao81/iam-login/pulls/4)，
+Spring Security 重构见 [PR #5](https://git.ddupan.top/panxiao81/iam-login/pulls/5)；
+2026-09-27 通过 18 项 JVM 测试和 1 项浏览器回归，新版本真实人类复验仍待反馈。
 配置、边界与使用方式见
-[iam-login AD 接入文档（开发分支）](https://git.ddupan.top/panxiao81/iam-login/src/branch/feat/ad-login/docs/ad-login.md)。
+[iam-login AD 接入文档（开发分支）](https://git.ddupan.top/panxiao81/iam-login/src/branch/refactor/spring-security-login/docs/ad-login.md)。
