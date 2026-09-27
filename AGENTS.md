@@ -20,4 +20,5 @@
 - 凭据只记录取得方式和受管位置，不复制实际密码、token、私钥、state 或含敏感值的输出。
 - 不复制 apps/tailscale/helm.sh 的内容。迁移旧文档前先审查敏感内容，不能整库直接发布。
 - 提交前运行 `python3 scripts/check_docs.py`；修改检查器时运行 `python3 -m unittest discover -s tests -v`。依赖与本地环境见 CONTRIBUTING.md。
+- 本 Wiki 完成检查后直接提交并推送 main，无需 PR；代码仓库仍走分支和 PR。
 - 遵守 CONTRIBUTING.md；不把临时检查日志和个人 agent memory 当成正式文档。
