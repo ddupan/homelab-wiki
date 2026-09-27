@@ -99,8 +99,7 @@ MFA 接入前拒绝访问。监控 Basic 认证与人类登录会话隔离。
 2026-09-25 维护者已在 HTTPS 开发入口完成真实密码验证，成功进入待 MFA 页面，
 并反馈目录标识、邮箱及六个直接所属组的查询结果。此人类验收只覆盖 AD 第一因素与
 属性读取，不包括 MFA 或 Hydra 登录。新增路径尚未跑 Native；日常迭代不要求每轮原生编译。开发入口使用受限 Tailscale HTTPS，属于临时验收实例，不是生产入口。
-AD 接入见 [iam-login PR #4](https://git.ddupan.top/panxiao81/iam-login/pulls/4)，
-Spring Security 重构见 [PR #5](https://git.ddupan.top/panxiao81/iam-login/pulls/5)；
+AD 接入与 Spring Security 重构统一见 [iam-login PR #4](https://git.ddupan.top/panxiao81/iam-login/pulls/4)；
 2026-09-27 通过 18 项 JVM 测试和 1 项浏览器回归，新版本真实人类复验仍待反馈。
 配置、边界与使用方式见
-[iam-login AD 接入文档（开发分支）](https://git.ddupan.top/panxiao81/iam-login/src/branch/refactor/spring-security-login/docs/ad-login.md)。
+[iam-login AD 接入文档（开发分支）](https://git.ddupan.top/panxiao81/iam-login/src/branch/feat/ad-login/docs/ad-login.md)。

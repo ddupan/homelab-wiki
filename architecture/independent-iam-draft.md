@@ -202,9 +202,8 @@ AD 密码因素与直接所属组查询在重构前已通过维护者浏览器�
 已通过 JVM 与浏览器回归；Spring Security 重构后的真实人类复验仍待反馈。
 密码成功后停在待 MFA 状态，不接受 Hydra challenge，也不替换现役入口。
 界面方案的早期验证见 [iam-login PR #3](https://git.ddupan.top/panxiao81/iam-login/pulls/3)；
-AD 接入见 [iam-login PR #4](https://git.ddupan.top/panxiao81/iam-login/pulls/4)，
-Spring Security 重构见 [PR #5](https://git.ddupan.top/panxiao81/iam-login/pulls/5)，使用方式见
-[iam-login AD 接入文档（开发分支）](https://git.ddupan.top/panxiao81/iam-login/src/branch/refactor/spring-security-login/docs/ad-login.md)。
+AD 接入与 Spring Security 重构统一见 [iam-login PR #4](https://git.ddupan.top/panxiao81/iam-login/pulls/4)，使用方式见
+[iam-login AD 接入文档（开发分支）](https://git.ddupan.top/panxiao81/iam-login/src/branch/feat/ad-login/docs/ad-login.md)。
 按维护者 2026-09-27 明确的边界，React 只替换 Spring Security 默认登录前端。
 认证、因素状态、SecurityContext、会话轮换与退出由 Spring Security 管理，不再维护
 自建 `LoginTransaction` 状态机。密码通过可以保存仅含密码因素的认证结果，但不能
