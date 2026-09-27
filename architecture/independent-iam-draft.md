@@ -197,11 +197,17 @@ Testcontainers、UnboundID、Lombok、配置处理器、DevTools 与 Native 插�
 
 页面与 Spring 后端同仓库维护，前端资源构建后随 Native 应用交付。生产不增加 Node/BFF、
 嵌入式 JavaScript 运行时或 FreeMarker；首轮接受客户端首屏渲染，不实现 React SSR/RSC。
-浏览器交互原型已经维护者体验认可。AD 密码因素与直接所属组查询已通过维护者浏览器验收，
+应用只保留真实登录流程；用于选型的演示入口、演示状态机与演示码已移除。
+AD 密码因素与直接所属组查询在重构前已通过维护者浏览器验收；Spring Data LDAP 版本
+已通过 JVM 与浏览器回归，真实人类复验待反馈。
 密码成功后停在待 MFA 状态，不接受 Hydra challenge，也不替换现役入口。
-原型启动、实现与验证见 [iam-login PR #3](https://git.ddupan.top/panxiao81/iam-login/pulls/3)
-及其浏览器流程文档；AD 接入见
+界面方案的早期验证见 [iam-login PR #3](https://git.ddupan.top/panxiao81/iam-login/pulls/3)；
+当前实现与代码整理见 [iam-login PR #4](https://git.ddupan.top/panxiao81/iam-login/pulls/4)，使用方式见
 [iam-login AD 接入文档（开发分支）](https://git.ddupan.top/panxiao81/iam-login/src/branch/feat/ad-login/docs/ad-login.md)。
+代码按 DDD 组织 `authentication` 限界上下文：领域层持有 `User`、`UserRepository` 和
+`LoginTransaction`，应用层编排认证用例，AD 基础设施使用 Spring Data LDAP 实现用户仓储，
+Web 层仅处理 HTTP、会话与页面转换。按维护者选择，仓储复用本次用户 bind 的连接，
+查询完成即关闭，不增加独立读取账号，也不把密码或连接保存在浏览器会话中。
 后续机器 API 独立设计。
 
 ### 目录与 DNS 迁移
