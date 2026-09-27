@@ -36,6 +36,10 @@
 
 ## 待评估草案
 
+[十万日元以内混合存储草案](hybrid-storage-draft.md)（2026-09-27，draft）评估单机
+Ceph SSD/HDD 分池、千兆起步与二手 PC。预算与方向来自维护者讨论，尚未形成已验证的
+采购清单，未部署或替代现有存储；备份与恢复优先于跨主机高可用。
+
 [独立 IAM 与 agent 身份草案](independent-iam-draft.md)（2026-09-25，draft）提出以 Hydra
 解耦认证与签发，通过 OIDC 接入人类、machine 和 agent，并作为 Ayatori 的独立外部依赖。
 完整方案仍为草案。2026-09-25 已按维护者要求先实施人类登录 PoC，上表显式记录其有限
