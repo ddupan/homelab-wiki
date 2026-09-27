@@ -27,7 +27,7 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 | [openviking](openviking.md) | 上下文检索服务 | `记录端口 1933 / 8020` | 配置与部署指南；未附上线记录 | `apps/openviking/README.md` | 已有导入、任务查询、检索与原文读取指南 |
 | [ps3netsrv](ps3netsrv.md) | PS3 网络内容服务 | `宿主 TCP 38008；地址未记录` | Docker 运维文档记录运行 | `apps/ps3netsrv/docker-compose.yml` | 已有客户端与内容目录指南 |
 | [seaweedfs](seaweedfs.md) | S3 对象存储 | `s3.ad.ddupan.top` | zot 文档记录已使用 | `apps/seaweedfs/README.md` | 已有客户端读写指南与备份边界说明 |
-| [shared-etcd](shared-etcd.md) | homelab 共享协调与选主存储 | 三个 mTLS endpoints，见服务页 | 三成员已部署并现场验证，experimental | `infrastructure/etcd/README.md` | 原生指标与规则已接入；自动续签已启用；备份/证书年龄告警待补 |
+| [shared-etcd](shared-etcd.md) | homelab 共享协调与选主存储 | 三个 mTLS endpoints，见服务页 | 三成员已部署并现场验证，experimental | `infrastructure/etcd/README.md` | 原生指标与规则已接入；自动续签已启用；维护指标采集已部署，告警规则待 PR #166 合并 |
 | [shared-postgresql](shared-postgresql.md) | CNPG 与新 k3s 外共享 PG | 旧 `shared-db`；新 `pg-prod` / `pg-dev.ad.ddupan.top` | 新生产主从与开发实例上线，旧应用未迁移 | `infrastructure/shared-postgresql/README.md`、旧 migration.md | 切换/备份恢复已验证；Ayatori 独立控制面仅备齐声明 |
 | [smtp-relay](smtp-relay.md) | 应用经 Microsoft 365 发信 | `smtp-relay.smtp-relay.svc.cluster.local:25` | 有配置与测试指南；未附上线记录 | `apps/smtp-relay/README.md` | 已有应用参数、测试邮件与投递边界指南 |
 | [tailscale](tailscale.md) | 远程网络与子网路由 | `Tailscale 网络` | 有配置；本轮未读敏感安装脚本 | `apps/tailscale/subnet-routes.sh` | 已有远程访问与路由边界指南 |

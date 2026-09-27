@@ -2,7 +2,7 @@
 title: 共享 PostgreSQL 使用指南
 lifecycle: active
 evidence: documented
-last_reviewed: 2026-09-25
+last_reviewed: 2026-09-27
 last_verified: null
 ---
 
@@ -129,7 +129,7 @@ Bao PKI 与专用 `homelab-postgresql` SPIFFE 身份已通过 OIDC 管理会话�
 数据库日常运行独立于 k3s；机器身份续签依赖现有 SPIRE 与 Bao，不等于运行时依赖。
 
 生产 Patroni 原生指标已接入现有监控，两目标 up=1、五条 HA 规则 health=ok 且 inactive。
-SQL 级 exporter、开发实例、备份年龄和证书到期告警尚未补齐。存储事故与持续观察边界见
+SQL 级 exporter 仍后置；开发实例、备份年龄与证书的维护监控进度见下节。存储事故与持续观察边界见
 [共享 etcd](shared-etcd.md#依赖维护与恢复)，不以短期验收证明底层长期稳定。
 
 维护者明确 Ayatori 沿用独立控制面规划：本轮只准备 Instance、ExternalSecret、公开 CA、
@@ -141,3 +141,24 @@ Kustomize 与专用 ESO 只读 policy，没有向现有 k3s 安装 controller/CR
 `ayatori/README.md`；部署、切换、恢复、续签及凭据引用的具体入口在那里维护，文档已发布 main；IaC 见 [IaC PR #159](https://git.ddupan.top/panxiao81/homelab-infra/pulls/159)，已合并；2026-09-25 核实 Flux observability 已应用 `f6d12d6`，四个监控对象均已进入 inventory。
 Terraform backend 已复用 `kv/k8s/seaweedfs-s3` 中受限 AK/SK；此前阻塞是 Bao 管理权限，已由
 维护者重新 OIDC 登录解决，不是 S3 凭据缺失。旧 Ansible Vault 迁移仍后置。
+
+
+### 维护告警（2026-09-27）
+
+三台现有主机已部署只读采集与 textfile exporter，每分钟检查 etcd 成功快照、PG 仓库成功 full、
+磁盘证书链、laptop 上两个续签任务，以及 dev 本地 peer 身份的只读 SQL。无需新增数据库密码或
+Bao token，数据库和 etcd 未重启。实际检查均成功；vmagent Pod 可访问三个内网 `:9109/metrics`。
+
+[IaC PR #166](https://git.ddupan.top/panxiao81/homelab-infra/pulls/166) 尚待合并，新增抓取和八条告警
+**尚未启用**。规则覆盖采集不可用/过期/单项失败、备份超过 36 小时、证书不足 10 天 warning / 3 天
+critical、续签检查超过 36 小时或失败，以及 dev SQL 连续异常 3 分钟。已有运行及选主告警保持启用。
+
+故障时先查 `homelab-data-collect.service/timer` 和 `homelab-data-exporter.service`。
+备份异常再查原 snapshot/backup unit；续签异常查 laptop 的两个 renew unit 和 Bao/SPIRE 连通性；
+dev 异常查数据库 unit、磁盘及 socket。不要通过修改备份文件时间、删除证书或重建实例消除告警。
+
+备份年龄不证明可恢复或 WAL 连续；dev 只读检查不验证外部 DNS/TLS；磁盘证书有效不证明运行进程已
+重载。部署入口与详细排障见 [维护监控 runbook](https://git.ddupan.top/panxiao81/homelab-infra/src/branch/main/infrastructure/shared-data-monitoring/README.md)。
+文档来源 [26a8ffe](https://git.ddupan.top/panxiao81/homelab-infra/commit/26a8ffe)，IaC 版本
+[0988f5c](https://git.ddupan.top/panxiao81/homelab-infra/commit/0988f5c)。6 项采集测试、12 个新增告警场景、
+既有规则回归、Ansible lint 和 Kustomize 渲染通过；三主机重复部署 `changed=0`。

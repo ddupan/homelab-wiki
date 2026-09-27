@@ -2,7 +2,7 @@
 title: Homelab 共享 etcd
 lifecycle: experimental
 evidence: live-verified
-last_reviewed: 2026-09-25
+last_reviewed: 2026-09-27
 last_verified: 2026-09-25
 ---
 
@@ -33,7 +33,8 @@ Patroni etcd3 gateway 使用无 CN 的 mTLS 证书加独立账号密码，不能
 源码实现提供每日每成员本地快照、独立认证初始化、消费者收敛和逐成员更新入口。
 三个成员的原生指标已接入现有 VictoriaMetrics，不增加 exporter；内网 2381 listener 不提供 KV API。
 六条规则覆盖成员采集、采集可见成员不足、无 leader、容量、fsync 和选举，现场三目标 up=1、规则 health=ok。
-Alertmanager 已接入 [Telegram 通知](grafana.md#telegram-告警接入)，warning/critical 可向外通知；备份年龄与证书到期告警尚待补齐。
+Alertmanager 已接入 [Telegram 通知](grafana.md#telegram-告警接入)，warning/critical 可向外通知；备份/证书/续签检查的主机采集已于 2026-09-27 部署，
+新增规则待 PR #166 合并，见[维护告警](shared-postgresql.md#维护告警2026-09-27)。
 
 自动续签已启用：维护者恢复 OIDC 管理会话后，独立 cert auth、受限 policy 与每日 timer 已部署。
 登录使用 laptop 现有 peer 证书，按 DNS SAN 限制身份；无 CN gateway 证书不能用于 Bao cert

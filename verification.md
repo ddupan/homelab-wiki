@@ -162,3 +162,11 @@ Ayatori 按维护者决定继续使用独立控制面，本轮只准备接入材
 源码 [PR #165](https://git.ddupan.top/panxiao81/homelab-infra/pulls/165) 已获授权并合并至 main，
 提交为 [06943d4](https://git.ddupan.top/panxiao81/homelab-infra/commit/06943d4c6583f1b62fea6176b56f237da54a12e7)，与已部署配置一致。
 配置及验证范围见 [ARC 内存预算](guides/laptop-arc-budget.md)。本次合并未重复应用或重启主机；下一次更新负载下的效果仍待观察。
+
+
+## 共享数据维护告警接管边界
+
+2026-09-27 主机端采集、低开销 exporter 和三目标网络验证完成，6 项采集测试及 12 个新增规则场景通过。
+相关 [PR #166](https://git.ddupan.top/panxiao81/homelab-infra/pulls/166) 尚未合并；新增 VMStaticScrape/VMRule
+尚未现场应用，不能把端点可达当作告警已启用。合并后需核实 Flux inventory、三个 up 目标及八条规则健康。
+详细事实见[维护告警](services/shared-postgresql.md#维护告警2026-09-27)。现有 PR #159 的接管验收不受影响。
