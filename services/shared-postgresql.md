@@ -150,7 +150,8 @@ Terraform backend 已复用 `kv/k8s/seaweedfs-s3` 中受限 AK/SK；此前阻塞
 Bao token，数据库和 etcd 未重启。实际检查均成功；vmagent Pod 可访问三个内网 `:9109/metrics`。
 
 [IaC PR #166](https://git.ddupan.top/panxiao81/homelab-infra/pulls/166) 尚待合并，新增抓取和八条告警
-**尚未启用**。规则覆盖采集不可用/过期/单项失败、备份超过 36 小时、证书不足 10 天 warning / 3 天
+**尚未启用**。告警以 PrometheusRule 声明，由现有 converter 转换；exporter 升级只改版本，
+下载包与官方校验和列表随同一版本变量变化。规则覆盖采集不可用/过期/单项失败、备份超过 36 小时、证书不足 10 天 warning / 3 天
 critical、续签检查超过 36 小时或失败，以及 dev SQL 连续异常 3 分钟。已有运行及选主告警保持启用。
 
 故障时先查 `homelab-data-collect.service/timer` 和 `homelab-data-exporter.service`。
@@ -160,5 +161,5 @@ dev 异常查数据库 unit、磁盘及 socket。不要通过修改备份文件�
 备份年龄不证明可恢复或 WAL 连续；dev 只读检查不验证外部 DNS/TLS；磁盘证书有效不证明运行进程已
 重载。部署入口与详细排障见 [维护监控 runbook](https://git.ddupan.top/panxiao81/homelab-infra/src/branch/main/infrastructure/shared-data-monitoring/README.md)。
 文档来源 [26a8ffe](https://git.ddupan.top/panxiao81/homelab-infra/commit/26a8ffe)，IaC 版本
-[0988f5c](https://git.ddupan.top/panxiao81/homelab-infra/commit/0988f5c)。6 项采集测试、12 个新增告警场景、
+[0d633cf](https://git.ddupan.top/panxiao81/homelab-infra/commit/0d633cf)。6 项采集测试、12 个新增告警场景、
 既有规则回归、Ansible lint 和 Kustomize 渲染通过；三主机重复部署 `changed=0`。
