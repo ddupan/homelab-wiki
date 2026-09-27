@@ -60,12 +60,23 @@ infra 能力，不属于第一个使用它们的 Database 领域。启动入口�
 依赖产品领域，也不为复用而增加全局注册中心或统一包装所有后端的 reader/writer。
 优先使用官方 SDK 和 manager 已提供的接口；不同身份与权限范围仍须显式隔离。
 
-领域按用例需要定义 repository，adapter 保留对象映射、凭据格式、路径、冲突与恢复语义。
-例如 Database 七键凭据及 UID 路径不是通用 KV 规则。此次修订纠正原实现把 Bao 认证放在
+领域维护业务值对象与规则，application 按消费方需要定义 repository 接口，adapter 负责
+对象映射与后端访问。例如 Database 七键凭据、位置约束及冲突恢复不是通用 KV 规则，
+也不应因接入 Bao 而把这些业务规则归入 adapter。此次修订纠正原实现把 Bao 认证放在
 Database adapter 的归属，认证方式与部署位置约定不变。源码拆分由
 [PR #13](https://git.ddupan.top/panxiao81/ayatori/pulls/13) 跟踪，2026-09-27 经维护者批准合并；
 实现与详细约定见
 [6b2808c 的总体架构](https://git.ddupan.top/panxiao81/ayatori/src/commit/6b2808ce91b03215f466746a15d0c3d7442bb9d4/docs/architecture/overview.md#进程内依赖边界)。
+
+2026-09-27 维护者进一步确认采用 Wire 风格的显式构造器注入：当前规模由 bootstrap
+集中手写装配，不引入运行时 IoC 容器或代码生成依赖。controller 接收装配完的用例，
+不在 Reconcile 或注册过程中创建 adapter/use case。application 保留 I/O 编排、消费方
+接口及并发快照；凭据值对象、准备资格和恢复规则归领域，Kubernetes Conditions 映射归
+adapter。此约定用于纠正业务规则混入 application 及装配分散的问题，不要求把所有接口
+和临时数据结构搬进领域。实现见待审阅的
+[PR #15](https://git.ddupan.top/panxiao81/ayatori/pulls/15)，具体边界与测试见
+[7834cab 的总体架构](https://git.ddupan.top/panxiao81/ayatori/src/commit/7834cab/docs/architecture/overview.md#进程内依赖边界)；
+不改变现有 API 或凭据协议，尚未部署。
 
 ## CI 验证约定
 

@@ -193,7 +193,8 @@ Database 保留凭据 repository/adapter 语义；装配由独立 bootstrap 包�
 版本漂移均按 Conflict 人工处理，不认领、不生成替代密码，也不随部署参数搬迁。
 按维护者要求，字段切片已扩展为一个完整的凭据准备行为，见
 [凭据准备闭环](https://git.ddupan.top/panxiao81/ayatori/src/commit/35ada6d7eb58245c5214632282178b145489d0dc/docs/database/README.md#凭据准备闭环)，
-仍在 [PR #14](https://git.ddupan.top/panxiao81/ayatori/pulls/14) 审阅，未合并、未部署。
+已随 [PR #14](https://git.ddupan.top/panxiao81/ayatori/pulls/14) 在 CI 三项检查通过后合并
+（合并提交 `72ce3ed`），未部署。
 显式设置 `--database-credential-mount` 后启用：校验双向绑定和 Instance，固定位置，
 创建并回读，保存确认版本。用例在 application，Kubernetes repository 负责状态写入，
 controller 只驱动 watch/重查；Bao client 与认证生命周期仍由公共 infra 统一装配。
@@ -203,6 +204,11 @@ controller 只驱动 watch/重查；Bao client 与认证生命周期仍由公共
 真实 API server、隔离 Bao 与实际 manager 已覆盖重启、并发、依赖恢复、状态保存失败及
 删除边界；完整集成回归通过，但这不是现场验证。只有 CredentialsReady 可以为 True，
 PostgreSQL 创建、ESO 交付和删除回收尚未接入，Database/Tenant 不能据此宣告 Ready。
+
+凭据准备的分层进一步按维护者确认的
+[显式装配与领域边界](../architecture/ayatori-control-plane.md#controller-公共基础设施边界)
+重构，见待审阅的 [PR #15](https://git.ddupan.top/panxiao81/ayatori/pulls/15)。
+该重构不扩展供应范围或修改凭据协议；本地完整集成回归已通过，尚未合并或部署。
 
 - operator 管理实例内的租户资源，不运行 PostgreSQL/OpenBao，也不管理 VM、存储、备份或 OpenBao PKI。
 - 应用密码写入 OpenBao，不进入 CR、Event 或日志；ESO 负责向 Kubernetes 消费者投射。
