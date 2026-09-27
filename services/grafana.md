@@ -169,3 +169,5 @@ Grafana API 已确认 provisioned 数据源，并通过其代理成功读取 `/a
 旧 Compose 栈与数据已[清理](victoriametrics-legacy.md)，不要再使用旧实例作为排障入口。
 
 来源文件的固定版本与工作区差异见[来源追溯](../sources.md#grafana)。
+
+宿主机 ARC 的 4 GiB 预算、应用方式及验证边界见[ARC 内存预算](../guides/laptop-arc-budget.md)。

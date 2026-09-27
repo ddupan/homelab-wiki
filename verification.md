@@ -155,3 +155,10 @@ Bao client/TLS 与认证不再归 Database；Secret 凭据适配器注入 manage
 Ayatori 按维护者决定继续使用独立控制面，本轮只准备接入材料，尚未验收 controller/Instance Ready。
 两仓事实已同步，源码文档已直接推送 main：[文档 acd4b55](https://git.ddupan.top/panxiao81/homelab-infra/commit/acd4b55)；IaC 固定版本为
 [3a2fe5f](https://git.ddupan.top/panxiao81/homelab-infra/commit/3a2fe5f)。
+
+## laptop ARC 预算（2026-09-27）
+
+维护者授权的 4 GiB 上限已在线应用并持久化，Ansible 复查零变更。
+源码 [PR #165](https://git.ddupan.top/panxiao81/homelab-infra/pulls/165) 尚待合并授权，
+因此现场配置已完成、main 纳管未完成。配置及验证范围见
+[ARC 内存预算](guides/laptop-arc-budget.md)。合并后更新本项，不重复应用或重启主机。
