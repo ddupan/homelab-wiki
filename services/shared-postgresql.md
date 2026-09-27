@@ -165,20 +165,3 @@ dev 异常查数据库 unit、磁盘及 socket。不要通过修改备份文件�
 文档来源 [26a8ffe](https://git.ddupan.top/panxiao81/homelab-infra/commit/26a8ffe)，IaC 版本
 [0d633cf](https://git.ddupan.top/panxiao81/homelab-infra/commit/0d633cf)。6 项采集测试、12 个新增告警场景、
 既有规则回归、Ansible lint 和 Kustomize 渲染通过；三主机重复部署 `changed=0`。
-
-
-### 数据库接入材料的环境隔离（2026-09-27）
-
-数据库工作仅准备接入声明，不负责安装或变更 Ayatori 控制面及其基础容器。
-[PR #167](https://git.ddupan.top/panxiao81/homelab-infra/pulls/167) 将旧的 prod/dev 聚合入口拆成
-`ayatori/dev` 与 `ayatori/prod`；每个入口只交付本环境一个 Instance、ExternalSecret 和公开 CA。
-SecretStore 名称及只读 policy 分开，Dev 不应获得 Prod 管理凭据。Instance 为集群级资源，
-渲染结果不含 namespace；管理 Secret 和 CA 仍位于 `ayatori-system`。
-
-旧材料尚未应用，此次不改变数据库账号、密码或实际 Bao 权限。根入口在修正后只渲染公开 CA，
-不能当作两环境批量接入入口。实际 SecretStore、身份绑定与 Instance Ready 仍属于独立控制面部署。
-
-PR 尚待合并。环境隔离、引用和作用域测试及当前 CRD JSON schema 离线校验通过，未执行
-Kubernetes CEL 或集群 apply。具体交付方法见
-[数据库侧接入说明](https://git.ddupan.top/panxiao81/homelab-infra/src/branch/main/infrastructure/shared-postgresql/ayatori/README.md)，
-IaC 固定版本 [84a1e9e](https://git.ddupan.top/panxiao81/homelab-infra/commit/84a1e9e)。

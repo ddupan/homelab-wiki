@@ -177,11 +177,3 @@ Ayatori 按维护者决定继续使用独立控制面，本轮只准备接入材
 VMStaticScrape/PrometheusRule 已入 inventory；converter 生成的 VMRule 为 operational。
 三个目标均 up=1，八条规则 health=ok、inactive，新增告警已启用。
 详细事实见[维护告警](services/shared-postgresql.md#维护告警2026-09-27)。现有 PR #159 的接管验收不受影响。
-
-
-## Ayatori 数据库接入声明隔离修正
-
-2026-09-27 核对发现原聚合入口同时引用两环境管理凭据，且全局 namespace 会作用于集群级 Instance。
-[PR #167](https://git.ddupan.top/panxiao81/homelab-infra/pulls/167) 修正声明并新增离线隔离验证，尚未合并。
-本轮只修改数据库侧材料，未更改数据库、Bao 身份或 Ayatori 控制面；不以渲染通过替代 Instance Ready。
-交付边界见[数据库接入材料](services/shared-postgresql.md#数据库接入材料的环境隔离2026-09-27)。
