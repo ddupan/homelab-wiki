@@ -168,9 +168,9 @@ OpenBao 测试已覆盖并发、软删除、固定前缀权限和响应丢失，
 Database 供应或 ESO。源码模块文档与 wiki 已关联，见
 [同步记录](../verification.md)。
 
-Kubernetes 认证会话的后续实现位于
-[PR #13](https://git.ddupan.top/panxiao81/ayatori/pulls/13)，提交
-[f0aa86f](https://git.ddupan.top/panxiao81/ayatori/commit/f0aa86f67673fbfb5f182f3ce35679c614be968d)，尚未合并。
+Kubernetes 认证会话、公共 infra 与 bootstrap 装配拆分已于 2026-09-27 经维护者批准合并
+[PR #13](https://git.ddupan.top/panxiao81/ayatori/pulls/13)，合并提交
+[6b2808c](https://git.ddupan.top/panxiao81/ayatori/commit/6b2808ce91b03215f466746a15d0c3d7442bb9d4)。
 维护者指出并纠正了首版的 Pod 文件假设：controller 可以是 systemd service；Kubernetes auth
 仍是正确路径，但应复用 manager 的标准 kubeconfig/in-cluster 配置，通过 RBAC 授权的指定
 ServiceAccount TokenRequest 申请短期 JWT。集群内外共用同一客户端路径，不另建机器身份。
@@ -182,9 +182,10 @@ manager 已增加显式 HTTPS/CA、auth role、目标 SA/audience 配置、Runna
 三轮 race、本地全量测试和两种 lint 通过。生产 auth 配置与 Database 供应尚未接入，不代表已部署。
 认证客户端与生命周期按维护者确认的
 [公共 infra 边界](../architecture/ayatori-control-plane.md#controller-公共基础设施边界)整理，
-Database 保留凭据 repository/adapter 语义；重构继续由同一 PR 跟踪，不表示供应链路已完成。
+Database 保留凭据 repository/adapter 语义；装配由独立 bootstrap 包负责，Run 只编排启动与清理。
+合并不表示供应链路已完成；合并时 CI 的状态边界见[同步记录](../verification.md)。
 具体使用边界见该提交的
-[认证会话说明](https://git.ddupan.top/panxiao81/ayatori/src/commit/f0aa86f67673fbfb5f182f3ce35679c614be968d/docs/database/README.md#openbao-kubernetes-认证会话)。
+[认证会话说明](https://git.ddupan.top/panxiao81/ayatori/src/commit/6b2808ce91b03215f466746a15d0c3d7442bb9d4/docs/database/README.md#openbao-kubernetes-认证会话)。
 
 - operator 管理实例内的租户资源，不运行 PostgreSQL/OpenBao，也不管理 VM、存储、备份或 OpenBao PKI。
 - 应用密码写入 OpenBao，不进入 CR、Event 或日志；ESO 负责向 Kubernetes 消费者投射。

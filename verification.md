@@ -116,7 +116,7 @@ controller、目标固定、finalizer 保留与生成 RBAC，真实 API server �
 首版依赖投射 SA 文件的假设已按维护者意见撤除：集群外 kubeconfig 与集群内配置共用 manager
 客户端，通过受限 TokenRequest 获取登录 JWT。manager 显式配置、Runnable 与 readiness 已装配；
 三轮真实 API/OpenBao race、本地全量测试与两种 lint 通过，覆盖 RBAC 撤回/恢复和越权拒绝。
-源码文档与 wiki 已同步边界和正式链接。认证尚未合并，不把本地验证等同于新 head 的远端 CI；
+源码文档与 wiki 已同步边界和正式链接；后续合并及 CI 结果见下文，不把本地验证等同于远端 CI；
 未部署生产 auth/RBAC，也未接入 Database 供应或 ESO 交付。
 
 同一 PR 的公共 infra 拆分已提交为
@@ -125,7 +125,12 @@ Bao client/TLS 与认证不再归 Database；Secret 凭据适配器注入 manage
 领域继续维护凭据格式和写入结果语义。分层约定已同步
 [控制面边界](architecture/ayatori-control-plane.md#controller-公共基础设施边界)及源码文档。
 全量单元/API 测试、真实 PostgreSQL/OpenBao 集成、公共 infra race 与两种 lint 本地通过；
-新 head 的远端 CI 仍由 PR 跟踪，不把本地验证或本次文档同步当成合并、部署完成。
+最终 head 为 `356e216`，包含 bootstrap 职责拆分、配置测试与真实 API 启动测试。
+2026-09-27 维护者批准合并为
+[6b2808c](https://git.ddupan.top/panxiao81/ayatori/commit/6b2808ce91b03215f466746a15d0c3d7442bb9d4)。
+请求设置了 `merge_when_checks_succeed=true`、`force_merge=false`，但 Gitea 在
+database-integration 仍运行时执行了合并，不能将自动合并参数视为全部 CI 通过的保证。
+随后确认 CI #931 已结束，test、lint、database-integration 全部成功；不声称已部署。
 
 ## 2026-09-25 sandbox 存储故障复盘的来源边界
 

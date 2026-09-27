@@ -63,8 +63,9 @@ infra 能力，不属于第一个使用它们的 Database 领域。启动入口�
 领域按用例需要定义 repository，adapter 保留对象映射、凭据格式、路径、冲突与恢复语义。
 例如 Database 七键凭据及 UID 路径不是通用 KV 规则。此次修订纠正原实现把 Bao 认证放在
 Database adapter 的归属，认证方式与部署位置约定不变。源码拆分由
-[PR #13](https://git.ddupan.top/panxiao81/ayatori/pulls/13) 跟踪，尚未合并；实现与详细约定见
-[65c60cc 的总体架构](https://git.ddupan.top/panxiao81/ayatori/src/commit/65c60cca4528bc8bf14783fb7b59922283059c02/docs/architecture/overview.md#进程内依赖边界)。
+[PR #13](https://git.ddupan.top/panxiao81/ayatori/pulls/13) 跟踪，2026-09-27 经维护者批准合并；
+实现与详细约定见
+[6b2808c 的总体架构](https://git.ddupan.top/panxiao81/ayatori/src/commit/6b2808ce91b03215f466746a15d0c3d7442bb9d4/docs/architecture/overview.md#进程内依赖边界)。
 
 ## CI 验证约定
 
