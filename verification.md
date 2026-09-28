@@ -177,3 +177,11 @@ Ayatori 按维护者决定继续使用独立控制面，本轮只准备接入材
 VMStaticScrape/PrometheusRule 已入 inventory；converter 生成的 VMRule 为 operational。
 三个目标均 up=1，八条规则 health=ok、inactive，新增告警已启用。
 详细事实见[维护告警](services/shared-postgresql.md#维护告警2026-09-27)。现有 PR #159 的接管验收不受影响。
+
+## iam-login Hydra 接入的来源同步（2026-09-28）
+
+[Hydra 服务页](services/hydra.md#独立登录服务的-hydra-接入)中的新增 Login/Consent、客户端
+管理与注销实现已签名提交并推送，固定源码为
+[62b6e9d](https://git.ddupan.top/panxiao81/iam-login/commit/62b6e9d)，包含在
+[PR #6](https://git.ddupan.top/panxiao81/iam-login/pulls/6)，尚未合并。此前 GPG agent 阻塞已解除。
+本轮 wiki 同步实现边界与隔离验收结果，不代表生产入口已切换。

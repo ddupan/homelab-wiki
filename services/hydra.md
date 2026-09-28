@@ -112,7 +112,12 @@ Spring Security 官方 WebAuthn 流程，并以官方 JDBC 仓储和本地 Postg
 开发入口仍为 `https://laptop.tail7e769.ts.net:18082/signin`，限 Tailscale 可达。
 先验证 AD 密码，首次使用注册 passkey，再实际验证 passkey；注册成功本身不通过 MFA。
 已有凭据后的新增注册要求现有 MFA；本轮 UI 不开放凭据管理、删除或自助恢复。
-`/signin/complete` 显示双因素结果，目前不向 Hydra 接受授权。
+当前真实 AD 开发实例的 `/signin/complete` 显示双因素结果，尚未配置 Hydra 授权接入；
+新增 Login/Consent 的代码与隔离验证见下文。
+
+2026-09-28 维护者明确首轮自用边界：AD 用户、密码和组继续使用 RSAT/命令行管理；
+丢失全部 MFA 时由管理员核实身份后人工操作目标主体的数据库凭据恢复。
+不开发目录管理、自动恢复或完整 self-service UI，也不将其作为核心人类链路验收前提。
 
 22 项 JVM 测试与 Chromium 虚拟认证器流程通过，覆盖再次登录、注册限制、会话轮换、
 challenge 过期/消费、断言重放及跨主体凭据拒绝。真实开发 HTTPS 页面的证书与表单回归
@@ -121,3 +126,36 @@ challenge 过期/消费、断言重放及跨主体凭据拒绝。真实开发 HT
 重启恢复或 Hydra/Gitea 新链路验收，也未限定认证器型号与跨设备兼容范围。
 数据库开发操作、数据卷保留与失败边界见
 [WebAuthn 文档（开发分支）](https://git.ddupan.top/panxiao81/iam-login/src/branch/feat/webauthn-mfa/docs/webauthn.md)。
+
+### 独立登录服务的 Hydra 接入
+
+双因素后的 Login/Consent、客户端管理与统一注销已提交至
+[同一 iam-login PR #6](https://git.ddupan.top/panxiao81/iam-login/pulls/6)，源码版本为
+[62b6e9d](https://git.ddupan.top/panxiao81/iam-login/commit/62b6e9d)，尚未合并或切换生产入口。
+2026-09-28 已通过 36 项 JVM 测试与隔离 Hydra v26.2.0 的浏览器授权码及注销流程：
+模拟 AD → WebAuthn → 原生表单确认 → Hydra code → 客户端兑换并验签 ID token。
+验证覆盖 issuer、audience、nonce、显式配置的旧 subject、直接组 claims 与授权码重放拒绝；
+独立 MFA 路径此前也通过浏览器回归。本轮另验证客户端 CRUD、Hydra 重启后的 PostgreSQL
+持久化、更新保留密钥、管理权限/CSRF 拒绝、再次授权确认、注销通知签名与 sid 关联，以及
+Spring 本地会话失效。这些是测试夹具结果，不是生产 Gitea 验收。
+
+生产主体按 AD authority + objectGUID 显式绑定现役 Hydra sub，未绑定账号拒绝授权；
+不靠邮箱、用户名或自动新建账号迁移。生产映射值尚未取得并核实，现役入口未切换，
+AD/WebAuthn/Hydra 的 Native 完整链路也仍待验收。配置与迁移条件见
+[Login/Consent 文档（开发分支）](https://git.ddupan.top/panxiao81/iam-login/src/branch/feat/webauthn-mfa/docs/hydra-login.md)。
+
+Hydra 持有客户端注册表并提供 CRUD Admin API；新增客户端不依赖修改服务器配置文件。
+管理能力由 iam-login 的 `clients` 领域模块包装：Spring session、有效 MFA 与显式直接管理组
+控制访问，写操作保留 CSRF；不公开 Hydra admin 或任意代理。本地实现中的客户端与密钥只存
+Hydra PostgreSQL，启用标记写入 client metadata 并在授权时重新读取。旧配置 allowlist
+只作无标记客户端的过渡兼容，不是第二份注册表。暂不建设完整自助管理 UI。
+
+统一注销计划沿用 Hydra 登记的 front/back-channel 协议；登录服务通过 Spring 清除当前
+本地会话。Hydra 必须保留登录会话以关联注销；仅凭 issuer 的 remembered-login 标记不能
+绕过本地 MFA。下游不支持注销协议、通知失败或 issuer 会话已过期时，不能声称所有应用均
+已退出；不等同撤销全部 token 或其他设备会话。
+
+正式入口目标是替换现役 `auth.ddupan.top`，Hydra public 与 iam-login UI/API 按路径共用
+origin，仍保持独立部署。不能把整个 `/oauth2/**` 都路由给 Hydra，也不发布 admin 路径。
+上线前需审查 issuer 与现有账号关联、cookie/TLS 转发、WebAuthn RP ID 与凭据重新注册、
+回退路由；这是部署计划，现有 Go/Authelia 生产链路未改变。
