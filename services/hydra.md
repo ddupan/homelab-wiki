@@ -159,3 +159,15 @@ Hydra PostgreSQL，启用标记写入 client metadata 并在授权时重新读�
 origin，仍保持独立部署。不能把整个 `/oauth2/**` 都路由给 Hydra，也不发布 admin 路径。
 上线前需审查 issuer 与现有账号关联、cookie/TLS 转发、WebAuthn RP ID 与凭据重新注册、
 回退路由；这是部署计划，现有 Go/Authelia 生产链路未改变。
+
+### 登录服务的数据源与框架边界
+
+应用运行需要 PostgreSQL，通过 Boot 的 `spring.datasource.*` 与 `spring.datasource.hikari.*`
+配置连接及连接池；不以关闭 WebAuthn 为由排除数据源自动配置。WebAuthn 继续使用官方 JDBC
+仓储，注册行锁及事务封装在持久化实现，策略复查与凭据保存处于同一事务。
+客户端使用领域层 `ClientRepository`，Hydra HTTP 实现仓储；Login/Consent/Logout 共用
+`HydraGateway`。HTTP client 由 Boot builder 装配，连接和读取超时通过
+`iam.hydra.http.connect-timeout` / `read-timeout` 配置（默认 3s / 5s），保持禁止重定向。
+该重构见 [fdf2e49](https://git.ddupan.top/panxiao81/iam-login/commit/fdf2e49)，随 PR #6 交付。
+2026-09-29 的 37 项 JVM 测试与隔离浏览器登录/注销回归通过，不表示开发实例或生产入口已更新。
+测试 AOT 夹具退出问题与 Native 验收仍待处理，详见源码 `docs/native-validation.md`。
