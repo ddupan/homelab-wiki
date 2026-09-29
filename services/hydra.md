@@ -107,12 +107,12 @@ AD 接入与 Spring Security 重构统一见 [iam-login PR #4](https://git.ddupa
 
 2026-09-27 的 [iam-login PR #6](https://git.ddupan.top/panxiao81/iam-login/pulls/6) 将第二因素接入
 Spring Security 官方 WebAuthn 流程，并以官方 JDBC 仓储和本地 PostgreSQL 持久卷保存凭据。
-该实现仍在开发 PR，生产 Go/Authelia 链路未切换。
+该实现已随 iam-login PR #6 合并，生产 Go/Authelia 链路未切换。
 
 开发入口仍为 `https://laptop.tail7e769.ts.net:18082/signin`，限 Tailscale 可达。
 先验证 AD 密码，首次使用注册 passkey，再实际验证 passkey；注册成功本身不通过 MFA。
 已有凭据后的新增注册要求现有 MFA；本轮 UI 不开放凭据管理、删除或自助恢复。
-当前真实 AD 开发实例的 `/signin/complete` 显示双因素结果，尚未配置 Hydra 授权接入；
+2026-09-29 开发实例已更新至 iam-login main `5f49a7c`，配置真实 Hydra 授权接入；
 新增 Login/Consent 的代码与隔离验证见下文。
 
 2026-09-28 维护者明确首轮自用边界：AD 用户、密码和组继续使用 RSAT/命令行管理；
@@ -125,7 +125,7 @@ challenge 过期/消费、断言重放及跨主体凭据拒绝。真实开发 HT
 据此记录 AD + passkey 人类浏览器路径已获维护者确认。此反馈不构成 Native、数据库
 重启恢复或 Hydra/Gitea 新链路验收，也未限定认证器型号与跨设备兼容范围。
 数据库开发操作、数据卷保留与失败边界见
-[WebAuthn 文档（开发分支）](https://git.ddupan.top/panxiao81/iam-login/src/branch/feat/webauthn-mfa/docs/webauthn.md)。
+[WebAuthn 文档（已合并版本）](https://git.ddupan.top/panxiao81/iam-login/src/commit/5f49a7c/docs/webauthn.md)。
 
 ### 独立登录服务的 Hydra 接入
 
@@ -141,7 +141,8 @@ challenge 过期/消费、断言重放及跨主体凭据拒绝。真实开发 HT
 Spring 本地会话失效。这些是测试夹具结果，不是生产 Gitea 验收。
 
 生产主体按 AD authority + objectGUID 显式绑定现役 Hydra sub，未绑定账号拒绝授权；
-不靠邮箱、用户名或自动新建账号迁移。生产映射值尚未取得并核实，现役入口未切换，
+不靠邮箱、用户名或自动新建账号迁移。2026-09-29 已只读核对目标用户的 Gitea Hydra 外部关联及开发库的稳定目录主体，
+映射配置仅保存在受限运行目录，现役入口未切换，
 AD/WebAuthn/Hydra 的 Native 完整链路也仍待验收。配置与迁移条件见
 [Login/Consent 文档（已合并版本）](https://git.ddupan.top/panxiao81/iam-login/src/commit/5f49a7c/docs/hydra-login.md)。
 
@@ -172,3 +173,21 @@ origin，仍保持独立部署。不能把整个 `/oauth2/**` 都路由给 Hydra
 该重构见 [fdf2e49](https://git.ddupan.top/panxiao81/iam-login/commit/fdf2e49)，随 PR #6 交付。
 2026-09-29 的 37 项 JVM 测试与隔离浏览器登录/注销回归通过，不表示开发实例或生产入口已更新。
 测试 AOT 夹具退出问题与 Native 验收仍待处理，详见源码 `docs/native-validation.md`。
+
+### 真实开发链路的切换准备（2026-09-29）
+
+开发实例已启用真实 Hydra Admin 连接与审核过的 subject 绑定，保留原 PostgreSQL 持久卷
+和既有 Passkey。源码为 iam-login `5f49a7c`，运行 artifact 为 `iam-login-5c20a10d53f19aeb.jar`。
+现场检查：`/signin`、总健康和 readiness 返回 200；使用真实 Hydra 的未认证 challenge
+验证请求读取成功且仍要求登录。此检查没有完成真实密码/MFA 或 Gitea 新链路验收。
+
+[基础设施 PR #168](https://git.ddupan.top/panxiao81/homelab-infra/pulls/168) 调整 Hydra 全局
+login/consent/logout 回调至 Tailscale 开发实例，尚未合并或应用。当前 Gitea Hydra 登录仍走
+旧 Go/Authelia 路径；该 PR 合并并由 Flux 应用后才开始新链路人类验收。直接 Authelia
+登录源和旧 Go 适配器保留，不切换 `auth.ddupan.top`。
+
+开发 Admin 通道仅监听 loopback 18445，以自动重连 port-forward 跨过 Hydra 滚动更新；
+该临时进程与本地 JVM 容器必须保持运行。运行配置及回退备份在受限本地目录，不公开 Admin。
+客户端管理暂以有效 MFA 加 AD Domain Admins 直接成员为门槛。默认 Boot LDAP 健康探针
+不对应本服务的用户 bind 仓储，开发配置已禁用该无效探针；数据库健康仍保留，AD 以真实
+认证验收为准。当前 Gitea client 没有登记任何 OIDC 注销端点，Gitea 联动注销尚未验收。
