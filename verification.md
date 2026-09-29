@@ -183,5 +183,7 @@ VMStaticScrape/PrometheusRule 已入 inventory；converter 生成的 VMRule 为 
 [Hydra 服务页](services/hydra.md#独立登录服务的-hydra-接入)中的新增 Login/Consent、客户端
 管理与注销实现已签名提交并推送，固定源码为
 [62b6e9d](https://git.ddupan.top/panxiao81/iam-login/commit/62b6e9d)，包含在
-[PR #6](https://git.ddupan.top/panxiao81/iam-login/pulls/6)，尚未合并。此前 GPG agent 阻塞已解除。
+[PR #6](https://git.ddupan.top/panxiao81/iam-login/pulls/6)。该 PR 连同仓储、网关及自动配置重构于
+2026-09-29 合并，版本为 [5f49a7c](https://git.ddupan.top/panxiao81/iam-login/commit/5f49a7c)。
+此前 GPG agent 阻塞已解除。
 本轮 wiki 同步实现边界与隔离验收结果，不代表生产入口已切换。

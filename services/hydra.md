@@ -131,7 +131,8 @@ challenge 过期/消费、断言重放及跨主体凭据拒绝。真实开发 HT
 
 双因素后的 Login/Consent、客户端管理与统一注销已提交至
 [同一 iam-login PR #6](https://git.ddupan.top/panxiao81/iam-login/pulls/6)，源码版本为
-[62b6e9d](https://git.ddupan.top/panxiao81/iam-login/commit/62b6e9d)，尚未合并或切换生产入口。
+[合并版本 5f49a7c](https://git.ddupan.top/panxiao81/iam-login/commit/5f49a7c)，
+2026-09-29 已合并，生产入口尚未切换。
 2026-09-28 已通过 36 项 JVM 测试与隔离 Hydra v26.2.0 的浏览器授权码及注销流程：
 模拟 AD → WebAuthn → 原生表单确认 → Hydra code → 客户端兑换并验签 ID token。
 验证覆盖 issuer、audience、nonce、显式配置的旧 subject、直接组 claims 与授权码重放拒绝；
@@ -142,7 +143,7 @@ Spring 本地会话失效。这些是测试夹具结果，不是生产 Gitea 验
 生产主体按 AD authority + objectGUID 显式绑定现役 Hydra sub，未绑定账号拒绝授权；
 不靠邮箱、用户名或自动新建账号迁移。生产映射值尚未取得并核实，现役入口未切换，
 AD/WebAuthn/Hydra 的 Native 完整链路也仍待验收。配置与迁移条件见
-[Login/Consent 文档（开发分支）](https://git.ddupan.top/panxiao81/iam-login/src/branch/feat/webauthn-mfa/docs/hydra-login.md)。
+[Login/Consent 文档（已合并版本）](https://git.ddupan.top/panxiao81/iam-login/src/commit/5f49a7c/docs/hydra-login.md)。
 
 Hydra 持有客户端注册表并提供 CRUD Admin API；新增客户端不依赖修改服务器配置文件。
 管理能力由 iam-login 的 `clients` 领域模块包装：Spring session、有效 MFA 与显式直接管理组
