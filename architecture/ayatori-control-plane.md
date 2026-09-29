@@ -1,6 +1,6 @@
 ---
 title: Ayatori 控制面边界
-last_reviewed: 2026-09-25
+last_reviewed: 2026-09-29
 ---
 
 # Ayatori 控制面边界
@@ -73,8 +73,8 @@ Database adapter 的归属，认证方式与部署位置约定不变。源码拆
 不在 Reconcile 或注册过程中创建 adapter/use case。application 保留 I/O 编排、消费方
 接口及并发快照；凭据值对象、准备资格和恢复规则归领域，Kubernetes Conditions 映射归
 adapter。此约定用于纠正业务规则混入 application 及装配分散的问题，不要求把所有接口
-和临时数据结构搬进领域。实现见待审阅的
-[PR #15](https://git.ddupan.top/panxiao81/ayatori/pulls/15)，具体边界与测试见
+和临时数据结构搬进领域。实现已随
+[PR #15](https://git.ddupan.top/panxiao81/ayatori/pulls/15) 合并（`d71285a`），PR 三项 CI 均通过；具体边界与测试见
 [7834cab 的总体架构](https://git.ddupan.top/panxiao81/ayatori/src/commit/7834cab/docs/architecture/overview.md#进程内依赖边界)；
 不改变现有 API 或凭据协议，尚未部署。
 

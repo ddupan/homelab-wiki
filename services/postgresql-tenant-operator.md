@@ -2,7 +2,7 @@
 title: PostgreSQL Tenant Operator（计划中的 DBaaS）
 lifecycle: planned
 evidence: documented
-last_reviewed: 2026-09-27
+last_reviewed: 2026-09-29
 last_verified: null
 sources:
   - https://git.ddupan.top/panxiao81/postgresql-tenant-operator
@@ -207,8 +207,19 @@ PostgreSQL 创建、ESO 交付和删除回收尚未接入，Database/Tenant 不�
 
 凭据准备的分层进一步按维护者确认的
 [显式装配与领域边界](../architecture/ayatori-control-plane.md#controller-公共基础设施边界)
-重构，见待审阅的 [PR #15](https://git.ddupan.top/panxiao81/ayatori/pulls/15)。
-该重构不扩展供应范围或修改凭据协议；本地完整集成回归已通过，尚未合并或部署。
+重构，已随 [PR #15](https://git.ddupan.top/panxiao81/ayatori/pulls/15) 合并为 `d71285a`。
+该重构不扩展供应范围或修改凭据协议；PR 三项 CI 全部通过，尚未部署。
+
+2026-09-29，角色/数据库创建闭环进入
+[PR #16](https://git.ddupan.top/panxiao81/ayatori/pulls/16)，
+实现和配置见 [e2016d3 的模块文档](https://git.ddupan.top/panxiao81/ayatori/src/commit/e2016d3/docs/database/README.md#postgresql-资源创建闭环)。
+本地全量测试、真实三后端 race 集成、lint 和构建通过，尚待 review、未合并或部署。
+外部创建默认关闭，显式启用后在同一条 reconcile 顺序检查
+已确认凭据和供应资源，复用现有 Instance 管理连接，不新增连接池或 registry。
+角色及数据库分别在创建成功回读后记录 CR status OID；未知同名或未确认的创建结果报
+Conflict，已确认对象消失、被重建或权限漂移也停止。新库先关闭连接入口，确认后收紧
+PUBLIC CONNECT 再开放；不改其他数据库权限。扩展、导入、ESO 交付和回收仍未接入，
+ResourcesReady 不能当成整体 Ready。配置与诊断步骤以上述源码文档为准，不表示现场验证。
 
 - operator 管理实例内的租户资源，不运行 PostgreSQL/OpenBao，也不管理 VM、存储、备份或 OpenBao PKI。
 - 应用密码写入 OpenBao，不进入 CR、Event 或日志；ESO 负责向 Kubernetes 消费者投射。
