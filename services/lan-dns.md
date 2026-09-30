@@ -2,7 +2,7 @@
 title: LAN DNS（Blocky、路由器与 Samba AD）
 lifecycle: active
 evidence: documented
-last_reviewed: 2026-09-16
+last_reviewed: 2026-09-30
 last_verified: null
 sources:
   - 维护者于 2026-09-16 提供的现状说明
@@ -72,3 +72,21 @@ profile 中恢复原范围并移除 AP 固定绑定，保存后重新核对租�
 
 路由器自身的更上游和 AD/DN42 条件转发明细未在本次补充，也不因此自动产生核查任务。
 需要进一步查询时，先向维护者确认当前工作和范围，不因旧文档差异直接发起现场检查。
+
+## 关键服务 DNS 冗余目标（2026-09-30 已接受，待实现）
+
+[9 月 30 日事故](../incidents/2026-09-30-dc-dns-openbao.md)确认单 DC DNS 停止会令
+Bao 域名访问、ESO 和监控认证同时失败。维护者决定：完整 AD 高可用暂未建立时，
+先让关键服务 DNS 容忍单 DC 故障。原有域权威与 RRset 所有权规则继续有效。
+
+至少需要两个可独立提供受保护服务记录的 DNS 实例，覆盖不同宿主故障域，
+备用启动不依赖先访问 AD/Bao 或故障中的 k3s。静态服务记录继续以
+`infrastructure/dns/records.yml` 为声明入口，具体服务、分发及客户端切换方案待设计。
+两个 resolver 都转发到同一 DC 或仅依靠缓存，不满足本次目标。
+
+验收必须包含 DC 停止、缓存过期、备用冷启动、任一 DNS 宿主故障，以及 LAN/Pod
+实际解析与 Bao TLS/ESO/监控认证。独立 DNS 不保证 LDAP、Kerberos 或 AD 动态记录高可用；
+这些边界应分别标明。详细故障证据和整改标准以事故报告为准。
+
+本节是已接受的目标，尚未部署；2026-09-30 仅现场验证 DC DNS 与 Bao 依赖链恢复，
+没有重新验收本页全部 DHCP、Blocky 和路由器配置，因此不刷新整页 `last_verified`。

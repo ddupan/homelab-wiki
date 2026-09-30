@@ -23,6 +23,7 @@
 | SPIFFE 提供跨基础设施的统一机器身份入口，替代 workload-sts 统一 IAM 平台方案 | 服务信任 SPIFFE 身份、签发自己的 token 并维护自身权限；非 Kubernetes 身份不依赖 Kubernetes ServiceAccount，优先复用服务现有接入机制 | [核心设计与取舍](../services/spire.md#核心设计与取舍)，维护者于 2026-09-16 补充 |
 | 已由 Flux 接管的资源通过 Git 修改；brownfield 不全局开启 prune | 防止漂移回滚与误删；未接管资源不能假定受 Flux 管理 | `clusters/homelab/README.md` |
 | DNS 各视图保留权威边界；只管理明确声明的 RRset | 不清理 Samba 自动维护的域记录；LAN 现状按维护者说明对齐，旧源码文档待同步 | `infrastructure/dns/README.md`、[LAN DNS](../services/lan-dns.md) |
+| 关键服务 DNS 应容忍单 DC 故障；完整 AD HA 不是前置条件 | 2026-09-30 已接受、待实现；备用需独立提供受保护记录并跨宿主故障域，保留 AD 动态记录所有权；冷启动和缓存过期也须通过验收 | [LAN DNS](../services/lan-dns.md)、[事故报告](../incidents/2026-09-30-dc-dns-openbao.md) |
 | DHCP 下发主 DNS Blocky、副 DNS 路由器；Blocky 上游为路由器 | 路由器同时承担上游与客户端备用角色；Samba AD 保留域 DNS 职责，不能把所有条件转发合并成一条普通上游 | [LAN DNS](../services/lan-dns.md)，维护者于 2026-09-16 说明 |
 | Docker 地址池不得与 DN42 的 172.20.0.0/14 重叠 | 本地直连路由会干扰 DN42；已有网络不自动改地址 | `infrastructure/docker/README.md` |
 | NetBox 目前是评估，拓扑由 Git 管理 | 不把网页编辑结果当作新的权威数据 | `apps/netbox/README.md`、`CLAUDE.md` |

@@ -2,7 +2,7 @@
 title: Samba AD 日常使用入口
 lifecycle: active
 evidence: documented
-last_reviewed: 2026-09-16
+last_reviewed: 2026-09-30
 last_verified: null
 ---
 
@@ -91,3 +91,32 @@ SAMR/LSARPC pipe 断连，以及 AppArmor `samba-rpcd` profile 拒绝
 域控身份数据库与应用数据不同，不能通过重跑建域、清空数据库来排查普通登录失败。
 
 来源文件的固定版本与工作区差异见[来源追溯](../sources.md#samba-ad)。
+
+## 更新后 DNS 不响应与 Samba 启动失败
+
+2026-09-30 更新后的重启窗口内，Samba 的 IPv6 bind 返回
+`NT_STATUS_ADDRESS_NOT_ASSOCIATED`，Samba 整体退出；`Restart=no` 导致故障持续。网络与服务启动竞态是当前最有证据支持的解释。
+[事故报告](../incidents/2026-09-30-dc-dns-openbao.md)保存时间线与证据边界。
+
+排查先通过已知管理 IP 检查 `systemctl status samba-ad-dc`、服务 journal、
+`ip -6 addr` 与 53 端口监听，区分地址未就绪、配置错误与数据库问题。
+在确认地址恢复且没有持续错误、已获恢复授权后，启动 `samba-ad-dc`；
+不默认重启 VM、禁用 IPv6 或重建域。
+
+随后分别验证 DC DNS、关键服务的域名 HTTPS（保持 TLS 校验）、ClusterSecretStore、
+ExternalSecret 和监控 Agent。下游可能仍在退避；可对明确受影响对象按 ESO 机制触发
+`force-sync`，不修改 Secret 副本。采集 up 后还需复核告警清除。
+
+本次仅恢复服务，没有安装自动重试或 DNS 冗余；后续按 [DNS 冗余目标](lan-dns.md)
+推进。现场验证限于此次恢复，不能视为整个 AD 目录和登录链路完成验收。
+
+### 短期自恢复整改（2026-09-30 已确认，待实现）
+
+维护者要求优先补 Samba 自恢复：本次地址恢复后单次手动启动成功，说明故障存在
+通过重试恢复的条件；现有 `Restart=no` 缺少这层保护。
+后续由 IaC 管理失败重试、间隔、启动限流与失败告警，并保留人工停止的维护语义。
+重试预算须覆盖预期地址就绪窗口，超出预算时的处理必须明确。
+
+验收同时覆盖暂态地址未就绪后自动恢复，以及持续错误时受控重试和告警；
+仅验证 unit 配置正确或正常启动成功不够。本项与 DNS 冗余分别推进，
+具体依据和关闭条件见[事故报告](../incidents/2026-09-30-dc-dns-openbao.md)。
