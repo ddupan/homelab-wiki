@@ -2,7 +2,7 @@
 title: 共享 PostgreSQL 使用指南
 lifecycle: active
 evidence: documented
-last_reviewed: 2026-09-27
+last_reviewed: 2026-10-01
 last_verified: null
 ---
 
@@ -129,7 +129,7 @@ Bao PKI 与专用 `homelab-postgresql` SPIFFE 身份已通过 OIDC 管理会话�
 数据库日常运行独立于 k3s；机器身份续签依赖现有 SPIRE 与 Bao，不等于运行时依赖。
 
 生产 Patroni 原生指标已接入现有监控，两目标 up=1、五条 HA 规则 health=ok 且 inactive。
-SQL 级 exporter 仍后置；开发实例、备份年龄与证书的维护监控进度见下节。存储事故与持续观察边界见
+SQL 级指标见 [SQL 级指标](#sql-级指标2026-10-01)；开发实例、备份年龄与证书的维护监控见 [维护告警](#维护告警2026-09-27)。存储事故与持续观察边界见
 [共享 etcd](shared-etcd.md#依赖维护与恢复)，不以短期验收证明底层长期稳定。
 
 维护者明确 Ayatori 沿用独立控制面规划：本轮只准备 Instance、ExternalSecret、公开 CA、
@@ -165,3 +165,30 @@ dev 异常查数据库 unit、磁盘及 socket。不要通过修改备份文件�
 文档来源 [26a8ffe](https://git.ddupan.top/panxiao81/homelab-infra/commit/26a8ffe)，IaC 版本
 [0d633cf](https://git.ddupan.top/panxiao81/homelab-infra/commit/0d633cf)。6 项采集测试、12 个新增告警场景、
 既有规则回归、Ansible lint 和 Kustomize 渲染通过；三主机重复部署 `changed=0`。
+
+### SQL 级指标（2026-10-01）
+
+每个实例在自身主机运行 [prometheus-community/postgres_exporter](https://github.com/prometheus-community/postgres_exporter)
+0.20.1：prod 为 laptop / pve1 的 `:9187`，dev 为 laptop `:9188`，仅监听内网地址。维护者参考了 Pigsty 的监控设计，
+但明确不采用 Pigsty 维护的 `pg_exporter`。exporter 以实例 OS 用户经本地 socket 登录，peer + ident 映射到
+`homelab_monitor`（仅 `pg_monitor`、无密码、连接上限 3），因此无需 Bao 或密码。该角色只约束 exporter 自身查询，
+**不是隔离边界**：同一 OS 用户仍可经 peer 以 superuser 登录，exporter 被攻破等同实例属主。prod/dev 已启用
+`pg_stat_statements`（为此重启过实例；维护者确认实例尚未投入使用，可以重启）。
+
+告警（PrometheusRule `shared-postgresql-sql`）以上游 `postgres_mixin` 为底改写：采集或 SQL 不通、复制回放落后超过
+1 MiB（与 failover 阈值一致）、主库复制槽保留超过 1 GiB、WAL 归档失败、XID/MXID 年龄、客户端连接超过 80%、
+空闲事务超过 10 分钟、事务超过 1 小时、死锁、频繁请求 checkpoint，以及**主库落在 pve1 超过 15 分钟**。
+最后一条的原因：pve1 的数据盘是 HDD，而自动切换后主库安全落到 pve1 不会触发无主/多主规则。抓取目标带 `env`
+标签，Alertmanager 把 `env="dev"`（含既有 dev SQL 检查告警）送到独立的 dev Telegram 频道，与生产共用同一
+vmagent 与 Alertmanager，不另建监控栈。
+
+2026-10-01 现场：两个 prod 成员按 pending 原位重启、未切换；三个端点 `pg_up 1`、无采集失败，exporter 约 8 MiB；
+重复部署 `changed=0`；vmagent Pod 可达三个端点。**k8s 侧抓取、规则与 dev 路由在
+[IaC PR #173](https://git.ddupan.top/panxiao81/homelab-infra/pulls/173) 中，合并并经 Flux 应用前尚未生效**；
+dev 频道是否能收到告警（bot 需为频道管理员）也待合并后首条告警确认。
+
+同日发现：2026-09-30 06:36 UTC laptop 上大量服务被批量重启时 Patroni 随之重启，主库自动切到 pg-pve1，
+约一天无人察觉。2026-10-01 16:31 UTC 由维护者执行计划内 switchover 回到 pg-laptop（时间线 7），pve1 以
+replica 流复制、回放落后 0。切换时 pve1 exporter 仅一次抓取 `pg_up 0`，下次抓取自动重连。批量重启的触发者未查明。
+
+部署入口 `infrastructure/shared-postgresql/ansible/monitoring.yml`，说明见源码 README 的“SQL 级指标”一节。
