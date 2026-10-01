@@ -1,12 +1,13 @@
 ---
 title: 独立 IAM 草案：人类、机器与 AI Agent 的统一应用接入
 status: draft
-last_reviewed: 2026-09-27
+last_reviewed: 2026-10-01
 last_verified: null
 sources:
   - https://git.ddupan.top/panxiao81/iam-login/pulls/3
   - https://git.ddupan.top/panxiao81/iam-login/commit/9cf2d235dff0cd33f98012b0a114f14a8f9bfcda
   - 维护者于 2026-09-25 的架构讨论与草案记录要求
+  - 2026-10-01 Hydra 与 Spring Authorization Server 能力调研（spring-security-oauth2-authorization-server 7.1.1 jar 实查）
 ---
 
 # 独立 IAM 草案：人类、机器与 AI Agent 的统一应用接入
@@ -247,6 +248,41 @@ DNS 可独立评估迁往 PowerDNS Authoritative，主要考虑其 API 与资源
 AD 存续期间保留其域记录权威与动态更新边界；普通记录的迁移、Blocky/路由器解析链和
 最终域退役应分别设计。PowerDNS 不是 IAM 的必需组件。
 
+## 待确认决策：以 Spring Authorization Server 替换 Hydra
+
+**状态：提议，未采纳。** 2026-10-01 维护者认为该迁移有价值，尚未确认执行。采纳前，
+现役链路与本草案其他章节中“协议与签发交给 Hydra”的定位不变。
+
+- **旧定位**：OAuth2/OIDC 协议与 token 签发交给 Hydra；iam-login 只做 Login/Consent。
+- **提议**：在 iam-login 进程内使用 Spring Security 7 内置的授权服务器
+  （`spring-security-oauth2-authorization-server`，原 Spring Authorization Server 已并入），
+  由同一服务完成认证、授权策略与签发；Hydra 在迁移期保留作回退。
+- **原因**：本方案要自建的能力在 Hydra 上都只能在其外部补丁实现，在 Spring 中则是框架扩展点：
+
+| 需求 | Hydra v26.2.0 | Spring Security 7.1.1 授权服务器 |
+|---|---|---|
+| refresh 时执行策略（客户端禁用、agent 授权撤销） | 不经过 Login/Consent，需 token hook | 进程内 AuthenticationProvider |
+| agent 委托（“agent A 代表用户 B”） | 无 token exchange 发布版 | RFC 8693 token exchange，含 `act` |
+| MCP：RFC 8707 `resource`、CIMD | 均不支持（只读 `audience`，仅 DCR） | 原生均不支持；社区 `mcp-security` 提供 |
+| SPIFFE | 只能在 login 步骤绕行 | `tls_client_auth` 可扩展为按 SPIFFE ID（URI SAN）匹配，或自定义授权类型 |
+| 动态注册 | DCR | RFC 7591 与 OIDC DCR |
+| 客户端密钥轮换 | 原生接口未发版 | 本地客户端仓储，直接实现 |
+| 前/后通道注销 | 支持 | 不支持，仅 RP-Initiated Logout |
+| OpenID 官方认证 | 有（早期版本取得） | 未找到 |
+| 运维 | 两个服务、Admin 私有通道、跨服务 challenge 绑定 | 单服务 |
+
+代价：失去认证背书，需自行以 OIDF 一致性测试套件证明合规；签名密钥存储与轮换、授权
+记录清理、consent 存储改由本服务负责；前/后通道注销需自建或明确不支持；`mcp-security`
+为社区 0.1.x 快照，依赖与否另行决定；授权服务器的 Native 兼容性待实测。
+
+迁移条件：issuer 变化，宜与正式 `auth.ddupan.top` 切换合并进行。Gitea 账号关联按登录源与
+`sub`，已有显式 subject 绑定可保持 `sub`；Hydra 只存密钥哈希，Gitea 需换发新 secret。
+当前只接入 Gitea 一个应用，迁移成本最低。
+
+若采纳，建议顺序：iam-login 内建授权服务器 → OIDF 一致性测试（Basic OP、Config OP、
+RP-Initiated Logout）→ 与 `auth.ddupan.top` 切换一起迁移 Gitea → 保留 Hydra 一段时间回退。
+采纳时须同步更新本草案的服务边界、[Hydra 服务页](../services/hydra.md)与约束索引。
+
 ## 与现役约束的关系
 
 现役记录仍以 [架构约束](constraints.md)、[Authelia](../services/authelia.md) 和
@@ -276,6 +312,10 @@ SPIFFE 的下游复用 OIDC；并为 agent 增加区别于传统 service account
 以下文档用于说明协议与产品能力，不代表本方案已验证或已选定具体版本：
 
 - [Hydra Login / Consent 流程](https://www.ory.com/docs/oauth2-oidc/custom-login-consent/flow)
+- [Spring Authorization Server 概览](https://docs.spring.io/spring-authorization-server/reference/overview.html)
+- [MCP 授权规范 2026-07-28](https://modelcontextprotocol.io/specification/2026-07-28/basic/authorization)
+- [Spring AI MCP Security](https://github.com/spring-ai-community/mcp-security)
+- [OpenID 认证的 OP 列表](https://openid.net/certification/certified-openid-providers-profiles/)
 - [Gitea OAuth2 provider 与 tea 内置客户端](https://docs.gitea.com/development/oauth2-provider/)
 - [tea 登录命令定义](https://pkg.go.dev/code.gitea.io/tea/cmd/login)
 - [Kubernetes 身份验证](https://kubernetes.io/docs/reference/access-authn-authz/authentication/)
