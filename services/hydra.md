@@ -191,5 +191,3 @@ login/consent/logout 回调至 Tailscale 开发实例，尚未合并或应用。
 客户端管理暂以有效 MFA 加 AD Domain Admins 直接成员为门槛。默认 Boot LDAP 健康探针
 不对应本服务的用户 bind 仓储，开发配置已禁用该无效探针；数据库健康仍保留，AD 以真实
 认证验收为准。当前 Gitea client 没有登记任何 OIDC 注销端点，Gitea 联动注销尚未验收。
-
-接续操作、临时运行依赖与待验收项见 [2026-10-01 IAM 交接](../guides/iam-handoff.md)。

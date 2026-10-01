@@ -10,7 +10,6 @@ last_reviewed: 2026-09-25
 
 | 要做什么 | 先读 | 需要时再读 |
 |---|---|---|
-| 接续 IAM 人类登录与 Gitea 验收 | [IAM 交接](iam-handoff.md) | [Hydra 服务页](../services/hydra.md)、基础设施 PR #168 |
 | 评估独立 IAM 与 AI agent 身份 | [独立 IAM 草案](../architecture/independent-iam-draft.md) | [Hydra 人类登录 PoC](../services/hydra.md)；完整 IAM 仍为草案 |
 | 设计或实现 Ayatori 控制面能力 | [Ayatori 控制面边界](../architecture/ayatori-control-plane.md) | Ayatori 仓库 ADR、对应领域 API 与 adapter 文档 |
 | 发布新的 LAN Web 服务 | [发布新服务](publish-service.md) | [DNS](../services/lan-dns.md)、[Authelia](../services/authelia.md) |
