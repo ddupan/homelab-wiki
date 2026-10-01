@@ -248,10 +248,11 @@ DNS 可独立评估迁往 PowerDNS Authoritative，主要考虑其 API 与资源
 AD 存续期间保留其域记录权威与动态更新边界；普通记录的迁移、Blocky/路由器解析链和
 最终域退役应分别设计。PowerDNS 不是 IAM 的必需组件。
 
-## 待确认决策：以 Spring Authorization Server 替换 Hydra
+## 决策：以 Spring Authorization Server 替换 Hydra
 
-**状态：提议，未采纳。** 2026-10-01 维护者认为该迁移有价值，尚未确认执行。采纳前，
-现役链路与本草案其他章节中“协议与签发交给 Hydra”的定位不变。
+**状态：方向已采纳，技术验证中。** 2026-10-01 维护者采纳迁移方向，先做技术验证。
+验证只在隔离夹具中进行（模拟 AD、临时 PostgreSQL、虚拟认证器、测试 RP，仅 loopback），
+不接触现役链路；切换完成前，现役 Gitea 登录与其他章节中“协议与签发交给 Hydra”的描述仍是现状。
 
 - **旧定位**：OAuth2/OIDC 协议与 token 签发交给 Hydra；iam-login 只做 Login/Consent。
 - **提议**：在 iam-login 进程内使用 Spring Security 7 内置的授权服务器
