@@ -88,9 +88,11 @@ Resources/Record/Presenter 层只是再包装 `client.Client`，造成两个用�
 [PR #17](https://git.ddupan.top/panxiao81/ayatori/pulls/17)、[PR #18](https://git.ddupan.top/panxiao81/ayatori/pulls/18) 迁移（合并提交
 `915f83b`、`adce262`），判断放置与命名规则见
 [adce262 的领域模型](https://git.ddupan.top/panxiao81/ayatori/src/commit/adce262e68e267f23c88ae5d56522d107f46c33d/docs/database/domain-model.md#分层)。
-Instance 与 Tenant 绑定链路仍是旧结构，待后续 PR 迁移；源码
-`docs/architecture/overview.md` 的“进程内依赖边界”仍描述旧分层，同步状态见
-[同步记录](../verification.md#ayatori-database-设计修订同步)。
+Instance 与 Tenant 绑定链路随后经 [PR #19](https://git.ddupan.top/panxiao81/ayatori/pulls/19)、[PR #20](https://git.ddupan.top/panxiao81/ayatori/pulls/20)
+按同一规则迁移（合并提交 `c5424b5`、`3205186`），`application` 层与 Kubernetes adapter
+包已删除；管理 Secret 由 Reconciler 直连读取，PostgreSQL 连接池登记归 PostgreSQL adapter。
+源码总体架构已同步，见
+[3205186 的进程内依赖边界](https://git.ddupan.top/panxiao81/ayatori/src/commit/320518684c714101109ec835ccf6f23e41eb4cac/docs/architecture/overview.md#进程内依赖边界)。
 
 ## CI 验证约定
 

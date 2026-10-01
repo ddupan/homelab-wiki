@@ -137,8 +137,9 @@ database-integration 仍运行时执行了合并，不能将自动合并参数�
 在三项 CI 通过后合并为 `8dbdff0`、`915f83b`、`adce262`，未部署、未现场验证。
 [控制面边界](architecture/ayatori-control-plane.md#controller-公共基础设施边界)与
 [PostgreSQL Tenant Operator](services/postgresql-tenant-operator.md) 已同步。
-未完成同步：源码 `docs/architecture/overview.md` 的“进程内依赖边界”仍描述 repository →
-用例 → controller 的旧分层，计划随 Instance/Tenant 链路迁移的后续 PR 更新。
+源码 `docs/architecture/overview.md` 的“进程内依赖边界”曾滞后于新分层，已随
+[PR #19](https://git.ddupan.top/panxiao81/ayatori/pulls/19)、[PR #20](https://git.ddupan.top/panxiao81/ayatori/pulls/20) 同步（合并提交 `c5424b5`、`3205186`，
+CI 三项均通过）；Instance 与 Tenant 链路同时完成迁移，未部署、未现场验证。
 
 ## 2026-09-25 sandbox 存储故障复盘的来源边界
 
