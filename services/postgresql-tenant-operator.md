@@ -2,7 +2,7 @@
 title: PostgreSQL Tenant Operator（计划中的 DBaaS）
 lifecycle: planned
 evidence: documented
-last_reviewed: 2026-09-29
+last_reviewed: 2026-10-01
 last_verified: null
 sources:
   - https://git.ddupan.top/panxiao81/postgresql-tenant-operator
@@ -196,9 +196,8 @@ Database 保留凭据 repository/adapter 语义；装配由独立 bootstrap 包�
 已随 [PR #14](https://git.ddupan.top/panxiao81/ayatori/pulls/14) 在 CI 三项检查通过后合并
 （合并提交 `72ce3ed`），未部署。
 显式设置 `--database-credential-mount` 后启用：校验双向绑定和 Instance，固定位置，
-创建并回读，保存确认版本。用例在 application，Kubernetes repository 负责状态写入，
-controller 只驱动 watch/重查；Bao client 与认证生命周期仍由公共 infra 统一装配。
-创建开始却没有成功确认时，重入转 Conflict，即使进程可能尚未实际发请求也保守停止；
+创建并回读，保存确认版本；Bao client 与认证生命周期仍由公共 infra 统一装配。
+（当时的 application 分层与“创建中”检查点已于 2026-10-01 被下文的修订取代。）
 明确的权限拒绝可等待恢复。无关 Conditions 刷新不改变目标，相关绑定、generation、删除
 或 Ready 变化则停止旧操作。旧 CRD 裁剪新字段时拒绝继续外部写入，升级须先安装新 CRD。
 真实 API server、隔离 Bao 与实际 manager 已覆盖重启、并发、依赖恢复、状态保存失败及
@@ -210,16 +209,22 @@ PostgreSQL 创建、ESO 交付和删除回收尚未接入，Database/Tenant 不�
 重构，已随 [PR #15](https://git.ddupan.top/panxiao81/ayatori/pulls/15) 合并为 `d71285a`。
 该重构不扩展供应范围或修改凭据协议；PR 三项 CI 全部通过，尚未部署。
 
-2026-09-29，角色/数据库创建闭环进入
-[PR #16](https://git.ddupan.top/panxiao81/ayatori/pulls/16)，
-实现和配置见 [e2016d3 的模块文档](https://git.ddupan.top/panxiao81/ayatori/src/commit/e2016d3/docs/database/README.md#postgresql-资源创建闭环)。
-本地全量测试、真实三后端 race 集成、lint 和构建通过，尚待 review、未合并或部署。
-外部创建默认关闭，显式启用后在同一条 reconcile 顺序检查
-已确认凭据和供应资源，复用现有 Instance 管理连接，不新增连接池或 registry。
-角色及数据库分别在创建成功回读后记录 CR status OID；未知同名或未确认的创建结果报
-Conflict，已确认对象消失、被重建或权限漂移也停止。新库先关闭连接入口，确认后收紧
-PUBLIC CONNECT 再开放；不改其他数据库权限。扩展、导入、ESO 交付和回收仍未接入，
-ResourcesReady 不能当成整体 Ready。配置与诊断步骤以上述源码文档为准，不表示现场验证。
+角色/数据库创建闭环随 [PR #16](https://git.ddupan.top/panxiao81/ayatori/pulls/16) 合并（`8dbdff0`）。2026-10-01 经
+[PR #17](https://git.ddupan.top/panxiao81/ayatori/pulls/17)、[PR #18](https://git.ddupan.top/panxiao81/ayatori/pulls/18) 重构并修订协议（合并提交
+`915f83b`、`adce262`），各 PR 三项 CI 均通过，未部署。当前行为见
+[adce262 的模块文档](https://git.ddupan.top/panxiao81/ayatori/src/commit/adce262e68e267f23c88ae5d56522d107f46c33d/docs/database/README.md#postgresql-资源创建闭环)：
+
+- 外部创建默认关闭；显式启用后由同一个 `DatabaseReconciler` 先确认凭据再供应资源，
+  复用现有 Instance 管理连接，不新增连接池或 registry。
+- 不使用持久“创建中”检查点或事务：每轮按 CR 记录的 OID 与本轮 catalog 事实执行一步。
+  顺序为管理账号临时 owner 建库 → 撤销 PUBLIC CONNECT → 最后创建应用 LOGIN 角色 →
+  移交 owner 并以新 owner 身份保留管理账号 CONNECT。
+- 未知同名对象、已确认对象消失或被重建、owner 既非管理账号也非已确认角色时报 Conflict；
+  创建结果丢失由下一轮观察到未记录的同名对象而转为 Conflict，对象不存在则重试。
+- 前提是除不可恢复情况外不人工登录改库；controller 不检测、不修正人工授予的特权或成员
+  关系。管理权限丢失由 Instance 转为 NotReady 停止供应，不另做逐次权限重查。
+- 不改其他数据库权限。扩展、导入、ESO 交付和回收仍未接入，ResourcesReady 不能当成
+  整体 Ready。配置与诊断步骤以上述源码文档为准，不表示现场验证。
 
 - operator 管理实例内的租户资源，不运行 PostgreSQL/OpenBao，也不管理 VM、存储、备份或 OpenBao PKI。
 - 应用密码写入 OpenBao，不进入 CR、Event 或日志；ESO 负责向 Kubernetes 消费者投射。

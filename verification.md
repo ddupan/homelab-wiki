@@ -132,6 +132,14 @@ Bao client/TLS 与认证不再归 Database；Secret 凭据适配器注入 manage
 database-integration 仍运行时执行了合并，不能将自动合并参数视为全部 CI 通过的保证。
 随后确认 CI #931 已结束，test、lint、database-integration 全部成功；不声称已部署。
 
+2026-10-01 Database 链路按维护者修订的分层重构，并改为无检查点的事实驱动供应：
+[PR #16](https://git.ddupan.top/panxiao81/ayatori/pulls/16)、[PR #17](https://git.ddupan.top/panxiao81/ayatori/pulls/17)、[PR #18](https://git.ddupan.top/panxiao81/ayatori/pulls/18)
+在三项 CI 通过后合并为 `8dbdff0`、`915f83b`、`adce262`，未部署、未现场验证。
+[控制面边界](architecture/ayatori-control-plane.md#controller-公共基础设施边界)与
+[PostgreSQL Tenant Operator](services/postgresql-tenant-operator.md) 已同步。
+未完成同步：源码 `docs/architecture/overview.md` 的“进程内依赖边界”仍描述 repository →
+用例 → controller 的旧分层，计划随 Instance/Tenant 链路迁移的后续 PR 更新。
+
 ## 2026-09-25 sandbox 存储故障复盘的来源边界
 
 维护者报告 VyOS 到 sandbox 的 LB 故障并授权恢复。现场确认 LB 配置未在故障当天更改，

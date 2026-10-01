@@ -1,6 +1,6 @@
 ---
 title: Ayatori 控制面边界
-last_reviewed: 2026-09-29
+last_reviewed: 2026-10-01
 ---
 
 # Ayatori 控制面边界
@@ -77,6 +77,20 @@ adapter。此约定用于纠正业务规则混入 application 及装配分散的
 [PR #15](https://git.ddupan.top/panxiao81/ayatori/pulls/15) 合并（`d71285a`），PR 三项 CI 均通过；具体边界与测试见
 [7834cab 的总体架构](https://git.ddupan.top/panxiao81/ayatori/src/commit/7834cab/docs/architecture/overview.md#进程内依赖边界)；
 不改变现有 API 或凭据协议，尚未部署。
+
+2026-10-01 维护者修订上述分层。旧规则：application 按消费方定义 repository 接口并编排
+I/O，Kubernetes adapter 负责 CR 映射与 Conditions 呈现。新规则：Reconciler 本身就是
+Kubernetes adapter 并承担用例，直接用 `client.Client` 读写 CR；只为可能出现新实现的后端
+（PostgreSQL、凭据后端）在使用方声明接口，以 `Backend` 结尾；领域聚合根据持久状态与
+本轮事实决定下一步，后端 adapter 只返回事实并把错误归为领域结果分类。原因是前期实现的
+Resources/Record/Presenter 层只是再包装 `client.Client`，造成两个用例争写同一对象、
+判断散落在 application 与 SQL 中，以及命名不统一。Database 链路已随
+[PR #17](https://git.ddupan.top/panxiao81/ayatori/pulls/17)、[PR #18](https://git.ddupan.top/panxiao81/ayatori/pulls/18) 迁移（合并提交
+`915f83b`、`adce262`），判断放置与命名规则见
+[adce262 的领域模型](https://git.ddupan.top/panxiao81/ayatori/src/commit/adce262e68e267f23c88ae5d56522d107f46c33d/docs/database/domain-model.md#分层)。
+Instance 与 Tenant 绑定链路仍是旧结构，待后续 PR 迁移；源码
+`docs/architecture/overview.md` 的“进程内依赖边界”仍描述旧分层，同步状态见
+[同步记录](../verification.md#ayatori-database-设计修订同步)。
 
 ## CI 验证约定
 
