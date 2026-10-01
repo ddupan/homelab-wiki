@@ -187,3 +187,12 @@ VMStaticScrape/PrometheusRule 已入 inventory；converter 生成的 VMRule 为 
 2026-09-29 合并，版本为 [5f49a7c](https://git.ddupan.top/panxiao81/iam-login/commit/5f49a7c)。
 此前 GPG agent 阻塞已解除。
 本轮 wiki 同步实现边界与隔离验收结果，不代表生产入口已切换。
+
+## Incus 接入的跨仓库链接
+
+2026-09-25：共享 Envoy 后端 TLS 兼容补丁已合并发布，见
+[homelab-infra #164](https://git.ddupan.top/panxiao81/homelab-infra/pulls/164)。
+2026-10-01：Incus/Authelia/DNS IaC 已推送至 `feat/incus-ayatori-base`，
+固定源码为 [d45e0b9](https://git.ddupan.top/panxiao81/homelab-infra/commit/d45e0b94e80cb8a509df46a14cd7e89d5381b124)，尚未合并 main。
+对应 wiki 随本次提交同步；
+维护者已确认真实用户 MFA 登录并返回控制台成功。入口与恢复边界见 [Incus](services/incus.md)。

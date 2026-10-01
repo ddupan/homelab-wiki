@@ -45,3 +45,10 @@ SPIRE 的 OIDC discovery 用于机器身份验签，不构成另一个人类登�
 - `archive/keycloak/RETIRED.md`、`archive/casdoor/RETIRED.md`：旧身份方案的退役记录。
 
 新增应用的 OIDC 接入与权限配置在对应源码和服务文档中维护，不在知识库保存实际 client secret。
+
+## Incus 接入
+
+[Incus](incus.md) 使用独立 public client 与 PKCE S256，专属策略默认拒绝，
+仅允许 `panxiao81` 且要求 MFA；不依赖待重构的组。配置通过 live Helm values
+增量合并，保留现有客户端。2026-09-25 已验证部署、浏览器授权跳转和设备授权发起；
+维护者同日确认真实用户 MFA 登录并返回 Incus 控制台成功。来源 `apps/authelia/clients/incus.yaml` 已推送为 [d45e0b9](https://git.ddupan.top/panxiao81/homelab-infra/commit/d45e0b94e80cb8a509df46a14cd7e89d5381b124)，尚未合并 main。

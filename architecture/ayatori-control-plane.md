@@ -87,3 +87,13 @@ adapter。此约定用于纠正业务规则混入 application 及装配分散的
 [f347ee5 的环境文档](https://git.ddupan.top/panxiao81/ayatori/src/commit/f347ee5292ecf39ac0ecbb21e162ee406d8ce382/docs/concepts/environments.md)，
 已随 [PR #9](https://git.ddupan.top/panxiao81/ayatori/pulls/9) 合并 main；合并后未触发重复全量验证。
 这不是整个 homelab 的统一 CI 策略。
+
+## API-only 部署选项与基础容器
+
+2026-09-25 维护者确认，本轮可以使用 API-only 模式：控制面仅提供所需 API，
+controller 可作为 systemd 服务运行，不要求带 worker 的 Kubernetes。
+相较环境文档中的默认 managed runtime，这里保留既有可选模式；不能由部署 Ayatori
+推导必须部署 kubelet、容器 runtime 或 CNI。具体运行时的裁剪与初始化不属于本次任务。
+
+本轮仅准备 [Incus](../services/incus.md) 上 `ayatori-dev`、`ayatori-prod` 两个基础 LXC；
+提前准备 Prod 容器不表示已有生产制品，也不改变制品 promotion 的要求。
