@@ -284,6 +284,41 @@ AD 存续期间保留其域记录权威与动态更新边界；普通记录的�
 RP-Initiated Logout）→ 与 `auth.ddupan.top` 切换一起迁移 Gitea → 保留 Hydra 一段时间回退。
 采纳时须同步更新本草案的服务边界、[Hydra 服务页](../services/hydra.md)与约束索引。
 
+### 技术验证结果（2026-10-01）
+
+分支 [iam-login `spike/authorization-server`](https://git.ddupan.top/panxiao81/iam-login/src/branch/spike/authorization-server)
+（四个阶段提交，最后为 `ad3d8d0`），只在隔离夹具中验证，未接触现役链路。结论：**方向可行**，
+无阻断项；以下缺口均有明确解法，进入正式实现。
+
+| 项目 | 结果 |
+|---|---|
+| 授权端点强制 MFA | 可行：框架只检查“已认证”，需在框架处理器之前加关卡；仅密码不得取得授权码 |
+| 授权码 + PKCE、`sub` 沿用绑定、`groups` | JVM 与真实浏览器均通过 |
+| `offline_access`、refresh 轮换与重放拒绝 | 通过；框架默认**不**轮换，须按客户端开启 |
+| refresh 时执行策略 | 可行：绑定撤销后拒绝续期（Hydra 不经过登录服务，做不到） |
+| userinfo、RP-Initiated Logout | 通过；refresh 会替换 id_token，注销须用最新的 hint |
+| Native | 浏览器端到端通过：启动约 1.5 s、常驻约 188 MB、二进制约 148 MB；编译约 11.5 分钟、峰值 5.35 GB |
+| OIDF Basic OP（release-v5.3.1） | 1628 条件通过、7 失败、5 警告，失败归入下列 4 个缺口 |
+
+正式实现前须解决：
+
+1. MFA 关卡位于框架处理器之前，未登录的 `prompt=none` 被导向登录页而非返回 `login_required`。
+2. `prompt=login`、`max_age` 不强制重新认证（Hydra 模式下由登录服务登出处理）。
+3. `request` 参数被静默忽略，应返回 `request_not_supported`。
+4. discovery 未声明 `profile`/`email` 等 scope。
+5. 签名密钥持久化与轮换；授权记录表加 token 索引与过期清理（技术验证中均从简）。
+
+实现注意：
+
+- Spring Security 7.1 与 WebAuthn4J 在 Native 下缺 Jackson 反射元数据（模块发现、mix-in、存储类型、
+  WebAuthn 请求/响应），JVM 下不可见。**这与迁移无关**，现有 WebAuthn 路径部署为 Native 时同样需要。
+- 框架默认对所有客户端强制 PKCE；不发送 PKCE 的旧 RP（迁移时核对 Gitea）须按客户端关闭。
+- 真实 passkey 后会话为 `WebAuthnAuthentication`，框架未提供其 Jackson 映射；MockMvc 伪造的因素测不出。
+- 套件自带 HtmlUnit 无法执行 ES module 登录页或 WebAuthn，一致性测试以 Playwright 驱动其浏览器步骤。
+
+技术验证用的临时构建机为 pve1 上的 LXC 104（`iam-spike-build`，Docker，非特权，仅放行 SSH）；
+Native 编译与一致性测试套件均在其中运行，可随时删除重建。
+
 ## 与现役约束的关系
 
 现役记录仍以 [架构约束](constraints.md)、[Authelia](../services/authelia.md) 和
