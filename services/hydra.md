@@ -2,8 +2,8 @@
 title: Hydra 与 OIDC 上游适配器
 lifecycle: experimental
 evidence: live-verified
-last_reviewed: 2026-09-27
-last_verified: 2026-09-25
+last_reviewed: 2026-10-01
+last_verified: 2026-10-01
 sources:
   - https://git.ddupan.top/panxiao81/iam-login/pulls/2
   - https://git.ddupan.top/panxiao81/iam-login/commit/9cf2d235dff0cd33f98012b0a114f14a8f9bfcda
@@ -11,6 +11,8 @@ sources:
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/143
   - 2026-09-25 部署、discovery、重定向与网络隔离检查
   - 维护者于 2026-09-25 确认 Hydra 登录成功返回原 Gitea 账号且仓库权限正常
+  - https://git.ddupan.top/panxiao81/homelab-infra/pulls/168
+  - 维护者于 2026-10-01 经 Spring 开发实例登录，确认返回原 Gitea 账号并可进入管理后台
 ---
 
 # Hydra 与 OIDC 上游适配器
@@ -23,7 +25,7 @@ sources:
 下一阶段直接连接 AD 的 Java/Spring 登录服务已建立独立仓库
 [iam-login](https://git.ddupan.top/panxiao81/iam-login)，已建立 Spring Native 构建验证基础，人类界面方向见
 [浏览器登录设计](../architecture/independent-iam-draft.md#人类浏览器登录界面)，
-尚未替换现役 Go/Authelia 链路。应用代码、测试与 Native 构建发布归新仓库，环境部署归
+2026-10-01 起 Hydra 回调已切至其 Tailscale 开发实例（见下文切换记录）。应用代码、测试与 Native 构建发布归新仓库，环境部署归
 homelab-infra；首轮实现由 [issue #1](https://git.ddupan.top/panxiao81/iam-login/issues/1) 跟踪。
 完整的多主体 IAM 仍是[草案](../architecture/independent-iam-draft.md)；
 本轮不实现 SPIFFE 登录、agent 专用认证、动态授权或统一组迁移。
@@ -33,16 +35,16 @@ homelab-infra；首轮实现由 [issue #1](https://git.ddupan.top/panxiao81/iam-
 | 入口 | 用途 |
 |---|---|
 | <https://hydra.ad.ddupan.top> | Hydra 公共 OAuth2/OIDC API |
-| <https://hydra-login.ad.ddupan.top> | Login/Consent 适配器，仅处理具体流程路径 |
+| <https://hydra-login.ad.ddupan.top> | 旧 Go Login/Consent 适配器；2026-10-01 起不再接收 Hydra 回调，保留供回退 |
 | <https://git.ddupan.top/user/oauth2/hydra> | 从 Gitea 发起 Hydra 人类登录 |
 
 Hydra 两个域名仅通过 LAN/Tailscale 可达，无公网 tunnel。请从 Gitea 的 `hydra`
-登录源进入，在 Authelia 完成既有认证，然后返回 Gitea；旧 `authelia` 登录源保留。
+登录源进入，在 iam-login 完成 AD 密码与 Passkey，然后返回 Gitea；旧 `authelia` 登录源保留。
 Gitea 继续按原有账号关联、仓库权限与 gitea-admins 组映射执行授权。
 
 ```text
-Gitea → Hydra → OIDC Login/Consent → Authelia → Samba AD
-      ← OIDC ← 已验证的人类身份 ← OIDC callback
+当前（2026-10-01 起）：Gitea → Hydra → iam-login 开发实例（AD bind + WebAuthn）
+首轮 PoC（可回退）：  Gitea → Hydra → Go Login/Consent → Authelia → Samba AD
 ```
 
 ## 验证范围
@@ -90,7 +92,7 @@ Gitea 接入见 [PR #143](https://git.ddupan.top/panxiao81/homelab-infra/pulls/1
 `iam-login` 的人类界面沿用内联上下文与原生表单，新增 AD 第一因素验收入口；
 以用户身份 LDAPS bind，读取 objectGUID 和直接 `memberOf`，组名保持原样。
 当前不展开嵌套组或主组，不能视为已完成与 Authelia 的有效组集合等价验证。
-密码成功仅代表第一因素通过；Gitea 仍使用上面已验收的 Go/Authelia 路径。
+密码成功仅代表第一因素通过；Gitea 经 Hydra 的新链路验收见下文切换记录。
 按 2026-09-27 明确的实现边界，React 只替换 Spring Security 默认 UI，密码 POST、
 因素状态和认证会话交由框架管理。待 MFA 页面要求近期密码因素，尚未实现的应用入口拒绝访问。监控 Basic 认证与人类登录会话隔离。
 
@@ -182,9 +184,29 @@ origin，仍保持独立部署。不能把整个 `/oauth2/**` 都路由给 Hydra
 验证请求读取成功且仍要求登录。此检查没有完成真实密码/MFA 或 Gitea 新链路验收。
 
 [基础设施 PR #168](https://git.ddupan.top/panxiao81/homelab-infra/pulls/168) 调整 Hydra 全局
-login/consent/logout 回调至 Tailscale 开发实例，尚未合并或应用。当前 Gitea Hydra 登录仍走
-旧 Go/Authelia 路径；该 PR 合并并由 Flux 应用后才开始新链路人类验收。直接 Authelia
+login/consent/logout 回调至 Tailscale 开发实例，已于 2026-10-01 合并并应用（见下节）。直接 Authelia
 登录源和旧 Go 适配器保留，不切换 `auth.ddupan.top`。
+
+### 回调切换与人类验收（2026-10-01）
+
+PR #168 于 2026-10-01 合并（`53e2854`）。Flux `hydra` Kustomization 按 10 分钟间隔尚未
+跟进，手动 reconcile 后应用该版本，Hydra 新 Pod 就绪，login/consent/logout 指向开发实例；
+issuer、client secret、签名密钥与 Gitea 登录源未变。Admin port-forward 在滚动更新时断开约
+2 秒后自动重连。匿名访问 Gitea `hydra` 登录源经 Hydra 落到 Spring `/signin`。
+
+**新链路人类验收通过。** 维护者从 Gitea `hydra` 入口完成 AD 密码、Passkey 与授权确认，
+Gitea 回调 303 成功；维护者确认回到原账号、权限正常并可进入管理后台。Hydra 每次跳转至
+login/consent 时记录一条 error 级 “must be aborted”，属正常流程日志，不是故障。
+
+验收前维护者已在密码管理器删除 9-27 注册的唯一 Passkey，服务端凭据仍在，导致无法通过 MFA。
+按维护者指示，未备份直接删除该主体在 `user_credentials` 中的唯一一行（未动 `user_entities`
+与 subject 绑定），随后以首次注册路径重新注册 Passkey 并完成上述验收。这证明手工删除凭据后
+可重新注册，但跳过了身份核实与备份，**不算 MFA 恢复流程验收**。
+
+仍未完成：真实管理员 session 下的客户端 CRUD 验收；Gitea 联动注销（client 未登记任何
+注销端点，需先核对 Gitea 支持的协议）；AD/WebAuthn/Hydra 完整 Native 验收；测试 AOT 夹具
+退出问题。开发实例与 18445 转发仍是临时运行条件，正式 `auth.ddupan.top` 切换另行设计。
+回退：revert PR #168 的回调配置恢复 Go/Authelia 路径，保留数据库与 Passkey。
 
 开发 Admin 通道仅监听 loopback 18445，以自动重连 port-forward 跨过 Hydra 滚动更新；
 该临时进程与本地 JVM 容器必须保持运行。运行配置及回退备份在受限本地目录，不公开 Admin。
