@@ -2,7 +2,7 @@
 title: PostgreSQL Tenant Operator（计划中的 DBaaS）
 lifecycle: planned
 evidence: documented
-last_reviewed: 2026-10-01
+last_reviewed: 2026-10-02
 last_verified: null
 sources:
   - https://git.ddupan.top/panxiao81/postgresql-tenant-operator
@@ -223,8 +223,16 @@ PostgreSQL 创建、ESO 交付和删除回收尚未接入，Database/Tenant 不�
   创建结果丢失由下一轮观察到未记录的同名对象而转为 Conflict，对象不存在则重试。
 - 前提是除不可恢复情况外不人工登录改库；controller 不检测、不修正人工授予的特权或成员
   关系。管理权限丢失由 Instance 转为 NotReady 停止供应，不另做逐次权限重查。
-- 不改其他数据库权限。扩展、导入、ESO 交付和回收仍未接入，ResourcesReady 不能当成
-  整体 Ready。配置与诊断步骤以上述源码文档为准，不表示现场验证。
+- 不改其他数据库权限。导入、ESO 交付和回收仍未接入，Tenant 不能 Ready。
+  配置与诊断步骤以上述源码文档为准，不表示现场验证。
+
+2026-10-02，扩展安装与就绪验证随 [PR #21](https://git.ddupan.top/panxiao81/ayatori/pulls/21) 合并（`bed7019`，三项 CI 通过，未部署）。
+资源收敛后，Tenant `spec.extensions` 中服务器可用但未安装的扩展由管理账号以 owner 身份
+安装，扩展对象归应用角色；服务器不提供或非 trusted 的扩展报 Unavailable，不卸载已安装扩展。
+`spec.extensions` 由 CRD 限制为只能追加。随后用已确认的应用凭据实际登录目标库，成功才
+`ResourcesReady=True` 与 Database `Ready=True/DatabaseReady`，每轮重新验证，凭据失效即撤销。
+Tenant Ready 仍需 ESO 交付。行为见
+[bed7019 的模块文档](https://git.ddupan.top/panxiao81/ayatori/src/commit/bed7019479bec5d7446e1ab88b01bb54fdb1b758/docs/database/README.md#postgresql-资源创建闭环)。
 
 - operator 管理实例内的租户资源，不运行 PostgreSQL/OpenBao，也不管理 VM、存储、备份或 OpenBao PKI。
 - 应用密码写入 OpenBao，不进入 CR、Event 或日志；ESO 负责向 Kubernetes 消费者投射。
