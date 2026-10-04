@@ -19,6 +19,11 @@ sources:
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/224
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/227
   - 2026-10-04 v0.1.1 Dev/Prod 部署与 GitOps 同步、权限拒绝、prune 现场验证
+  - https://git.ddupan.top/panxiao81/ayatori/pulls/33
+  - https://git.ddupan.top/panxiao81/ayatori/pulls/34
+  - https://git.ddupan.top/panxiao81/homelab-infra/pulls/222
+  - https://git.ddupan.top/panxiao81/homelab-infra/pulls/232
+  - 2026-10-04 v0.1.2 部署、手动备份、临时 LXC 恢复演练现场验证
   - 维护者于 2026-10-04 授权部署 Dev 与 Prod，并确认 Dev 可直接试验、Prod 只走发布流程
   - 2026-10-04 Dev/Prod 部署、幂等重跑与 Database 端到端验收（本页“当前状态与证据”）
 ---
@@ -33,7 +38,7 @@ Tenant 申请供应数据库与登录角色，把应用凭据写入 OpenBao 并�
 释放后按 Retain/Delete 处置，支持导入已有数据库与重新开放。边界见
 [控制面边界](../architecture/ayatori-control-plane.md)，资源模型见
 [DBaaS 设计](postgresql-tenant-operator.md)。成熟度为 experimental：Dev 与 Prod 已上线并完成
-端到端验收，尚未承载真实应用 Tenant，备份尚未建立。
+端到端验收；Prod 已承载首个真实 Tenant（`iam-login`）；控制面每日本机备份，尚无离机副本。
 
 ## 从哪里使用
 
@@ -151,8 +156,13 @@ SecretStore Valid、ExternalSecret SecretSynced；Instance `Ready=True / Managem
   LXC：`infrastructure/incus/terraform/`。
 - 依赖：Incus、OpenBao、共享 PostgreSQL、zot、Gitea（Flux 拉取与制品下载）、GitHub/ghcr
   （第三方 CRD 与镜像）。Gitea 或 zot 不可用只影响新部署，已运行实例不受影响。
-- 备份恢复：**尚未建立**。etcd（全部 CR 与 Database 已确认的 OID/凭据版本）与 k0s PKI 只存在于
-  各 LXC 的 rootfs；应用数据在共享 PostgreSQL，按其自身备份。
+- 备份：每日 `ayatori-backup.timer` 以 `k0s backup`（etcd 快照、PKI、k0s.yaml）写入 Incus custom volume
+  `ayatori-<env>-backup`（容器内 `/var/backups/ayatori`，宿主 `/var/lib/incus/storage-pools/ayatori/custom/default_ayatori-<env>-backup/`），
+  保留 7 份；实例另有每日快照保留 7 天。二者与实例同在 `ayatori` 池，**不是离机备份**；备份年龄告警
+  尚未接入。应用凭据随 OpenBao 快照，应用数据随共享 PostgreSQL 备份（pg-dev 不备份）。
+- 恢复：按原地址重建 LXC 后 `k0s restore` 并重跑部署，步骤见 Ayatori deploy/README。恢复较旧快照
+  不会破坏外部资源，但需人工对账：快照后新建的 Database 以 `source: Import` 重新登记，快照后已删除的
+  记录按 Retain 删除。
 
 ## 当前状态与证据
 
@@ -160,7 +170,10 @@ SecretStore Valid、ExternalSecret SecretSynced；Instance `Ready=True / Managem
 `sha256:ba3a63aab2a8c5ea0576aed1562f85003dd0f7437149e0d36ffcf81c846efff0`），Dev 二次部署 `changed=0`；
 随后两环境升级到 v0.1.1（git `239ad34`，manager 镜像
 `sha256:c64c4e932f6cfb7e9bf07db602af2d6da5065d33209640b88e629ea01a150391`，仅部署 role 增加 GitOps
-目录同步），Flux 三个 Kustomization 均 Ready，Instance Ready。
+目录同步），Flux 三个 Kustomization 均 Ready，Instance Ready。随后两环境升级到 v0.1.2（git `843ed2d`，
+首个 buildx 发布的 manager 镜像 `sha256:441480eb6d4b7187782e272aebf969088d49cdb9718368e359e3c582fe4e2a99`，
+增加每日备份），各手动触发一次备份成功并写入备份卷。Prod 已经 GitOps 目录承载 `iam-login`
+Tenant（Bound / CredentialsAvailable）。
 
 - v0.1.1 GitOps（Dev，以 homelab-infra 分支验证后切回 main）：目录中的 namespace + Tenant 被创建并
   Ready；加入 ConfigMap 被拒（`gitops-tenants` cannot patch configmaps）且未创建；移除后 namespace 与
@@ -174,4 +187,8 @@ SecretStore Valid、ExternalSecret SecretSynced；Instance `Ready=True / Managem
   （[ayatori #28](https://git.ddupan.top/panxiao81/ayatori/pulls/28)、
   [homelab-infra #204](https://git.ddupan.top/panxiao81/homelab-infra/pulls/204)），以及重新开放的
   动态供应 Database 无法被申请（[ayatori #30](https://git.ddupan.top/panxiao81/ayatori/pulls/30)）。
-- 未验证：导入（`source: Import`）在真实环境的路径、真实应用消费凭据、备份恢复、k0s 证书轮换。
+- 恢复演练：从 Dev 以 `k0s backup --save-path=-` 流式写入临时 LXC（不落本机），`k0s restore` 后
+  apiserver Ready，演练前标记、Instance、Flux 对象与同步的 Secret 均在，CA 指纹一致；演练容器不运行
+  controller，结束后删除。
+- 未验证：导入（`source: Import`）在真实环境的路径、真实应用消费凭据（消费方读取策略未建立）、
+  按原地址重建后的完整恢复、k0s 证书轮换。

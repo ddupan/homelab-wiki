@@ -271,4 +271,4 @@ Ayatori：[#27](https://git.ddupan.top/panxiao81/ayatori/pulls/27)（`9936960`�
 #208 的标题与提交信息写明 CI 身份增加 update，实际 diff 漏暂存该项，由 #211 补齐；以代码为准。
 
 未同步：Ayatori ADR-0002/0003 与 `docs/concepts/environments.md` 仍描述 managed runtime；
-homelab-infra `infrastructure/shared-postgresql/ayatori/` 旧接入材料待删除；备份未建立。
+homelab-infra `infrastructure/shared-postgresql/ayatori/` 旧接入材料待删除；备份仅本机（无离机副本、无年龄告警）。
