@@ -149,4 +149,3 @@ Kanidm 已是历史：其遗留的 `gitea/gitea-kanidm-secret`、`default/kanidm
 
 Terraform state 已于 2026-10-04 收敛到远端 backend（S3 或 OCI）；本地只剩 incus 的
 `*.pre-s3-20261004` 迁移前副本（归 Ayatori 范围维护者处理）与 OCI 的 GPG 加密源备份。
-
