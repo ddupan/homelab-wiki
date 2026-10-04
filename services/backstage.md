@@ -9,10 +9,10 @@ sources:
   - homelab-infra apps/authelia/values.yaml 与 infrastructure/dns/records.yml（2026-09-25 时尚未提交）
   - homelab-infra apps/backstage/（首版部署 29b3bde 起）
   - 2026-10-04 只读查看 Flux Kustomization、Pod 与 HTTPRoute 状态
-  - backstage PR #10、#11（TechDocs 改由 CI 发布到 S3）、#12（catalog 发现，2026-10-04 待合并）
+  - backstage PR #10、#11（TechDocs 改由 CI 发布到 S3）、#12（catalog 发现，2026-10-04 合并）
   - homelab-infra apps/seaweedfs/terraform/techdocs.tf、infrastructure/openbao/terraform/auth-spire.tf
   - ci-actions publish-techdocs
-  - 2026-10-04 通过 Backstage TechDocs API 读取 homelab-backstage 文档
+  - 2026-10-04 通过 Backstage catalog 与 TechDocs API 读取 homelab-backstage、homelab-wiki
 ---
 
 # Backstage
@@ -46,13 +46,15 @@ workflow 调用 `https://git.ddupan.top/panxiao81/ci-actions/publish-techdocs@v1
 homelab-infra `apps/seaweedfs/terraform/techdocs.tf` 管理。所有仓库共用一个发布身份，
 任一仓库可覆盖其他实体的文档。
 
-2026-10-04 已验证：homelab-backstage 的 techdocs workflow 发布 54 个文件，
-Backstage TechDocs API 返回其 metadata 与 `index.html`（HTTP 200）。本库按同一方式发布，
-首次发布结果以对应 workflow 运行为准。
-
 catalog 实体来自各仓库的 `catalog-info.yaml`。上游 Gitea provider 只遍历组织，
-backstage PR #12 改为列出 `panxiao81` 名下仓库、为每个仓库注册可选 Location；
-截至 2026-10-04 该 PR 待合并，合并前只有 homelab-backstage 通过显式 Location 进入目录。
+Backstage 改用自写 provider：每 30 分钟列出 `panxiao81` 名下的非空、未归档仓库，为每个仓库
+注册指向默认分支 `catalog-info.yaml` 的可选 Location；没有该文件的仓库不报错、不进目录。
+新仓库放好 `catalog-info.yaml` 即在 30 分钟内出现，无需登记。迁到组织后应换回上游 provider。
+
+2026-10-04 已验证：provider 注册 9 个仓库，catalog 中 9 个 Location 均无错误；
+homelab-backstage 与 homelab-wiki 均经该 provider 进入目录（`managed-by-location` 指向各自
+仓库的 `src/branch/main/catalog-info.yaml`），Backstage TechDocs API 对两者的 `index.html`
+返回 HTTP 200（分别发布 54、107 个文件）。未验证浏览器内 OIDC 登录后的展示。
 
 ## 依赖与维护边界
 
