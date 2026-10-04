@@ -2,7 +2,7 @@
 title: SMTP relay 应用发信指南
 lifecycle: unknown
 evidence: documented
-last_reviewed: 2026-09-16
+last_reviewed: 2026-10-04
 last_verified: null
 ---
 
@@ -68,6 +68,10 @@ refresh token 持久化在 `smtp-relay-tokens` PVC，SASL 层负责更新；
 它是可变运行数据，不是可复制进 wiki 的配置。
 源码的 device-code 流程使用 public client，维护说明明确 `CLIENT_SECRET` 留空；
 不要照抄同一旧 README 中与之不一致的“创建 client secret”注释。
+
+自 2026-10-04 起，`apps/smtp-relay` 由 Flux 管理，`smtp-relay-secret` 由 ESO 从 OpenBao
+`kv/k8s/smtp-relay` 同步（[#195](https://git.ddupan.top/panxiao81/homelab-infra/pulls/195)）；
+gitignored 的 `secret.yaml` 只在 OpenBao 不可用时手工 apply。改部署请提交 Git，直接 `kubectl apply` 会被 Flux 改回。
 
 初始化、重新授权、DKIM 与恢复入口为 `apps/smtp-relay/README.md`。
 其中 DKIM 等日期属于历史记录，本文不将其升级为新一次验证。
