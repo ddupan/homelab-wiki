@@ -17,6 +17,9 @@ sources:
 
 # Hydra 与 OIDC 上游适配器
 
+> **2026-10-04 起已被 [iam-login](iam-login.md) 取代**：Gitea 登录源（ID 3，现名 `sso`）已改指
+> `sso.ddupan.top`。Hydra 部署仅为回退保留，待下线。以下为历史记录。
+
 第一轮人类登录 PoC：Hydra 负责 OIDC 签发，薄的 Login/Consent 服务通过标准 OIDC
 验证上游身份。当前配置的上游是 Authelia，它继续连接 Samba AD 并执行人类 MFA。
 适配器没有直接连接 LDAP，也不与 Authelia 专有认证协议绑定。
