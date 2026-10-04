@@ -1,0 +1,28 @@
+name: techdocs
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**.md'
+      - mkdocs.yml
+      - catalog-info.yaml
+      - .gitea/workflows/techdocs.yml
+  workflow_dispatch:
+
+jobs:
+  # job id 是 SPIFFE ID 的一部分：OpenBao role ci-techdocs-publisher 只接受名为
+  # techdocs 的 job，改名会导致发布凭据读取失败。
+  techdocs:
+    runs-on: [self-hosted, pod]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Stage Markdown into docs/
+        run: |
+          mkdir docs
+          git ls-files -z -- '*.md' ':!:.gitea/**' | xargs -0 cp --parents -t docs/
+      # 必须写完整 URL：本 Gitea 会把简写的 uses 解析到 github.com。
+      - uses: https://git.ddupan.top/panxiao81/ci-actions/publish-techdocs@v1

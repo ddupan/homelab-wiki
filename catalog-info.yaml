@@ -1,0 +1,12 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: homelab-wiki
+  title: Homelab 知识库
+  description: 人和 AI 共用的 homelab 知识库：服务、指南、架构约束与验证记录
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+spec:
+  type: documentation
+  owner: user:default/panxiao81
+  lifecycle: production

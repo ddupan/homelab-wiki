@@ -9,6 +9,10 @@ sources:
   - homelab-infra apps/authelia/values.yaml 与 infrastructure/dns/records.yml（2026-09-25 时尚未提交）
   - homelab-infra apps/backstage/（首版部署 29b3bde 起）
   - 2026-10-04 只读查看 Flux Kustomization、Pod 与 HTTPRoute 状态
+  - backstage PR #10、#11（TechDocs 改由 CI 发布到 S3）、#12（catalog 发现，2026-10-04 待合并）
+  - homelab-infra apps/seaweedfs/terraform/techdocs.tf、infrastructure/openbao/terraform/auth-spire.tf
+  - ci-actions publish-techdocs
+  - 2026-10-04 通过 Backstage TechDocs API 读取 homelab-backstage 文档
 ---
 
 # Backstage
@@ -30,6 +34,25 @@ OIDC client 为 `backstage`，采用 `client_secret_basic`、`two_factor` 和现
 claims policy；scope 为 `openid profile email groups`。回调为
 `https://backstage.ad.ddupan.top/api/auth/oidc/handler/frame`。
 应用内权限及目录内容由 Backstage 自身配置，不由 OIDC 登录成功推导。
+
+## 目录与文档发布
+
+TechDocs 不在 Backstage 内构建（`builder: external`）。各仓库用 job id 为 `techdocs` 的
+workflow 调用 `https://git.ddupan.top/panxiao81/ci-actions/publish-techdocs@v1`，
+生成站点后上传到 [SeaweedFS](seaweedfs.md) 的 `techdocs` bucket；Backstage 以只读身份读取。
+仓库需要根目录的 `mkdocs.yml` 与带 `backstage.io/techdocs-ref` 注解的 `catalog-info.yaml`。
+发布凭据由 OpenBao role `ci-techdocs-publisher` 授予，只匹配
+`spiffe://ddupan.top/ci/panxiao81/*/techdocs`；bucket、IAM 用户与写入 Bao 的凭据由
+homelab-infra `apps/seaweedfs/terraform/techdocs.tf` 管理。所有仓库共用一个发布身份，
+任一仓库可覆盖其他实体的文档。
+
+2026-10-04 已验证：homelab-backstage 的 techdocs workflow 发布 54 个文件，
+Backstage TechDocs API 返回其 metadata 与 `index.html`（HTTP 200）。本库按同一方式发布，
+首次发布结果以对应 workflow 运行为准。
+
+catalog 实体来自各仓库的 `catalog-info.yaml`。上游 Gitea provider 只遍历组织，
+backstage PR #12 改为列出 `panxiao81` 名下仓库、为每个仓库注册可选 Location；
+截至 2026-10-04 该 PR 待合并，合并前只有 homelab-backstage 通过显式 Location 进入目录。
 
 ## 依赖与维护边界
 

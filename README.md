@@ -44,5 +44,6 @@ homelab 基础设施；本库不接管其应用文档或运行状态。
 不复制维护两份事实。单次变更由 commit/PR 记录，历史计划不能代替现状说明。
 
 使用标准 Markdown、普通相对链接和 YAML frontmatter。可将仓库直接作为 Obsidian vault
-打开；核心信息不依赖插件、动态查询或嵌入内容才能理解。尚未选择或部署网页展示层，
-后续可接入 Backstage，文档仓库本身不依赖 Backstage 可用。
+打开；核心信息不依赖插件、动态查询或嵌入内容才能理解。网页展示由 Backstage TechDocs
+提供：push 到 main 后 `techdocs` workflow 生成站点并发布到共享 S3（见
+[Backstage](services/backstage.md#目录与文档发布)），文档仓库本身不依赖 Backstage 可用。
