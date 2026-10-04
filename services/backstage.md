@@ -12,6 +12,7 @@ sources:
   - backstage PR #10、#11（TechDocs 改由 CI 发布到 S3）、#12（catalog 发现，2026-10-04 合并）
   - homelab-infra apps/seaweedfs/terraform/techdocs.tf、infrastructure/openbao/terraform/auth-spire.tf
   - ci-actions publish-techdocs
+  - backstage PR #13、homelab-infra PR #242（Flux 对象展示，2026-10-04 合并）
   - 2026-10-04 通过 Backstage catalog 与 TechDocs API 读取 homelab-backstage、homelab-wiki
 ---
 
@@ -55,6 +56,20 @@ Backstage 改用自写 provider：每 30 分钟列出 `panxiao81` 名下的非�
 homelab-backstage 与 homelab-wiki 均经该 provider 进入目录（`managed-by-location` 指向各自
 仓库的 `src/branch/main/catalog-info.yaml`），Backstage TechDocs API 对两者的 `index.html`
 返回 HTTP 200（分别发布 54、107 个文件）。未验证浏览器内 OIDC 登录后的展示。
+
+## Flux 可见性
+
+实体 Kubernetes 标签页通过 Kubernetes 插件的 `kubernetes.customResources` 展示带
+`backstage.io/kubernetes-id` label 的 Flux 对象：Kustomization、Git/Helm/OCI Repository、
+ImageRepository、ImagePolicy（只列集群提供的 v1）。`backstage-read-only` 对这些类型只有
+get/list/watch；HelmRelease 不可读，因为 `spec.values` 可能内联敏感配置。其他组件要显示
+自己的 Flux 对象，在 homelab-infra 给对象加与实体注解相同的 label。
+未采用 `@backstage-community/plugin-flux`：0.3.4 同时查询 Flux 2.9 已不提供的 v1beta2，
+后端返回 NOT_FOUND 会让卡片只显示错误。
+
+2026-10-04 已验证：Backstage 服务账号可 list 上述类型，不可读 HelmRelease/Secret、不可 patch；
+`/api/kubernetes/services/homelab-backstage` 无错误返回 Kustomization、ImageRepository、
+ImagePolicy 各一。未在浏览器中查看标签页。
 
 ## 依赖与维护边界
 
