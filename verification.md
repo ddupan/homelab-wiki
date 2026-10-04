@@ -197,6 +197,58 @@ VMStaticScrape/PrometheusRule 已入 inventory；converter 生成的 VMRule 为 
 此前 GPG agent 阻塞已解除。
 本轮 wiki 同步实现边界与隔离验收结果，不代表生产入口已切换。
 
+以下四节写于 2026-09-25 的旧工作区，2026-10-04 补发；文中“未提交”“链接待补”均指当时状态，
+相关源码之后已陆续合并（etcd/shared-postgresql 见 PR #159、Backstage 见 `apps/backstage/`）。
+
+## zot GC 与删除授权核实
+
+2026-09-25，维护者要求清理旧 SHA tag。现场 ConfigMap 已有 CI 发布授权，与
+旧 zot README/wiki 的“没有常驻 publisher”说明不同；服务页已按现场证据纠正。
+本地开发身份在两个 runner 仓库的精确规则仅有 read/create/update，
+并不继承通配规则的 delete；源码 SPIRE README 的全仓库删除说明不适用于这两个例外。
+详见 [zot GC 与清理](services/zot.md#gc-与-sha-tag-清理)。
+
+权限修正经 [PR #144](https://git.ddupan.top/panxiao81/homelab-infra/pulls/144) 合并并由 Flux
+应用 `185a47e2bb4877c5d4274633e366cad0e83cb2a0`；CI 检查通过，两个 HelmRelease Ready。
+维护者已授权上线与清理，实际删除 controller 19 个、runner 4 个旧 SHA tag；
+最新 main 额外引用的一个候选在删除前已剔除。最近两天推送以完整轮转日志复核。
+保留引用的 manifest 与 blob 读取验证通过；未验证 GC 后物理空间释放，未启用自动 retention。
+源码与 wiki 事实已同步并关联源码 PR；本轮 wiki 改动仍未提交。
+
+## Backstage 首版前置条件
+
+2026-09-25 按维护者要求准备 Backstage，见[接入与验证边界](services/backstage.md)。
+源码 `apps/authelia/values.yaml` 与 `infrastructure/dns/records.yml` 已改，OIDC 与 DNS 已应用；
+数据库已通过本机 SPIFFE 取密完成初始化，应用账号连接、owner 与建表权限验证通过。
+旧 CLI 会话的 403 不代表 SPIFFE 权限不足。源码及 wiki 改动尚未提交，正式链接待补。
+线上 Authelia 存在本地 values 未收录的 Hydra client/policy，本次通过保留线上 values 的
+增量升级避免覆盖；后续全量源码部署前需先同步该差异。
+
+## 共享 etcd 与 PostgreSQL 来源同步
+
+2026-09-25 shared etcd 三成员、新 PG 生产主从与开发实例、稳定入口、本地备份已部署，
+监控 CR 已现场应用。OIDC 恢复后，专用身份与 etcd/PG 每日续签均已启用；此前 Bao 权限阻塞已解除。
+真实 PG 自动切换、回切、SQL/TLS、备份恢复与配置幂等通过，边界见
+[共享 PostgreSQL](services/shared-postgresql.md#k3s-外实例的实现与验收边界2026-09-25)和
+[共享 etcd](services/shared-etcd.md)。
+
+源码 `infrastructure/etcd/`、`infrastructure/shared-postgresql/`、DNS 和监控修改仍未提交关联，
+不能当作 Flux 已从 Git 接管。既有 CNPG 应用未迁移，异地备份后置；数据库细项告警仍待补齐。
+Ayatori 按维护者决定继续使用独立控制面，本轮只准备接入材料，尚未验收 controller/Instance Ready。
+两仓事实已同步，正式源码 commit/PR 链接待补。
+
+## 2026-09-25 sandbox 存储故障复盘的来源边界
+
+维护者报告 VyOS 到 sandbox 的 LB 故障并授权恢复。现场确认 LB 配置未在故障当天更改，
+故障来自 DRBD quorum 丢失后 sandbox1 根卷进入只读；已离线修复并恢复数据库、双 API 与 Pod。
+后续按维护者给出的 PostgreSQL/Alertmanager 会话核对，发现新 HDD 数据卷初始同步重叠与
+多个既有资源故障的时间关联，尚未证明具体网络或磁盘瓶颈。长期恢复方法见
+[Proxmox](services/proxmox.md#sandbox-lb-与根文件系统恢复)。
+
+事故报告与恢复手册在 wiki 统一维护，见[完整事故报告](incidents/2026-09-25-drbd-quorum-sandbox.md)。
+取证引用的 etcd/shared-postgresql 源码当时尚未提交，固定版本关联待源码合并后补齐；
+服务恢复不等于全部整改完成。
+
 ## Incus 接入的跨仓库链接
 
 2026-09-25：共享 Envoy 后端 TLS 兼容补丁已合并发布，见

@@ -2,8 +2,8 @@
 title: zot 镜像与制品仓库使用指南
 lifecycle: active
 evidence: documented
-last_reviewed: 2026-09-16
-last_verified: null
+last_reviewed: 2026-09-25
+last_verified: 2026-09-25
 ---
 
 # zot 镜像与制品仓库
@@ -12,7 +12,8 @@ zot 保存容器镜像与 OCI 制品，底层数据存放于 [SeaweedFS](seaweed
 客户端使用 Registry API，不需要直接访问 S3 bucket。
 
 本页依据 homelab-infra 工作区 `apps/zot/README.md` 的 2026-09-16 记录整理。
-源文档记录双入口已上线并验收、由 Flux 管理；本轮未查询现场或执行下面的示例。
+源文档记录双入口已上线并验收、由 Flux 管理。2026-09-25 只读核验了两个实例的
+ConfigMap、已知仓库 tag/manifest 和集群镜像引用；未重新验收发布与恢复链路。
 
 ## 两个入口
 
@@ -45,8 +46,13 @@ crane pull zot.ad.ddupan.top/verification/anonymous-spire:smoke image.tar --form
 2. workflow 获取 `aud=zot` 的短期 JWT-SVID。
 3. zot 已为该 SPIFFE ID 授予目标 repository 所需的 `read/create/update` 权限。
 
-根据所读源文档，当前持久配置没有常驻 publisher 或删除授权，曾用于验收的临时写权限
-已经撤回。因此以下是获授权后的使用模板，不能仅登录成功就假定可以推送。
+2026-09-25 现场配置已为 Dynamic Runner 的 CI 发布身份和本地开发身份开放两个
+`panxiao81/gitea-dynamic-runner-*` 镜像仓库的 `read/create/update`。
+两类身份使用独立 policy：CI 保持 `read/create/update`，本地开发身份另外具有
+`delete`。精确规则会覆盖通配规则，不能根据 `**` 推断某仓库权限；
+本地维护权限修正已随 [PR #144](https://git.ddupan.top/panxiao81/homelab-infra/pulls/144) 上线。
+其他仓库仍按各自授权判断。
+下面是获授权后的使用模板，不能仅登录成功就假定可以推送。
 
 假定 workflow 已将 JWT-SVID 放入当前进程的 `ZOT_JWT`，准备好自己的 `image.tar`，
 并将示例目标替换为已授权的 repository/tag，在 Bash 中执行：
@@ -83,3 +89,31 @@ zot 的持久数据在 SeaweedFS `zot` bucket 的 `registry/` 前缀；zot Pod �
 部署、授权变更、凭据轮换及验收细节以 homelab-infra `apps/zot/README.md` 为准。
 
 来源文件的固定版本与工作区差异见[来源追溯](../sources.md#zot)。
+
+## GC 与 SHA tag 清理
+
+2026-09-25 现场 ConfigMap 与源码配置一致：写入实例 `gc=true`，
+`gcInterval=24h`、`gcDelay=24h`；reader 的 `gc=false`，不对共享存储重复清理。
+当前没有 `storage.retention`，因此已有 tag 不会因版本较旧自动删除。
+这次只核验了配置，没有核验一轮 GC 完成或 SeaweedFS 物理空间回收。
+
+维护者给出的本轮清理边界：保留最近两天及 infra 仓库引用的版本；额外保护
+当前工作负载、历史 ReplicaSet 和 `latest`、`main`、版本 tag 指向的 digest。
+不同 tag 可以引用同一 manifest，移除别名不意味着释放底层镜像层空间。
+删除前应再次核对 tag → digest、OCI index 子 manifest 与引用，避免并发发布改变目标。
+镜像 config 的 `created` 是构建时间，不是推送时间，不能单独证明最近两天没有推送。
+本次结合覆盖 48 小时的 Pod 轮转日志中成功 manifest PUT 与 S3 manifest 的
+`LastModified` 排除近期推送；读取存储元数据不代替通过 Registry API 删除。
+
+本次匿名和鉴权 `_catalog` 都返回空列表，但已知 repository 的 `tags/list` 与
+manifest 可读取，不能以 catalog 为空断言仓库无镜像或清理已覆盖全部仓库。
+只通过 registry API 清理已确认的 tag，不直接删除 S3 对象。
+
+权限修正已合并为 [`185a47e`](https://git.ddupan.top/panxiao81/homelab-infra/commit/185a47e2bb4877c5d4274633e366cad0e83cb2a0)，
+Flux zot Kustomization 已应用该 revision，两个 HelmRelease Ready。
+2026-09-25 清理后保留 tag、infra/运行/回滚引用的 19 个根 digest、57 个 manifest、
+161 个 blob 读取检查通过。这里只确认清理与读取，不宣称 S3 或 SeaweedFS 物理空间已回收。
+自动 tag retention 尚未启用；未来定期清理仍需动态核对 infra 与运行引用，
+不能仅使用固定年龄规则。
+
+参考：[zot v2.1.21 retention](https://zotregistry.dev/v2.1.21/articles/retention/)。

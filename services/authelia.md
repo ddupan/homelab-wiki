@@ -46,6 +46,11 @@ SPIRE 的 OIDC discovery 用于机器身份验签，不构成另一个人类登�
 
 新增应用的 OIDC 接入与权限配置在对应源码和服务文档中维护，不在知识库保存实际 client secret。
 
+## Backstage 接入
+
+2026-09-25 新增 [Backstage 客户端](backstage.md)，沿用二次认证。此次仅验证配置与 Pod 就绪，
+应用实际登录尚待首版部署（指当时；Backstage 之后已部署，登录仍未验收）；线上 Hydra 配置与本地 values 的差异及保留方式见该服务页。
+
 ## Incus 接入
 
 [Incus](incus.md) 使用独立 public client 与 PKCE S256，专属策略默认拒绝，

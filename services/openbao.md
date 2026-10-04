@@ -64,13 +64,24 @@ Kubernetes 应用通常消费 ESO 投射的 Secret。修改秘密应通过其受
 | 调用者 | 本库已记录的认证路径 |
 |---|---|
 | 人 | Authelia OIDC 登录 |
-| laptop 本地 AI agent | 独立客户端证书，cert auth role 为 `local-agent` |
+| laptop 本地开发进程（UID 1000） | SPIFFE `spiffe://ddupan.top/dev/panxiao81`，JWT role 为 `local-development` |
+| 本地 agent 旧证书路径 | 独立客户端证书，cert auth role 为 `local-agent` |
 | SPIFFE workload | 按 [SPIRE 接入说明](spire.md) 与对应 OpenBao role 配置换取 token |
 
 源码记录的本地 agent 证书与私钥由 Ansible 安装在 `/etc/homelab-agent/openbao/`，
 不要复制到仓库或 workflow。其 token TTL 为 15 分钟、最长 1 小时；权限包括受限的 SSH 签名、
 自身证书续期及 `kv/agents/local/*`，明确不包含 `kv/k8s/*`。
 证书注册、登录与续期按源码 README 操作，不能从 SPIFFE 的整体设计推断该路径已迁移。
+
+本机开发 SPIFFE 路径与上述旧证书路径不同：通过
+`/run/spire/agent-sockets/spire-agent.sock` 获取 `aud=openbao` 的 JWT-SVID，
+再调用 `auth/jwt-spire/login`、指定 `role=local-development`。
+该角色授予 `kv/data/k8s/*` 与 `kv/data/infra/*` 的 create/read/update，token TTL 为 5 分钟。
+2026-09-25 已实际用该身份读取 Backstage 数据库密码并完成[数据库接入](backstage.md)，
+无须更改策略或改用人类 OIDC。token/JWT 仅在进程内存中传递，不输出或写入文档。
+依据为 homelab-infra `platform/spire/README.md`、
+`infrastructure/openbao/terraform/auth-spire.tf` 与 `policies/local-development.hcl`。
+现有 CLI 会话返回 403 时，应先核对身份和有效期；不能据此判断 SPIFFE 缺少 KV 权限。
 
 SPIFFE 验证机器身份，OpenBao 自己签发 token 并维护 policy。
 Dynamic Runner 提供执行环境和 workload 身份，具体向 OpenBao 请求什么 token 由 workflow 决定。
