@@ -2,7 +2,7 @@
 title: PostgreSQL Tenant Operator（计划中的 DBaaS）
 lifecycle: planned
 evidence: documented
-last_reviewed: 2026-10-02
+last_reviewed: 2026-10-04
 last_verified: null
 sources:
   - https://git.ddupan.top/panxiao81/postgresql-tenant-operator
@@ -139,9 +139,10 @@ registry 实现、迁移与 Instance 初始化依赖已在
 1. 平台管理员通过 `PostgreSQLInstance` 注册已有 PostgreSQL 实例及管理连接。
 2. 下游以 namespaced `PostgreSQLTenant` 申请数据库，或显式引用管理员登记的 Database。
 3. controller 建立独立 Database 记录与排他绑定，供应或验证资源；未知同名及不确定创建报冲突。
-4. 应用凭据以 OpenBao KV 为事实来源，由 ESO 投射为 Kubernetes Secret。
-   非 Kubernetes 消费者使用提供的 OpenBao API URL，并通过自身授权获取凭据。
-5. ESO 投射成功且应用凭据实际登录成功后，Tenant 才能进入 Ready。
+4. 应用凭据以 OpenBao KV 为事实来源，Tenant status 公布其位置与已确认版本；消费方所在集群
+   自行投射（例如其 GitOps 中的 ExternalSecret），非 Kubernetes 消费者通过自身授权读取。
+5. Database 资源、扩展与应用登录验证通过后，Tenant 进入 Ready（2026-10-04 起不再以控制面内
+   ESO 投射为条件，见下文）。
 
 GitOps、Terraform、kubectl 和未来 Backstage 计划共用这套 Kubernetes API。
 当前没有可供日常申请数据库的已验证服务入口；接口和具体行为以项目规范为准。
@@ -231,11 +232,26 @@ PostgreSQL 创建、ESO 交付和删除回收尚未接入，Database/Tenant 不�
 安装，扩展对象归应用角色；服务器不提供或非 trusted 的扩展报 Unavailable，不卸载已安装扩展。
 `spec.extensions` 由 CRD 限制为只能追加。随后用已确认的应用凭据实际登录目标库，成功才
 `ResourcesReady=True` 与 Database `Ready=True/DatabaseReady`，每轮重新验证，凭据失效即撤销。
-Tenant Ready 仍需 ESO 交付。行为见
+当时 Tenant Ready 仍待交付设计，已由下文的交付修订补齐。行为见
 [bed7019 的模块文档](https://git.ddupan.top/panxiao81/ayatori/src/commit/bed7019479bec5d7446e1ab88b01bb54fdb1b758/docs/database/README.md#postgresql-资源创建闭环)。
 
+2026-10-04 凭据交付合同修订（[ADR-0010](https://git.ddupan.top/panxiao81/ayatori/src/commit/274cb9754ac5e046ea877140210e23145060769f/docs/decisions/0010-credential-delivery-ends-at-openbao.md)，
+随 [PR #23](https://git.ddupan.top/panxiao81/ayatori/pulls/23) 合并为 `274cb97`，三项 CI 通过，未部署）：
+
+- 旧规则：controller 在 Tenant namespace 创建 ExternalSecret，由 ESO 投射为应用 Secret，Tenant
+  Ready 以投射完成为准（沿自与 workload 同集群运行的原 operator）。
+- 新规则：交付止于 OpenBao。Tenant status 公布已确认凭据的 `credentialRef`、`credentialVersion`
+  与不含认证信息的 `credentialURL`；Database 就绪后 Tenant `Ready=True/CredentialsAvailable`。
+  投射由消费方所在集群自行完成；移除 `spec/status.secretName`。
+- 原因：Ayatori 控制面可能是不运行 workload 的纯 API server，workload 在其他集群；在控制面
+  投射违反“不隐含依赖 controller 所在集群 namespace 共置”的控制面约束，见
+  [控制面边界](../architecture/ayatori-control-plane.md)。曾实现的控制面 ESO 投射（PR #22）
+  因此关闭未合并。
+- 待定：消费方集群读取 Bao 路径的窄 policy（不使用能读全部租户凭据的共享身份）；API-only
+  形态下管理 Secret 的同步方式。
+
 - operator 管理实例内的租户资源，不运行 PostgreSQL/OpenBao，也不管理 VM、存储、备份或 OpenBao PKI。
-- 应用密码写入 OpenBao，不进入 CR、Event 或日志；ESO 负责向 Kubernetes 消费者投射。
+- 应用密码写入 OpenBao，不进入 CR、Event 或日志；投射由消费方集群自行完成，Ayatori 不在控制面投射。
 - Database 默认 Retain；删除 Tenant 保留资源对象与数据，Released 不自动重新分配。
 - 资源侧 Delete 需明确授权、finalizer 与实际管理范围检查，导入不隐含删除或改密授权。
 - 遇到未知 database/role 等资源报告 Conflict，不能自动接管、覆盖或删除；现有数据库迁移需遵循迁移合同。
