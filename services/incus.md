@@ -100,7 +100,7 @@ laptop Incus 已由 `access.yml` 下发 `/var/lib/incus/server.ca` 并开启
 `core.trust_ca_certificates=true`：该 CA 签发、未过期的客户端证书直接获完整权限，不入信任列表，
 过期即失效。这等同 laptop root。服务器证书仍为 Incus 自签，网关校验与 Web UI/OIDC 不受影响。
 
-CI 侧（[PR #200](https://git.ddupan.top/panxiao81/homelab-infra/pulls/200)，**待合并**）：`tf.py`
+CI 侧（[PR #200](https://git.ddupan.top/panxiao81/homelab-infra/pulls/200)，2026-10-04 合并，main 上 CI apply 成功）：`tf.py`
 每次调用现签证书，写入 tmpfs 临时目录，经 `https://192.168.10.127:8443` 访问并以仓库中的
 `server.crt` 固定校验服务器；incus 加入 `TF_ROOTS`，合并后 main 即 Incus 的期望状态，手工改动会被回滚。
 laptop 本地仍可经 Unix socket 运行。
