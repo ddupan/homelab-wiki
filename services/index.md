@@ -57,7 +57,8 @@ SPIFFE/SPIRE 已按维护者授权补读 #34；LAN DNS 与 Authelia 已按维护
 | [dns](lan-dns.md) | 跨视图 DNS 声明 | `records.yml` | LAN 角色已按维护者说明对齐；声明接管范围未重查 | `infrastructure/dns/README.md`、维护者说明 | 同步旧描述；补新增记录流程 |
 | docker | 宿主 Docker 网络管理 | `laptop` | 记录已迁移地址池 | [架构约束](../architecture/constraints.md) 与 IaC | Docker bridge 使用 `172.28.0.0/16`，避免 DN42 |
 | kata-lab | Kata VM 试验环境 | `历史 VMID 147` | 记录 9 月 14 日已销毁 | `infrastructure/kata-lab/README.md` | 保留验证历史，勿当现役 VM |
-| [incus](incus.md) | laptop 系统容器与新 Linux VM 管理 | `https://incus.ad.ddupan.top`；本地 `sudo incus` | 2026-09-25 安装 7.5.1，Authelia 单用户 MFA 接入；Ayatori 两个基础 LXC | [源码 README](https://git.ddupan.top/panxiao81/homelab-infra/src/commit/d45e0b94e80cb8a509df46a14cd7e89d5381b124/infrastructure/incus/README.md) | Ayatori 应用未部署；容器使用 DHCP |
+| [ayatori](ayatori.md) | 基础设施控制平面（当前 Database 领域） | `ayatori-dev` / `ayatori-prod` LXC 上的 k0s API | 2026-10-04 Dev/Prod 部署 v0.1.0 并端到端验收，experimental | [Ayatori deploy](https://git.ddupan.top/panxiao81/ayatori/src/tag/v0.1.0/deploy/README.md)、`infrastructure/ayatori/ansible/` | 备份未建立；消费方读取凭据的 Bao 策略未建立 |
+| [incus](incus.md) | laptop 系统容器与新 Linux VM 管理 | `https://incus.ad.ddupan.top`；本地 `sudo incus` | 2026-09-25 安装 7.5.1，Authelia 单用户 MFA 接入；Ayatori Dev/Prod 控制面 LXC（2026-10-04 开启嵌套并部署） | [源码 README](https://git.ddupan.top/panxiao81/homelab-infra/src/commit/d45e0b94e80cb8a509df46a14cd7e89d5381b124/infrastructure/incus/README.md) | Ayatori 应用未部署；容器使用 DHCP |
 | kata-lxc-lab | LXC 内 Kata worker 试验 | `pve2 / 记录地址 192.168.10.128` | 记录 PoC 验证；非正式生产服务 | `infrastructure/kata-lxc-lab/README.md` | 明确与 microVM runner 的职责 |
 | microvm-runner（历史目录名） | 动态 runner 的 homelab 基础设施记录 | 当前项目接口见 [Dynamic Runner](gitea-dynamic-runner.md) | 独立项目已更名并扩展到 Pod/VM，正在积极开发 | `infrastructure/microvm-runner/README.md`、独立项目文档 | 具体启用范围和实现进度以独立项目文档为准 |
 | [oci](oci.md) | 云主机、网络与站点互联 | `OCI ap-osaka-1` | 有恢复、接管与网络实施记录 | `infrastructure/oci/README.md` | 已有登录、站点网络与维护入口 |

@@ -3,7 +3,7 @@ title: laptop Incus
 lifecycle: experimental
 evidence: live-verified
 last_reviewed: 2026-10-04
-last_verified: 2026-10-01
+last_verified: 2026-10-04
 sources:
   - 维护者于 2026-09-25 授权通过 Ansible 安装 Incus，保留 libvirt 与裸机 k8s
   - https://git.ddupan.top/panxiao81/homelab-infra/commit/d45e0b94e80cb8a509df46a14cd7e89d5381b124
@@ -17,11 +17,13 @@ sources:
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/199
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/200
   - 2026-10-04 嵌套 Incus 的 PKI 模式验证、laptop CA 信任开启与 PR #200 CI plan 现场验证
+  - https://git.ddupan.top/panxiao81/homelab-infra/pulls/198
+  - 2026-10-04 开启 security.nesting 的 plan/apply、重启与 Ayatori 部署现场验证
 ---
 
 # laptop Incus
 
-用于后续 Linux 系统容器和新 Linux VM 的管理，已安装并开放 Web UI/Authelia OIDC，已准备 Ayatori 开发、生产基础容器，应用尚未部署。
+用于后续 Linux 系统容器和新 Linux VM 的管理，已安装并开放 Web UI/Authelia OIDC；承载 [Ayatori](ayatori.md) 开发、生产两个控制面容器（2026-10-04 已部署）。
 既有 VM 留在 libvirt，k8s 留在裸机；不引入 Incus SDN/LB。
 etcd 和共享 PostgreSQL 由各自服务管理，本次不迁移。
 
@@ -112,7 +114,8 @@ PR #200 的 CI plan 经 HTTPS + 短期证书访问 Incus，结果无变更。
 
 ## Ayatori 基础环境
 
-维护者于 2026-09-25 明确本次仅准备两个 LXC，不安装应用或 Kubernetes。
+维护者于 2026-09-25 明确当时仅准备两个 LXC；2026-10-04 起其上运行 Ayatori 控制面，应用部署由
+homelab-infra `infrastructure/ayatori/ansible/` 经 SSH 执行，不经 cloud-init，见 [Ayatori](ayatori.md)。
 `ayatori-dev` 与 `ayatori-prod` 为 Ubuntu 24.04 非特权容器，各限额 2 CPU、2 GiB RAM、
 20 GiB rootfs；存储池 `ayatori` 位于独立 ZFS dataset `data/incus-ayatori`。
 网络接入既有 br0，固定 MAC，静态地址 `192.168.10.11`（`ayatori-dev.ad.ddupan.top`）与
@@ -124,6 +127,9 @@ PR #200 的 CI plan 经 HTTPS + 短期证书访问 Incus，结果无变更。
 （公钥、免密 sudo）、安装 openssh-server，装包后再写 `sshd_config.d` drop-in 关闭密码与 root 登录。
 不使用 `ssh_pwauth`，它会在装包前写出残缺的 `sshd_config`，丢失 `UsePAM yes`。
 镜像跟随 `images:ubuntu/24.04/cloud` 最新构建，只在创建时使用；不固定指纹，因为上游会下架旧构建。
+
+两容器 `security.nesting=true`（[PR #198](https://git.ddupan.top/panxiao81/homelab-infra/pulls/198)），用于在非特权容器内
+运行 podman quadlet；该键不经 cloud-init，修改后重启实例即生效，无需重建。
 
 ⚠ 镜像模板只在创建/复制时渲染 cloud-init seed。修改已有实例的 cloud-init 配置不会生效，
 重启或 `cloud-init clean` 都不行；改地址或初始化内容须重建实例。
@@ -147,3 +153,8 @@ cloud-init 无错误，地址为 `.11`/`.12`，网关与 resolver 符合声明�
 `passwordauthentication no`、`permitrootlogin no`；公钥 SSH 与 `sudo -n` 成功，密码与 root 登录被拒。
 AD DNS 两条 A 记录经 DC 与 Blocky 解析正确，`dns.yml` 重跑 `changed=0`；Terraform plan 无变更。
 上述 2026-09-25 的 DHCP 地址已废弃。
+
+2026-10-04 开启嵌套：经 `run.py` 以本机 SPIFFE 身份取 S3 凭据，plan 为两个实例原地更新
+`security.nesting` false→true（0 add / 0 destroy），apply 后两容器重启、地址不变、SSH 与 systemd
+正常，复跑 plan 无变更。随后 podman 以 overlay 存储运行，Ayatori Dev/Prod 部署与验收见
+[Ayatori](ayatori.md#当前状态与证据)。

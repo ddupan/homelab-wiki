@@ -257,3 +257,18 @@ Ayatori 按维护者决定继续使用独立控制面，本轮只准备接入材
 固定源码为 [d45e0b9](https://git.ddupan.top/panxiao81/homelab-infra/commit/d45e0b94e80cb8a509df46a14cd7e89d5381b124)，尚未合并 main。
 对应 wiki 随本次提交同步；
 维护者已确认真实用户 MFA 登录并返回控制台成功。入口与恢复边界见 [Incus](services/incus.md)。
+
+## Ayatori 首次部署的跨仓库关联（2026-10-04）
+
+Ayatori：[#27](https://git.ddupan.top/panxiao81/ayatori/pulls/27)（`9936960`，部署 role 与 Release）、
+[#28](https://git.ddupan.top/panxiao81/ayatori/pulls/28)（`045f535`，OpenBao audience）、
+[#30](https://git.ddupan.top/panxiao81/ayatori/pulls/30)（`c0422d9`，重新开放绑定与重新拉取镜像）；
+`v0.1.0` 重打于 `c0422d9`。homelab-infra：[#198](https://git.ddupan.top/panxiao81/homelab-infra/pulls/198)（`64b24cc`）、
+[#202](https://git.ddupan.top/panxiao81/homelab-infra/pulls/202)（`79e9dbe`）、[#204](https://git.ddupan.top/panxiao81/homelab-infra/pulls/204)（`60de647`）、
+[#208](https://git.ddupan.top/panxiao81/homelab-infra/pulls/208)（`53730fb`）、[#211](https://git.ddupan.top/panxiao81/homelab-infra/pulls/211)（`60868b7`）、
+[#216](https://git.ddupan.top/panxiao81/homelab-infra/pulls/216)（`61da505`）。现场验证见 [Ayatori](services/ayatori.md#当前状态与证据)。
+
+#208 的标题与提交信息写明 CI 身份增加 update，实际 diff 漏暂存该项，由 #211 补齐；以代码为准。
+
+未同步：Ayatori ADR-0002/0003 与 `docs/concepts/environments.md` 仍描述 managed runtime；
+homelab-infra `infrastructure/shared-postgresql/ayatori/` 旧接入材料待删除；备份未建立。

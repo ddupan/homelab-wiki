@@ -1,6 +1,6 @@
 ---
 title: 按任务查找文档
-last_reviewed: 2026-09-25
+last_reviewed: 2026-10-04
 ---
 
 # 按任务查找文档
@@ -12,6 +12,7 @@ last_reviewed: 2026-09-25
 |---|---|---|
 | 评估独立 IAM 与 AI agent 身份 | [独立 IAM 草案](../architecture/independent-iam-draft.md) | [Hydra 人类登录 PoC](../services/hydra.md)；完整 IAM 仍为草案 |
 | 设计或实现 Ayatori 控制面能力 | [Ayatori 控制面边界](../architecture/ayatori-control-plane.md) | Ayatori 仓库 ADR、对应领域 API 与 adapter 文档 |
+| 部署、发布 Ayatori 或用它申请数据库 | [Ayatori 控制面](../services/ayatori.md) | [Incus](../services/incus.md)、[OpenBao](../services/openbao.md)、[共享 PostgreSQL](../services/shared-postgresql.md) |
 | 发布新的 LAN Web 服务 | [发布新服务](publish-service.md) | [DNS](../services/lan-dns.md)、[Authelia](../services/authelia.md) |
 | 写 CI 或选择 Pod/VM runner | [Gitea / Actions](../services/gitea.md) | [Dynamic Runner](../services/gitea-dynamic-runner.md)、[SPIFFE](../services/spire.md)、[`ci-actions@v1`](https://git.ddupan.top/panxiao81/ci-actions/src/tag/v1) |
 | 为 CI 缓存 Ansible/Go 依赖 | [Nexus POC](../services/nexus.md) | [Dynamic Runner](../services/gitea-dynamic-runner.md)、[OpenBao](../services/openbao.md) |

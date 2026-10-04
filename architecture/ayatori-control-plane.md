@@ -1,6 +1,6 @@
 ---
 title: Ayatori 控制面边界
-last_reviewed: 2026-10-01
+last_reviewed: 2026-10-04
 ---
 
 # Ayatori 控制面边界
@@ -51,7 +51,7 @@ Database 资源模型于 2026-09-24 明确采用官方 PV/PVC 的资源/申请�
 [ADR-0001](https://git.ddupan.top/panxiao81/ayatori/src/branch/main/docs/decisions/0001-kubernetes-api-machinery.md)
 、[ADR-0006](https://git.ddupan.top/panxiao81/ayatori/src/branch/main/docs/decisions/0006-demand-driven-resource-scope.md)
 和[总体架构](https://git.ddupan.top/panxiao81/ayatori/src/branch/main/docs/architecture/overview.md)为准。
-本页记录跨 homelab 的稳定边界，不表示 Ayatori 已部署或达到生产可用状态。
+本页记录跨 homelab 的稳定边界；部署与运行现状见 [Ayatori 服务页](../services/ayatori.md)。
 
 ## Controller 公共基础设施边界
 
@@ -113,3 +113,17 @@ controller 可作为 systemd 服务运行，不要求带 worker 的 Kubernetes�
 
 本轮仅准备 [Incus](../services/incus.md) 上 `ayatori-dev`、`ayatori-prod` 两个基础 LXC；
 提前准备 Prod 容器不表示已有生产制品，也不改变制品 promotion 的要求。
+
+2026-10-04 维护者确认并实施运行形态（[Ayatori 服务页](../services/ayatori.md)）：
+
+- API-only 以 k0s controller-only 实现，裁剪到 apiserver、etcd 与只开 namespace 控制器的
+  KCM；评估过直接运行上游 kube-apiserver，因需自行维护 PKI、etcd 与证书轮换而未采用。
+- 引入 podman 后，ESO、Flux 与 ayatori-manager 统一以镜像经 quadlet 运行，不另做二进制交付。
+- Flux 在各自 LXC 上运行并只同步本仓库 release tag 的清单；不由 homelab k3s 的 Flux 远程推送，
+  以免 k3s 持有 Dev/Prod 两套近 admin 凭据并让控制面 GitOps 依赖 k3s。
+- 部署 role 在 Ayatori 仓库、环境声明在 homelab-infra（只声明环境与 PostgreSQL 实例）；
+  cloud-init 只负责创建 LXC。Dev 可直接试验，Prod 只经 release 与 promotion。
+- 凭据交付止于 OpenBao：Tenant status 公布位置，消费方集群自行投射（Ayatori ADR-0010）。
+
+Ayatori 仓库 ADR-0002/0003 与 `docs/concepts/environments.md` 仍以 managed runtime（带 worker 的
+k0s、集群内 Flux）为 Dev/Prod 默认形态，与上述实施不一致，待源码文档修订。

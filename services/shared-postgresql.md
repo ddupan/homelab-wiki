@@ -132,10 +132,11 @@ Bao PKI 与专用 `homelab-postgresql` SPIFFE 身份已通过 OIDC 管理会话�
 SQL 级指标见 [SQL 级指标](#sql-级指标2026-10-01)；开发实例、备份年龄与证书的维护监控见 [维护告警](#维护告警2026-09-27)。存储事故与持续观察边界见
 [共享 etcd](shared-etcd.md#依赖维护与恢复)，不以短期验收证明底层长期稳定。
 
-维护者明确 Ayatori 沿用独立控制面规划：本轮只准备 Instance、ExternalSecret、公开 CA、
-Kustomize 与专用 ESO 只读 policy，没有向现有 k3s 安装 controller/CRD 或应用这些声明。
-独立控制面还需创建实际 SecretStore/认证绑定并验收 Instance Ready；完整 Database/Tenant
-供应能力以 Ayatori 自身实施为准。不能把现有 SQL 验证当作 Ayatori 已接管。
+维护者明确 Ayatori 沿用独立控制面规划。2026-10-04 Ayatori Dev/Prod 已上线：各自 ESO 以
+`kubernetes-ayatori-<env>` 只读对应管理凭据，`homelab-dev`/`homelab-prod` Instance Ready，并在
+pg-dev/pg-prod 完成供应与 Delete 回收验收，见 [Ayatori](ayatori.md#当前状态与证据)。
+Instance、SecretStore/ExternalSecret 现由 Ayatori 仓库 `deploy/flux` 与部署 role 管理；
+homelab-infra `infrastructure/shared-postgresql/ayatori/` 中的接入材料已被取代，尚未删除。
 
 源码为 homelab-infra `infrastructure/shared-postgresql/README.md` 与
 `ayatori/README.md`；部署、切换、恢复、续签及凭据引用的具体入口在那里维护，文档已发布 main；IaC 见 [IaC PR #159](https://git.ddupan.top/panxiao81/homelab-infra/pulls/159)，已合并；2026-09-25 核实 Flux observability 已应用 `f6d12d6`，四个监控对象均已进入 inventory。

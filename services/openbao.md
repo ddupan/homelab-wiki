@@ -67,6 +67,7 @@ Kubernetes 应用通常消费 ESO 投射的 Secret。修改秘密应通过其受
 | laptop 本地开发进程（UID 1000） | SPIFFE `spiffe://ddupan.top/dev/panxiao81`，JWT role 为 `local-development` |
 | 本地 agent 旧证书路径 | 独立客户端证书，cert auth role 为 `local-agent` |
 | SPIFFE workload | 按 [SPIRE 接入说明](spire.md) 与对应 OpenBao role 配置换取 token |
+| Ayatori Dev/Prod 的 manager 与 ESO | kubernetes auth `kubernetes-ayatori-<env>`（k0s SA，登录 JWT 兼作 TokenReview 凭据），见 [Ayatori](ayatori.md) |
 
 源码记录的本地 agent 证书与私钥由 Ansible 安装在 `/etc/homelab-agent/openbao/`，
 不要复制到仓库或 workflow。其 token TTL 为 15 分钟、最长 1 小时；权限包括受限的 SSH 签名、
