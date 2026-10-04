@@ -224,7 +224,7 @@ PostgreSQL 创建、ESO 交付和删除回收尚未接入，Database/Tenant 不�
   创建结果丢失由下一轮观察到未记录的同名对象而转为 Conflict，对象不存在则重试。
 - 前提是除不可恢复情况外不人工登录改库；controller 不检测、不修正人工授予的特权或成员
   关系。管理权限丢失由 Instance 转为 NotReady 停止供应，不另做逐次权限重查。
-- 不改其他数据库权限。导入、ESO 交付和回收仍未接入，Tenant 不能 Ready。
+- 不改其他数据库权限。
   配置与诊断步骤以上述源码文档为准，不表示现场验证。
 
 2026-10-02，扩展安装与就绪验证随 [PR #21](https://git.ddupan.top/panxiao81/ayatori/pulls/21) 合并（`bed7019`，三项 CI 通过，未部署）。
@@ -249,6 +249,21 @@ PostgreSQL 创建、ESO 交付和删除回收尚未接入，Database/Tenant 不�
   因此关闭未合并。
 - 待定：消费方集群读取 Bao 路径的窄 policy（不使用能读全部租户凭据的共享身份）；API-only
   形态下管理 Secret 的同步方式。
+
+2026-10-04，释放、回收与导入随 [PR #24](https://git.ddupan.top/panxiao81/ayatori/pulls/24)、[PR #25](https://git.ddupan.top/panxiao81/ayatori/pulls/25) 合并
+（`bbd417f`、`0590823`，三项 CI 通过，未部署）。行为见
+[0590823 的模块文档](https://git.ddupan.top/panxiao81/ayatori/src/commit/059082366f630c7845d8cfd31d886e364553f293/docs/database/README.md#释放与回收)：
+
+- 删除 Tenant 时先把 Database 记为 Released（保留旧绑定身份）再移除 Tenant finalizer，只需 API
+  写入；Released 后回收策略由 CEL 固定。
+- Retain：保留数据库、角色与凭据；删除 Database CR 只放行 finalizer。
+- Delete（仅动态供应来源）：按已确认 OID 逐步阻止登录、以 owner 身份终止应用会话并删库、
+  `DROP ROLE`（不 CASCADE）、永久删除 Bao 凭据，最后删除 Database；同名但身份不符即 Conflict。
+  需要额外授予 Bao metadata `delete` 权限。
+- 导入（`source: Import`）只读验证已有对象后登记 OID 与凭据版本，不改密码、owner、权限或扩展，
+  只支持 Retain。
+- 重新开放：Released 记录已具备导入成功的全部确认，管理员处置旧访问后清除 `spec.tenantRef`
+  （对照 PV 清除 `claimRef`），同一记录按确认身份重新验证后回到 Available，可被新 Tenant 申请。
 
 - operator 管理实例内的租户资源，不运行 PostgreSQL/OpenBao，也不管理 VM、存储、备份或 OpenBao PKI。
 - 应用密码写入 OpenBao，不进入 CR、Event 或日志；投射由消费方集群自行完成，Ayatori 不在控制面投射。
