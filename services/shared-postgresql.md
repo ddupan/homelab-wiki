@@ -136,10 +136,10 @@ SQL 级指标见 [SQL 级指标](#sql-级指标2026-10-01)；开发实例、备�
 `kubernetes-ayatori-<env>` 只读对应管理凭据，`homelab-dev`/`homelab-prod` Instance Ready，并在
 pg-dev/pg-prod 完成供应与 Delete 回收验收，见 [Ayatori](ayatori.md#当前状态与证据)。
 Instance、SecretStore/ExternalSecret 现由 Ayatori 仓库 `deploy/flux` 与部署 role 管理；
-homelab-infra `infrastructure/shared-postgresql/ayatori/` 中的接入材料已被取代，尚未删除。
+homelab-infra `infrastructure/shared-postgresql/ayatori/` 中的旧接入材料已删除（[PR #238](https://git.ddupan.top/panxiao81/homelab-infra/pulls/238)，`ec95fae`），
+公开中央 CA 移至 `infrastructure/shared-postgresql/ca.crt`。
 
-源码为 homelab-infra `infrastructure/shared-postgresql/README.md` 与
-`ayatori/README.md`；部署、切换、恢复、续签及凭据引用的具体入口在那里维护，文档已发布 main；IaC 见 [IaC PR #159](https://git.ddupan.top/panxiao81/homelab-infra/pulls/159)，已合并；2026-09-25 核实 Flux observability 已应用 `f6d12d6`，四个监控对象均已进入 inventory。
+源码为 homelab-infra `infrastructure/shared-postgresql/README.md`；部署、切换、恢复、续签及凭据引用的具体入口在那里维护，文档已发布 main；IaC 见 [IaC PR #159](https://git.ddupan.top/panxiao81/homelab-infra/pulls/159)，已合并；2026-09-25 核实 Flux observability 已应用 `f6d12d6`，四个监控对象均已进入 inventory。
 Terraform backend 已复用 `kv/k8s/seaweedfs-s3` 中受限 AK/SK；此前阻塞是 Bao 管理权限，已由
 维护者重新 OIDC 登录解决，不是 S3 凭据缺失。旧 Ansible Vault 迁移仍后置。
 
