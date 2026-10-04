@@ -125,5 +125,6 @@ controller 可作为 systemd 服务运行，不要求带 worker 的 Kubernetes�
   cloud-init 只负责创建 LXC。Dev 可直接试验，Prod 只经 release 与 promotion。
 - 凭据交付止于 OpenBao：Tenant status 公布位置，消费方集群自行投射（Ayatori ADR-0010）。
 
-Ayatori 仓库 ADR-0002/0003 与 `docs/concepts/environments.md` 仍以 managed runtime（带 worker 的
-k0s、集群内 Flux）为 Dev/Prod 默认形态，与上述实施不一致，待源码文档修订。
+该形态由 Ayatori [ADR-0013](https://git.ddupan.top/panxiao81/ayatori/src/branch/main/docs/decisions/0013-api-only-control-plane-on-lxc.md)
+记录（[PR #35](https://git.ddupan.top/panxiao81/ayatori/pulls/35)，4aaca48），部分取代 ADR-0002/0003 的 managed runtime 默认形态；
+`docs/concepts/environments.md` 已同步。
