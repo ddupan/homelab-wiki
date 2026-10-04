@@ -99,8 +99,10 @@ sudo k0s kubectl -n demo get postgresqltenant demo -o jsonpath='{.status}'
 
 预期数秒内 `Ready=True / CredentialsAvailable`，status 给出 `credentialRef`（KV v2 mount
 `kv` 与路径）、`credentialVersion` 与不含认证信息的 `credentialURL`。凭据只交付到 OpenBao，
-由消费方集群用自己的身份读取并投射（例如其 ESO）；**消费方读取应用凭据的 Bao 策略尚未
-建立**，按应用单独授权时再补。
+由消费方集群用自己的身份读取并投射（例如其 ESO）。消费方读取权限按应用单独授权：在
+homelab-infra `infrastructure/openbao/terraform` 为消费方 SA 建 role 与只读该凭据路径的 policy，
+参照 `apps/iam-login/README.md` 的 `iam-login-database`（ExternalSecret 固定 Tenant status 的
+`credentialVersion`）。
 
 清理：自动生成的 Database 默认 `reclaimPolicy: Retain`。要连同数据删除，先把该 Database
 改为 `Delete` 再删 Tenant；Retain 释放后改策略会被 CEL 拒绝。
@@ -190,5 +192,6 @@ Tenant（Bound / CredentialsAvailable）。
 - 恢复演练：从 Dev 以 `k0s backup --save-path=-` 流式写入临时 LXC（不落本机），`k0s restore` 后
   apiserver Ready，演练前标记、Instance、Flux 对象与同步的 Secret 均在，CA 指纹一致；演练容器不运行
   controller，结束后删除。
-- 未验证：导入（`source: Import`）在真实环境的路径、真实应用消费凭据（消费方读取策略未建立）、
-  按原地址重建后的完整恢复、k0s 证书轮换。
+- 消费方：`iam-login` 以自有 SA `iam-login-database` 经 OpenBao 只读其凭据（homelab-infra
+  `apps/iam-login/README.md`），本页未独立验证其运行。
+- 未验证：导入（`source: Import`）在真实环境的路径、按原地址重建后的完整恢复、k0s 证书轮换。
