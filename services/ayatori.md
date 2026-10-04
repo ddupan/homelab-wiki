@@ -15,6 +15,10 @@ sources:
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/208
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/211
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/216
+  - https://git.ddupan.top/panxiao81/ayatori/pulls/32
+  - https://git.ddupan.top/panxiao81/homelab-infra/pulls/224
+  - https://git.ddupan.top/panxiao81/homelab-infra/pulls/227
+  - 2026-10-04 v0.1.1 Dev/Prod 部署与 GitOps 同步、权限拒绝、prune 现场验证
   - 维护者于 2026-10-04 授权部署 Dev 与 Prod，并确认 Dev 可直接试验、Prod 只走发布流程
   - 2026-10-04 Dev/Prod 部署、幂等重跑与 Database 端到端验收（本页“当前状态与证据”）
 ---
@@ -45,7 +49,34 @@ Tenant 申请供应数据库与登录角色，把应用凭据写入 OpenBao 并�
 
 ## 第一次使用
 
-在 Dev 申请一个带 pgcrypto 的数据库（Dev 允许随意试验，Prod 先确认用途）：
+### 推荐：在 homelab-infra 以 GitOps 申请
+
+每个环境的 Flux 从 homelab-infra `main` 同步 `clusters/ayatori-dev/` 或 `clusters/ayatori-prod/`。
+在对应目录提交 PR，新增文件并加入该目录 `kustomization.yaml` 的 `resources`：
+
+```yaml
+# clusters/ayatori-prod/myapp.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: myapp
+---
+apiVersion: database.ayatori.ddupan.top/v1alpha1
+kind: PostgreSQLTenant
+metadata: {name: myapp, namespace: myapp}
+spec:
+  provision: {instanceRef: {name: homelab-prod}, database: myapp, loginRole: myapp}
+  extensions: [pgcrypto]
+```
+
+合并后约 1 分钟内同步。目录只允许 Namespace、PostgreSQLTenant、PostgreSQLDatabase，其他对象会
+使整个同步失败（`gitops-tenants` 无权限），需先移除。`prune` 开启：从目录删除 Tenant 即释放其
+Database（默认 Retain，不删数据）；删除 namespace 会连带释放其中所有 Tenant。导入已有数据库
+（`source: Import`）同样在此声明 PostgreSQLDatabase。
+
+### 在主机上直接试验（仅 Dev）
+
+不经 Git 直接创建（Dev 允许随意试验；Prod 只经上面的 GitOps 目录）：
 
 ```bash
 ssh panxiao81@ayatori-dev.ad.ddupan.top
@@ -125,9 +156,15 @@ SecretStore Valid、ExternalSecret SecretSynced；Instance `Ready=True / Managem
 
 ## 当前状态与证据
 
-2026-10-04 维护者授权后部署：Dev 与 Prod 均运行 v0.1.0（git `c0422d9`，manager 镜像
-`sha256:ba3a63aab2a8c5ea0576aed1562f85003dd0f7437149e0d36ffcf81c846efff0`），Flux revision
-`v0.1.0@c0422d9`，Instance Ready。Dev 二次部署 `changed=0`。
+2026-10-04 维护者授权后部署。Dev 与 Prod 先以 v0.1.0 上线并验收（git `c0422d9`，manager 镜像
+`sha256:ba3a63aab2a8c5ea0576aed1562f85003dd0f7437149e0d36ffcf81c846efff0`），Dev 二次部署 `changed=0`；
+随后两环境升级到 v0.1.1（git `239ad34`，manager 镜像
+`sha256:c64c4e932f6cfb7e9bf07db602af2d6da5065d33209640b88e629ea01a150391`，仅部署 role 增加 GitOps
+目录同步），Flux 三个 Kustomization 均 Ready，Instance Ready。
+
+- v0.1.1 GitOps（Dev，以 homelab-infra 分支验证后切回 main）：目录中的 namespace + Tenant 被创建并
+  Ready；加入 ConfigMap 被拒（`gitops-tenants` cannot patch configmaps）且未创建；移除后 namespace 与
+  Tenant 被 prune、Database 回收，pg-dev 无残留。Dev/Prod 部署后 `gitops` Kustomization 均 Ready。
 
 - Dev 验收：动态供应（含 pgcrypto、应用凭据实际登录）→ Delete 回收；Retain 释放 → Released 后
   改策略被拒 → 清除 tenantRef 重新开放 → 新 Tenant 以 databaseRef 申请并 Ready（凭据位置与版本
