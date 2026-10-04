@@ -14,6 +14,9 @@ sources:
   - 2026-10-01 容器重建后的 cloud-init、sshd、SSH 登录、DNS 与 Terraform plan 现场验证
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/194
   - 2026-10-04 state 迁移至 S3 后的 state list 与 plan 现场验证
+  - https://git.ddupan.top/panxiao81/homelab-infra/pulls/199
+  - https://git.ddupan.top/panxiao81/homelab-infra/pulls/200
+  - 2026-10-04 嵌套 Incus 的 PKI 模式验证、laptop CA 信任开启与 PR #200 CI plan 现场验证
 ---
 
 # laptop Incus
@@ -86,6 +89,27 @@ Incus/Authelia/DNS 来源配置在 `feat/incus-ayatori-base`，经
 [31f455d](https://git.ddupan.top/panxiao81/homelab-infra/commit/31f455d51daf25f6ff04b2b5d7a5f16e280c5145)
 尚未合并 main。
 
+## CI 访问（pki-incus 短期证书）
+
+目标是让 CI 用 Terraform 管理整个 Incus（不只 Ayatori），且 Bao 中不存静态管理员证书。
+Bao 新增独立根 CA `pki-incus`（[PR #199](https://git.ddupan.top/panxiao81/homelab-infra/pulls/199)，
+2026-10-04 已由 CI apply）：私钥不出 Bao，role `ci-terraform` 只签 30 分钟客户端证书且不入存储。
+它不挂在内部 CA 下，否则内部 CA 签发的任何证书都会成为 Incus 管理员。
+
+laptop Incus 已由 `access.yml` 下发 `/var/lib/incus/server.ca` 并开启
+`core.trust_ca_certificates=true`：该 CA 签发、未过期的客户端证书直接获完整权限，不入信任列表，
+过期即失效。这等同 laptop root。服务器证书仍为 Incus 自签，网关校验与 Web UI/OIDC 不受影响。
+
+CI 侧（[PR #200](https://git.ddupan.top/panxiao81/homelab-infra/pulls/200)，**待合并**）：`tf.py`
+每次调用现签证书，写入 tmpfs 临时目录，经 `https://192.168.10.127:8443` 访问并以仓库中的
+`server.crt` 固定校验服务器；incus 加入 `TF_ROOTS`，合并后 main 即 Incus 的期望状态，手工改动会被回滚。
+laptop 本地仍可经 Unix socket 运行。
+
+2026-10-04 验证：嵌套 Incus 7.5.1 中 CA 签发证书 trusted 且可调用 API，自签与过期证书 untrusted，
+放置 `server.ca` 后服务器证书不变。laptop 执行 `access.yml` 后重跑 `changed=0`；incusd 重启
+（`KillMode=process`）而两容器启动时间不变；服务器证书指纹不变，Web UI 200，认证方式仍为 tls+oidc。
+PR #200 的 CI plan 经 HTTPS + 短期证书访问 Incus，结果无变更。
+
 ## Ayatori 基础环境
 
 维护者于 2026-09-25 明确本次仅准备两个 LXC，不安装应用或 Kubernetes。
@@ -109,7 +133,7 @@ Incus/Authelia/DNS 来源配置在 `feat/incus-ayatori-base`，经
 Terraform 经本机 Unix socket 管理；state 于 2026-10-04 迁至 S3 `tfstate` bucket 的
 `incus/terraform.tfstate`（原生 lockfile，[PR #194](https://git.ddupan.top/panxiao81/homelab-infra/pulls/194)），
 经 `infrastructure/incus/run.py` 从 Bao 取受限身份运行。迁移后 S3 上 plan 无变更；laptop 原本地
-state 改名为 `*.pre-s3-20261004` 留作回退。CD 不接管本 root（runner 连不到本机 socket）。
+state 改名为 `*.pre-s3-20261004` 留作回退。CI 接管见下节。
 容器离机备份仍待补齐。源码提交见上文；资源与用户初始化细节见源码 README。
 
 2026-09-25 验证：两个容器均 RUNNING，cloud-init 完成；DHCP 分别取得
