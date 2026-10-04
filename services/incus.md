@@ -2,12 +2,16 @@
 title: laptop Incus
 lifecycle: experimental
 evidence: live-verified
-last_reviewed: 2026-10-01
-last_verified: 2026-09-25
+last_reviewed: 2026-10-04
+last_verified: 2026-10-01
 sources:
   - 维护者于 2026-09-25 授权通过 Ansible 安装 Incus，保留 libvirt 与裸机 k8s
   - https://git.ddupan.top/panxiao81/homelab-infra/commit/d45e0b94e80cb8a509df46a14cd7e89d5381b124
   - 2026-09-25 laptop 本地版本、服务、资源清单与 Ansible 幂等验证
+  - https://git.ddupan.top/panxiao81/homelab-infra/pulls/176
+  - https://git.ddupan.top/panxiao81/homelab-infra/commit/31f455d51daf25f6ff04b2b5d7a5f16e280c5145
+  - 维护者于 2026-10-01 要求网络与 SSH 改由 cloud-init 声明、镜像不固定指纹，并授权重建两个空容器
+  - 2026-10-01 容器重建后的 cloud-init、sshd、SSH 登录、DNS 与 Terraform plan 现场验证
 ---
 
 # laptop Incus
@@ -44,7 +48,7 @@ HTTPS listener 为 `192.168.10.127:8443`；域名通过共享 Envoy 转发，后
 - 历史 `data/incus`（含 GNS3 与快照）已按维护者明确要求删除，不能恢复为旧服务；安装 playbook 不包含删除逻辑。
 - 当前依赖宿主 Ubuntu 24.04 amd64、systemd、APT 与 Zabbly 源。未来虚拟机还依赖可用 KVM。
 - Web/OIDC 另依赖 k3s、Envoy、Authelia；这些入口不可用时本地 `sudo incus` 仍可管理。
-- `access.yml` 管理 Incus 配置、独立入口资源和 Authelia client；`dns.yml` 仅协调 Incus DNS。
+- `access.yml` 管理 Incus 配置、独立入口资源和 Authelia client；`dns.yml` 仅协调 `incus`、`ayatori-dev`、`ayatori-prod` 三条 AD A 记录。
 - Authelia 更新基于 live Helm values 合并单个 client/policy，保留其他客户端；不要直接用滞后的本地 values 全量覆盖。
 - 共享 Envoy 后端 TLS 允许 1.2–1.3，由 Flux 管理；不升级网关，不修改前端证书或其他路由。
 - 重建安装使用源码 README 中的 Ansible 命令。实例和数据备份恢复尚未建立，需在承载持久数据前补齐。
@@ -75,18 +79,30 @@ PKCE S256、callback、audience 和设备授权发起已验证。维护者同日
 
 共享网关补丁已通过 [PR #164](https://git.ddupan.top/panxiao81/homelab-infra/pulls/164)
 合并并由 Flux 发布，revision `f5c8c09f961da3de5ca63c5775a9c50825c94752` Ready。
-Incus/Authelia/DNS 来源配置已推送至 `feat/incus-ayatori-base`，
-固定源码为 [d45e0b9](https://git.ddupan.top/panxiao81/homelab-infra/commit/d45e0b94e80cb8a509df46a14cd7e89d5381b124)，尚未合并 main；
-本页随此次文档提交同步。
+Incus/Authelia/DNS 来源配置在 `feat/incus-ayatori-base`，经
+[PR #176](https://git.ddupan.top/panxiao81/homelab-infra/pulls/176) 提交审阅，截至
+[31f455d](https://git.ddupan.top/panxiao81/homelab-infra/commit/31f455d51daf25f6ff04b2b5d7a5f16e280c5145)
+尚未合并 main。
 
 ## Ayatori 基础环境
 
 维护者于 2026-09-25 明确本次仅准备两个 LXC，不安装应用或 Kubernetes。
 `ayatori-dev` 与 `ayatori-prod` 为 Ubuntu 24.04 非特权容器，各限额 2 CPU、2 GiB RAM、
 20 GiB rootfs；存储池 `ayatori` 位于独立 ZFS dataset `data/incus-ayatori`。
-网络使用既有 br0/DHCP 和固定 MAC；当前地址通过 `terraform output containers` 查询，
-不作为已保留的固定地址。首次使用：`incus exec local:ayatori-dev -- bash`，或使用
-`panxiao81` 公钥 SSH 登录；没有配置密码登录。
+网络接入既有 br0，固定 MAC，静态地址 `192.168.10.11`（`ayatori-dev.ad.ddupan.top`）与
+`192.168.10.12`（`ayatori-prod.ad.ddupan.top`），位于 NEC IX DHCP 池（`.128–.250`）之外；
+地址只在源码 `infrastructure/dns/records.yml` 声明一次，Terraform 与 AD DNS 同源读取。
+
+容器初始化全部由 Terraform 写入的 cloud-init 完成，不再有容器侧 Ansible：
+`network-config` 配静态地址、网关 `.1`、resolver `.127`/`.1`；user-data 创建 `panxiao81`
+（公钥、免密 sudo）、安装 openssh-server，装包后再写 `sshd_config.d` drop-in 关闭密码与 root 登录。
+不使用 `ssh_pwauth`，它会在装包前写出残缺的 `sshd_config`，丢失 `UsePAM yes`。
+镜像跟随 `images:ubuntu/24.04/cloud` 最新构建，只在创建时使用；不固定指纹，因为上游会下架旧构建。
+
+⚠ 镜像模板只在创建/复制时渲染 cloud-init seed。修改已有实例的 cloud-init 配置不会生效，
+重启或 `cloud-init clean` 都不行；改地址或初始化内容须重建实例。
+
+首次使用：`incus exec local:ayatori-dev -- bash`，或 `ssh panxiao81@ayatori-dev.ad.ddupan.top`。
 
 Terraform 经本机 Unix socket 管理，state 暂存源码 `terraform/terraform.tfstate`（Git 忽略）。
 2026-09-25 部署时远端 state 凭据不可读，迁移远端 backend 与离机备份待后续完成。不得丢弃 state 后
@@ -96,3 +112,10 @@ Terraform 经本机 Unix socket 管理，state 暂存源码 `terraform/terraform
 `192.168.10.131`（dev）、`192.168.10.132`（prod）。实际公钥 SSH 和 sudo 成功，
 DNS 解析与包下载可用，非特权 UID 映射、2 GiB cgroup 限额及 20 GiB rootfs 已核对。
 Terraform plan 无变更，SSH Ansible 重跑 `changed=0`；宿主 k3s/libvirtd/Incus 仍 active。
+
+2026-10-01 重建：按维护者授权以 `-replace` 重建两个空容器（先后两次，分别落地网络与 SSH 声明）。
+重建前用临时容器核实 seed 只在 create/copy 渲染，并验证 cloud-init SSH 方案。重建后两容器
+cloud-init 无错误，地址为 `.11`/`.12`，网关与 resolver 符合声明；`sshd -T` 为 `usepam yes`、
+`passwordauthentication no`、`permitrootlogin no`；公钥 SSH 与 `sudo -n` 成功，密码与 root 登录被拒。
+AD DNS 两条 A 记录经 DC 与 Blocky 解析正确，`dns.yml` 重跑 `changed=0`；Terraform plan 无变更。
+上述 2026-09-25 的 DHCP 地址已废弃。
