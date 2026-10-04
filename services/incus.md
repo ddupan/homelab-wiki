@@ -12,6 +12,8 @@ sources:
   - https://git.ddupan.top/panxiao81/homelab-infra/commit/31f455d51daf25f6ff04b2b5d7a5f16e280c5145
   - 维护者于 2026-10-01 要求网络与 SSH 改由 cloud-init 声明、镜像不固定指纹，并授权重建两个空容器
   - 2026-10-01 容器重建后的 cloud-init、sshd、SSH 登录、DNS 与 Terraform plan 现场验证
+  - https://git.ddupan.top/panxiao81/homelab-infra/pulls/194
+  - 2026-10-04 state 迁移至 S3 后的 state list 与 plan 现场验证
 ---
 
 # laptop Incus
@@ -104,9 +106,11 @@ Incus/Authelia/DNS 来源配置在 `feat/incus-ayatori-base`，经
 
 首次使用：`incus exec local:ayatori-dev -- bash`，或 `ssh panxiao81@ayatori-dev.ad.ddupan.top`。
 
-Terraform 经本机 Unix socket 管理，state 暂存源码 `terraform/terraform.tfstate`（Git 忽略）。
-2026-09-25 部署时远端 state 凭据不可读，迁移远端 backend 与离机备份待后续完成。不得丢弃 state 后
-直接重新 apply。源码提交见上文；资源与用户初始化细节见源码 README。
+Terraform 经本机 Unix socket 管理；state 于 2026-10-04 迁至 S3 `tfstate` bucket 的
+`incus/terraform.tfstate`（原生 lockfile，[PR #194](https://git.ddupan.top/panxiao81/homelab-infra/pulls/194)），
+经 `infrastructure/incus/run.py` 从 Bao 取受限身份运行。迁移后 S3 上 plan 无变更；laptop 原本地
+state 改名为 `*.pre-s3-20261004` 留作回退。CD 不接管本 root（runner 连不到本机 socket）。
+容器离机备份仍待补齐。源码提交见上文；资源与用户初始化细节见源码 README。
 
 2026-09-25 验证：两个容器均 RUNNING，cloud-init 完成；DHCP 分别取得
 `192.168.10.131`（dev）、`192.168.10.132`（prod）。实际公钥 SSH 和 sudo 成功，
