@@ -48,11 +48,11 @@ Tenant 申请供应数据库与登录角色，把应用凭据写入 OpenBao 并�
 
 | 环境 | 主机 | API | PostgreSQL 实例 | Bao 应用凭据前缀 |
 |---|---|---|---|---|
-| Dev | `ayatori-dev.ad.ddupan.top`（192.168.10.11） | `https://192.168.10.11:6443` | `homelab-dev` → `pg-dev:5433` | `kv/ayatori/dev/applications/` |
-| Prod | `ayatori-prod.ad.ddupan.top`（192.168.10.12） | `https://192.168.10.12:6443` | `homelab-prod` → `pg-prod:5432` | `kv/ayatori/prod/applications/` |
+| Dev | `ayatori-dev.lab.ddupan.top`（192.168.10.11） | `https://192.168.10.11:6443` | `homelab-dev` → `pg-dev:5433` | `kv/ayatori/dev/applications/` |
+| Prod | `ayatori-prod.lab.ddupan.top`（192.168.10.12） | `https://192.168.10.12:6443` | `homelab-prod` → `pg-prod:5432` | `kv/ayatori/prod/applications/` |
 
 - 两台都是 [Incus](incus.md) 上的非特权 LXC，仅 LAN 可达。
-- 登录：当前只有主机管理员入口，`ssh panxiao81@ayatori-<env>.ad.ddupan.top` 后
+- 登录：当前只有主机管理员入口，`ssh panxiao81@ayatori-<env>.lab.ddupan.top` 后
   `sudo k0s kubectl ...`。尚未给人或其他系统签发 kubeconfig，也没有接入 IdM。
 - 前提：执行部署的机器只需 Ansible 与到两台 LXC 的 SSH（`panxiao81` 免密 sudo）；部署过程不读取任何凭据。
 
@@ -88,7 +88,7 @@ Database（默认 Retain，不删数据）；删除 namespace 会连带释放其
 不经 Git 直接创建（Dev 允许随意试验；Prod 只经上面的 GitOps 目录）：
 
 ```bash
-ssh panxiao81@ayatori-dev.ad.ddupan.top
+ssh panxiao81@ayatori-dev.lab.ddupan.top
 sudo k0s kubectl create namespace demo
 sudo k0s kubectl apply -f - <<'EOF'
 apiVersion: database.ayatori.ddupan.top/v1alpha1
@@ -138,7 +138,8 @@ homelab-infra `infrastructure/openbao/terraform` 为消费方 SA 建 role 与只
 `ayatori-external-secrets`、`ayatori-flux-{source,kustomize}-controller`，带 `cluster=ayatori-<env>`。
 规则在 `rules/ayatori.yaml`：目标不可用/缺失、控制面服务未运行、Instance 未就绪在 Prod 为 critical；
 备份失败/过期、磁盘、内存、Flux 与 ESO 同步、Database 冲突/不可用、Tenant 未就绪、reconcile 错误为
-warning。告警经 Alertmanager 发往 Telegram。
+warning。告警经 Alertmanager 发往 Telegram：采集标签 `env=dev` 的告警进 dev 频道（`telegram-dev`），
+其余按级别进生产频道；新增规则若结果不带采集标签（如 `absent()`），须显式写 `env`。
 
 LXC 内 node_exporter 只开启可信 collector：非特权 LXC 中 loadavg、vmstat、hwmon 是宿主数据，宿主负载
 由宿主自己的 node-exporter 负责。CR 状态（Flux、ExternalSecret/SecretStore、Instance/Database/Tenant）
@@ -211,7 +212,8 @@ Tenant（Bound / CredentialsAvailable）。
 - 监控（2026-10-05）：中央 12 个目标均 up，规则所需指标齐全；停止 Dev ESO 约 7 分钟后
   `AyatoriServiceInactive` 与 `AyatoriTargetDown` 触发，Alertmanager Telegram 发送计数上升；恢复后告警
   全部解除，Telegram 发送失败为 0。首版采集因 VMStaticScrape `jobName` 覆盖 endpoint 的 `job` 标签而
-  选不到序列，已按组件拆分修复（#260）。
+  选不到序列，已按组件拆分修复（#260）；首轮测试告警因标签名为 `environment` 进了生产频道，改为 `env`
+  （#262）后复测，Dev 告警的 receiver 为 `telegram-dev`。
 - 恢复演练：从 Dev 以 `k0s backup --save-path=-` 流式写入临时 LXC（不落本机），`k0s restore` 后
   apiserver Ready，演练前标记、Instance、Flux 对象与同步的 Secret 均在，CA 指纹一致；演练容器不运行
   controller，结束后删除。
