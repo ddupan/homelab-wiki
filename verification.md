@@ -272,4 +272,5 @@ Ayatori：[#27](https://git.ddupan.top/panxiao81/ayatori/pulls/27)（`9936960`�
 
 Ayatori ADR-0002/0003 与 `environments.md` 已由 ADR-0013（[PR #35](https://git.ddupan.top/panxiao81/ayatori/pulls/35)）同步。
 homelab-infra 旧接入材料已由 [PR #238](https://git.ddupan.top/panxiao81/homelab-infra/pulls/238) 删除。
-未同步：备份仅本机（无离机副本、无年龄告警）。
+监控与告警已接入（homelab-infra #255、#260，2026-10-05 端到端验证）。
+未同步：备份仅本机（无离机副本）；k0s 客户端证书到期无告警。

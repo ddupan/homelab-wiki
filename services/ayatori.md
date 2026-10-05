@@ -2,8 +2,8 @@
 title: Ayatori 控制面
 lifecycle: experimental
 evidence: live-verified
-last_reviewed: 2026-10-04
-last_verified: 2026-10-04
+last_reviewed: 2026-10-05
+last_verified: 2026-10-05
 sources:
   - https://git.ddupan.top/panxiao81/ayatori/src/tag/v0.1.0/deploy/README.md
   - https://git.ddupan.top/panxiao81/ayatori/pulls/27
@@ -24,6 +24,10 @@ sources:
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/222
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/232
   - 2026-10-04 v0.1.2 部署、手动备份、临时 LXC 恢复演练现场验证
+  - https://git.ddupan.top/panxiao81/ayatori/pulls/38
+  - https://git.ddupan.top/panxiao81/homelab-infra/pulls/255
+  - https://git.ddupan.top/panxiao81/homelab-infra/pulls/260
+  - 2026-10-05 v0.1.3 部署、中央采集与 Telegram 告警端到端现场验证
   - 维护者于 2026-10-04 授权部署 Dev 与 Prod，并确认 Dev 可直接试验、Prod 只走发布流程
   - 2026-10-04 Dev/Prod 部署、幂等重跑与 Database 端到端验收（本页“当前状态与证据”）
 ---
@@ -127,6 +131,20 @@ homelab-infra `infrastructure/openbao/terraform` 为消费方 SA 建 role 与只
   部署轮换。宿主负载很高（2026-10-04 约 97/12 核）时 manager 可能因 Lease 超时退出，由
   systemd 自动重启。
 
+## 监控与告警
+
+中央 vmagent 以 VMStaticScrape（homelab-infra `platform/observability/metrics/scrapes/ayatori.yaml`）
+采集每台 LXC 的 6 个目标，job 为 `ayatori-node`、`ayatori-kube-state-metrics`、`ayatori-manager`、
+`ayatori-external-secrets`、`ayatori-flux-{source,kustomize}-controller`，带 `cluster=ayatori-<env>`。
+规则在 `rules/ayatori.yaml`：目标不可用/缺失、控制面服务未运行、Instance 未就绪在 Prod 为 critical；
+备份失败/过期、磁盘、内存、Flux 与 ESO 同步、Database 冲突/不可用、Tenant 未就绪、reconcile 错误为
+warning。告警经 Alertmanager 发往 Telegram。
+
+LXC 内 node_exporter 只开启可信 collector：非特权 LXC 中 loadavg、vmstat、hwmon 是宿主数据，宿主负载
+由宿主自己的 node-exporter 负责。CR 状态（Flux、ExternalSecret/SecretStore、Instance/Database/Tenant）
+由 LXC 上的 kube-state-metrics 导出，ESO v2 自身不导出状态条件指标。
+k0s 客户端证书一年到期尚无告警。
+
 ## 出问题时
 
 只读检查（在对应主机 `sudo` 执行）：
@@ -174,7 +192,8 @@ SecretStore Valid、ExternalSecret SecretSynced；Instance `Ready=True / Managem
 `sha256:c64c4e932f6cfb7e9bf07db602af2d6da5065d33209640b88e629ea01a150391`，仅部署 role 增加 GitOps
 目录同步），Flux 三个 Kustomization 均 Ready，Instance Ready。随后两环境升级到 v0.1.2（git `843ed2d`，
 首个 buildx 发布的 manager 镜像 `sha256:441480eb6d4b7187782e272aebf969088d49cdb9718368e359e3c582fe4e2a99`，
-增加每日备份），各手动触发一次备份成功并写入备份卷。Prod 已经 GitOps 目录承载 `iam-login`
+增加每日备份），各手动触发一次备份成功并写入备份卷。2026-10-05 两环境升级到 v0.1.3（git `8d04b7b`，
+manager 镜像 `sha256:6bf930d91c73328f4897f545b8c216d3d802a04be325d97aa7567b71f69a9b57`，导出监控指标）。Prod 已经 GitOps 目录承载 `iam-login`
 Tenant（Bound / CredentialsAvailable）。
 
 - v0.1.1 GitOps（Dev，以 homelab-infra 分支验证后切回 main）：目录中的 namespace + Tenant 被创建并
@@ -189,6 +208,10 @@ Tenant（Bound / CredentialsAvailable）。
   （[ayatori #28](https://git.ddupan.top/panxiao81/ayatori/pulls/28)、
   [homelab-infra #204](https://git.ddupan.top/panxiao81/homelab-infra/pulls/204)），以及重新开放的
   动态供应 Database 无法被申请（[ayatori #30](https://git.ddupan.top/panxiao81/ayatori/pulls/30)）。
+- 监控（2026-10-05）：中央 12 个目标均 up，规则所需指标齐全；停止 Dev ESO 约 7 分钟后
+  `AyatoriServiceInactive` 与 `AyatoriTargetDown` 触发，Alertmanager Telegram 发送计数上升；恢复后告警
+  全部解除，Telegram 发送失败为 0。首版采集因 VMStaticScrape `jobName` 覆盖 endpoint 的 `job` 标签而
+  选不到序列，已按组件拆分修复（#260）。
 - 恢复演练：从 Dev 以 `k0s backup --save-path=-` 流式写入临时 LXC（不落本机），`k0s restore` 后
   apiserver Ready，演练前标记、Instance、Flux 对象与同步的 Secret 均在，CA 指纹一致；演练容器不运行
   controller，结束后删除。
