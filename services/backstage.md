@@ -13,6 +13,7 @@ sources:
   - homelab-infra apps/seaweedfs/terraform/techdocs.tf、infrastructure/openbao/terraform/auth-spire.tf
   - ci-actions publish-techdocs
   - backstage PR #13、homelab-infra PR #242（Flux 对象展示，2026-10-04 合并）
+  - homelab-infra PR #246（服务实体，2026-10-05 合并）
   - 2026-10-04 通过 Backstage catalog 与 TechDocs API 读取 homelab-backstage、homelab-wiki
 ---
 
@@ -70,6 +71,19 @@ get/list/watch；HelmRelease 不可读，因为 `spec.values` 可能内联敏感
 2026-10-04 已验证：Backstage 服务账号可 list 上述类型，不可读 HelmRelease/Secret、不可 patch；
 `/api/kubernetes/services/homelab-backstage` 无错误返回 Kustomization、ImageRepository、
 ImagePolicy 各一。未在浏览器中查看标签页。
+
+## 服务实体
+
+homelab-infra 根目录的 `catalog-info.yaml` 为每个 Flux Kustomization 声明一个 Component
+（Backstage 本身除外，`flux-image-automation` 并入 `flux`），经 catalog 自动发现进入目录。
+实体按命名空间关联集群资源：`backstage.io/kubernetes-namespace` 加选中全部对象的
+selector `!backstage.io/none`。不用 Flux 的 `kustomize/helm.toolkit.fluxcd.io/name` label，
+因为 Flux 只给顶层对象打 label，Pod 与 operator 生成的工作负载都没有，会在 Kubernetes
+标签页中缺失。前提是每个服务独占命名空间。不由这些 Kustomization 管理的命名空间
+（authelia、shared-db、cloudflared、tailscale 等）尚未建实体，需要时在该文件追加。
+
+2026-10-05 已验证：目录中 22 个 Component；zot、observability、flux 的 Kubernetes 数据
+无错误返回，且包含 Pod（分别 2、13、6 个）。
 
 ## 依赖与维护边界
 
