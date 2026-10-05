@@ -1,6 +1,6 @@
 ---
 title: 基础监控与告警运维
-last_reviewed: 2026-09-25
+last_reviewed: 2026-10-05
 ---
 
 # 基础监控与告警运维
@@ -48,6 +48,31 @@ Deployment 以声明副本为准，缩容到零不触发。
 本批没有增加主机 CPU/Swap/IO 告警、NATS JetStream 业务规则、数据库/备份或外部探测。
 job 完全消失使用 absent(up) 检查，但未建立每个预期主机/成员的独立清单，不能保证发现
 同一个 job 中少了一个成员；此类预期拓扑检测后续再补。
+
+## KSM 对象标签与跨集群告警
+
+KSM 抓取必须保留被观测对象的 `namespace/pod/container`：原生 ServiceMonitor
+以及 sandbox 的 VMServiceScrape endpoint 都应设置 `honorLabels: true`。
+缺少该设置时，对象标签会被改名为 `exported_namespace/exported_pod/exported_container`，
+原标签则指向 KSM exporter；按原标签聚合会把其他 workload 的重启误算成 KSM 重启。
+
+排障时同时核对原标签、`exported_*` 和 `cluster`，不能只凭告警标题重启 exporter。
+可按 `cluster,exported_namespace,exported_pod,exported_container` 拆分旧序列的
+`increase(kube_pod_container_status_restarts_total{job="kube-state-metrics"}[24h])`，
+追溯真实对象；退出原因仍需检查该对象所在集群的 Pod 与日志。
+
+Kubernetes 健康规则在聚合和 OOM 匹配中保留 `cluster`，Alertmanager 抑制也要求
+`cluster` 一致，防止跨集群同名对象相互累加、掩盖或抑制。本地历史序列没有
+`cluster` 时仍作为独立组处理。规则用 `exported_namespace=""` 排除旧冲突样本，
+避免修复采集后 24 小时窗口继续误报；这些历史样本仍可单独查询，没有删除。
+修复会创建标签正确的新序列，重启增量从新序列建立后的样本计算，不回填旧重启历史。
+
+实现与验证记录：[修复 PR #244](https://git.ddupan.top/panxiao81/homelab-infra/pulls/244)。
+2026-10-05 现场验收：central 的 `observability` 与 sandbox 的 `monitoring`
+均 Ready，应用合并版本 `588ec85467afdcfb325f4a58745d17f0405ceeb6`；sandbox 的
+30 条容器重启序列已保留真实对象标签，KSM `up=1`、重启计数为 0。
+累计重启规则 inactive、无评估错误，Alertmanager 已无该 KSM 误报，运行中的
+抑制条件包含 `cluster`。这是此次修复验收，不代表其他 workload 均健康。
 
 ## 通知、静默与抑制
 
