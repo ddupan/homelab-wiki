@@ -1,20 +1,24 @@
 ---
 title: NATS
-lifecycle: active
-evidence: documented
-last_reviewed: 2026-09-25
-last_verified: null
+lifecycle: retired
+evidence: live-verified
+last_reviewed: 2026-10-06
+last_verified: 2026-10-06
 sources:
   - 维护者于 2026-09-16 提供的部署与消费者说明
+  - https://git.ddupan.top/panxiao81/homelab-infra/pulls/278
 ---
 
 # NATS
 
-**NATS 已作为集群共享消息服务部署，目前唯一的消费者是 Dynamic Runner。**
-这是维护者于 2026-09-16 提供的现状；本轮未查询运行环境。
-
-共享服务的定位不随当前消费者数量改变。NATS 属于平台基础设施，
-Dynamic Runner 使用它传递任务消息，但不独占消息服务的用途和生命周期。
+**NATS 已停用并缩容到零，配置、PVC 与 Service 保留供恢复。**
+2026-10-05 的源码 README 记录 Dynamic Runner 已移除 JetStream 依赖；
+2026-10-06 排障现场确认 nats namespace 无 Pod，残留采集造成空抓取池告警。
+本次通过 [PR #278](https://git.ddupan.top/panxiao81/homelab-infra/pulls/278)
+停用 PodMonitor，现场清理残留 VMPodScrape；验收范围为无 Pod、无采集对象、
+Helm v13 和 Flux Ready，未验证停用前的消息业务。恢复时同时将 replicas 改回 1、启用
+`promExporter.podMonitor.enabled`，并从 Git 历史恢复 NATS 专用告警。
+以下 Account 与接入说明仅供恢复时参考，不代表入口当前可用。
 
 ## 多租户边界
 
@@ -41,10 +45,10 @@ Dynamic Runner 的 stream、subject、durable 名称、worker 配置和具体启
 知识库只保留[Dynamic Runner 的用途与职责边界](gitea-dynamic-runner.md)。
 涉及 runner 的实际配置和实现进度时，先按项目文档接续工作；需要扩大查询范围时再向维护者确认。
 
-## 指标与告警
+## 历史指标与告警
 
 2026-09-25 已现场确认既有 :7777 prom-exporter 经 PodMonitor → VMPodScrape 接入中央采集，
-job 为 `nats/nats`，target up 且 nats_* 指标有当前样本。已有采集不可用/整个 job 消失告警；
+job 为 `nats/nats`，target up 且 nats_* 指标有当前样本。当时配置了采集不可用/整个 job 消失告警；
 已增加 JetStream 服务端容量与慢消费者规则；consumer 积压仍待后续。
 范围和阈值见 [数据服务监控](../guides/monitoring-data-services.md)。
 转换器故障处理与验证依据见 [基础监控运维](../guides/monitoring-foundation.md#nats-转换故障经验)。

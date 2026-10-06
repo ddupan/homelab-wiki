@@ -1,6 +1,6 @@
 ---
 title: 基础监控与告警运维
-last_reviewed: 2026-10-05
+last_reviewed: 2026-10-06
 ---
 
 # 基础监控与告警运维
@@ -20,7 +20,8 @@ VMServiceScrape、VMPodScrape、VMRule，vmagent/vmalert 继续负责采集与�
   :8080 提供对象指标，:8081 提供 exporter 自身指标；job 均为 `kube-state-metrics`。
 - collector/RBAC 限于本批需要的 nodes、pods、deployments、statefulsets、daemonsets、
   PVC/PV、jobs/cronjobs、namespaces，只读 list/watch，没有启用 secrets collector。
-- NATS 沿用其 Helm 管理的 PodMonitor，转换后的 `nats/nats` VMPodScrape 抓取 :7777，job 为 `nats/nats`。
+- NATS 已于 2026-10-05 缩容到零，采集随服务停用；恢复步骤见 [NATS](../services/nats.md)。
+  历史采集使用 PodMonitor → VMPodScrape，job 为 `nats/nats`。
 - Operator HelmRelease 依赖 `prometheus-operator-crds`；KSM 同时依赖两者。
   先确保 CRD Ready，再启动依赖 CRD 的转换器和消费者。
 - 源码：[基础补齐 PR #149](https://git.ddupan.top/panxiao81/homelab-infra/pulls/149)。
@@ -65,7 +66,11 @@ Kubernetes 健康规则在聚合和 OOM 匹配中保留 `cluster`，Alertmanager
 `cluster` 一致，防止跨集群同名对象相互累加、掩盖或抑制。本地历史序列没有
 `cluster` 时仍作为独立组处理。规则用 `exported_namespace=""` 排除旧冲突样本，
 避免修复采集后 24 小时窗口继续误报；这些历史样本仍可单独查询，没有删除。
-修复会创建标签正确的新序列，重启增量从新序列建立后的样本计算，不回填旧重启历史。
+修复会创建标签正确的新序列，重启增量使用 `increase_prometheus` 从首个样本之后计算，
+不回填旧重启历史。MetricsQL 的 `increase` 可能将新序列的小初值也算入增量；
+不能把 promtool 的通过结果当作 VictoriaMetrics 语义验证。2026-10-05 的首次修复
+遗漏了这一点，初值 2 加后续 2 次重启被报成 4；现场对照查询确认
+`increase_prometheus` 返回 2。参见 [MetricsQL 文档](https://docs.victoriametrics.com/victoriametrics/metricsql/#increase_prometheus)。
 
 实现与验证记录：[修复 PR #244](https://git.ddupan.top/panxiao81/homelab-infra/pulls/244)。
 2026-10-05 现场验收：central 的 `observability` 与 sandbox 的 `monitoring`
@@ -73,6 +78,21 @@ Kubernetes 健康规则在聚合和 OOM 匹配中保留 `cluster`，Alertmanager
 30 条容器重启序列已保留真实对象标签，KSM `up=1`、重启计数为 0。
 累计重启规则 inactive、无评估错误，Alertmanager 已无该 KSM 误报，运行中的
 抑制条件包含 `cluster`。这是此次修复验收，不代表其他 workload 均健康。
+
+## 生命周期与告警边界
+
+- PVE exporter 对未纳入 HA 的客户机也输出全零 `pve_ha_state`。检测未启动前先要求
+  同一 id 至少一个状态为 1；不能将 `started=0` 单独解释为 HA 故障。
+- 定时 oneshot 服务正常结束后为 inactive。常驻服务不可用规则排除 `type="oneshot"`；
+  任务本身通过执行结果、定时器和专门的产物/备份指标排查，不能为了告警让任务常驻。
+- 服务主动缩容或停用时同步停用 PodMonitor，检查转换对象是否残留；在原对象已删除、
+  服务仍停用且转换对象无其他所有者时清理对应 VMPodScrape，避免空抓取池持续报警。
+
+规则及测试实现：[PR #278](https://git.ddupan.top/panxiao81/homelab-infra/pulls/278)。
+2026-10-06 现场验收：`observability` 与 `nats` 已 Ready，应用版本
+`551a34770433d3e74a340448aed22f4648d5a0b1`。NATS Helm v13 已删除 PodMonitor，
+无 ownerReference 的转换 VMPodScrape 不会随之回收，本次按对应名称显式删除；
+恢复服务时由重新启用的 PodMonitor 再生成。重启、HA 与 oneshot 误报规则已 inactive。
 
 ## 通知、静默与抑制
 
@@ -98,8 +118,9 @@ Telegram 完全不可达时，发送失败告警也无法依靠同一渠道送�
 4. 在 vmalert `/api/v1/rules` 核对规则数量、lastError 和依赖样本。
    没有失败 Job 或 OOM 时条件指标可能不存在，不能把这种空结果直接当作采集失败。
 5. 变更规则时从源码运行 `bash platform/observability/metrics/tests/check-rules.sh`；
-   依赖 Python 3、PyYAML、promtool（本次验证版本 3.5.0）。该脚本直接读取三份规则的 spec.groups，
-   生成临时文件校验，不维护第二份规则。8 组测试覆盖阈值持续时间、缺失目标和常见噪声边界。
+   依赖 Python 3、PyYAML、promtool 3.5.0 与 vmalert-tool-prod 1.126.0。脚本直接读取规则
+   spec.groups，按规则名拆分测试：Kubernetes 规则由隔离 VictoriaMetrics 执行，其余由
+   promtool 执行；不将 MetricsQL 临时替换成 PromQL 来冒充测试。vmalert-tool 需要本机监听端口。
 6. 经维护者授权发送临时 canary，验证触发与恢复后删除测试规则，恢复正式规则总数。
    不通过制造真实 OOM、磁盘满或破坏 Telegram token 来做验收。
 
