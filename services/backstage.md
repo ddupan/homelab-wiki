@@ -14,6 +14,7 @@ sources:
   - ci-actions publish-techdocs
   - backstage PR #13、homelab-infra PR #242（Flux 对象展示，2026-10-04 合并）
   - homelab-infra PR #246（服务实体，2026-10-05 合并）
+  - homelab-infra PR #280、#281（入口链接、System 与依赖，2026-10-07 合并）
   - 2026-10-04 通过 Backstage catalog 与 TechDocs API 读取 homelab-backstage、homelab-wiki
 ---
 
@@ -81,6 +82,13 @@ selector `!backstage.io/none`。不用 Flux 的 `kustomize/helm.toolkit.fluxcd.i
 因为 Flux 只给顶层对象打 label，Pod 与 operator 生成的工作负载都没有，会在 Kubernetes
 标签页中缺失。前提是每个服务独占命名空间。不由这些 Kustomization 管理的命名空间
 （authelia、shared-db、cloudflared、tailscale 等）尚未建实体，需要时在该文件追加。
+
+实体还带入口链接（Web UI 与 API 端点）并按 System 分组：identity、delivery、storage、
+networking、observability、platform、applications、developer-portal。`dependsOn` 只记录有配置
+依据的应用级依赖（数据库、认证、目录、对象存储、镜像仓库、邮件），envoy-gateway、
+external-secrets、cert-manager、openebs、flux 等通用平台组件不画，Catalog Graph 因此可读。
+集群外的 openbao、proxmox、incus、samba-ad 只有链接；共享数据库为 `kind: Resource`。
+2026-10-07 已验证：27 个 Component、1 个 Resource、8 个 System，全部有归属，25 条依赖关系。
 
 2026-10-05 已验证：目录中 22 个 Component；zot、observability、flux 的 Kubernetes 数据
 无错误返回，且包含 Pod（分别 2、13、6 个）。
