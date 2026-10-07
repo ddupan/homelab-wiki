@@ -10,3 +10,4 @@ spec:
   type: documentation
   owner: user:default/panxiao81
   lifecycle: production
+  system: developer-portal
