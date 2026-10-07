@@ -2,8 +2,8 @@
 title: Ayatori 控制面
 lifecycle: experimental
 evidence: live-verified
-last_reviewed: 2026-10-05
-last_verified: 2026-10-05
+last_reviewed: 2026-10-07
+last_verified: 2026-10-07
 sources:
   - https://git.ddupan.top/panxiao81/ayatori/src/tag/v0.1.0/deploy/README.md
   - https://git.ddupan.top/panxiao81/ayatori/pulls/27
@@ -28,6 +28,10 @@ sources:
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/255
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/260
   - 2026-10-05 v0.1.3 部署、中央采集与 Telegram 告警端到端现场验证
+  - https://git.ddupan.top/panxiao81/ayatori/releases/tag/v0.1.4
+  - https://git.ddupan.top/panxiao81/homelab-infra/pulls/262
+  - https://git.ddupan.top/panxiao81/homelab-infra/pulls/263
+  - 2026-10-07 v0.1.4 部署与证书到期指标、规则加载现场验证
   - 维护者于 2026-10-04 授权部署 Dev 与 Prod，并确认 Dev 可直接试验、Prod 只走发布流程
   - 2026-10-04 Dev/Prod 部署、幂等重跑与 Database 端到端验收（本页“当前状态与证据”）
 ---
@@ -113,7 +117,8 @@ homelab-infra `infrastructure/openbao/terraform` 为消费方 SA 建 role 与只
 
 ## 日常操作与限制
 
-- 发布：Ayatori 仓库打 `vX.Y.Z` git tag，Release 工作流用 ko 构建 manager 镜像并以同名 tag
+- 发布：攒一批变更再发版（功能 PR 不改版本号）。Ayatori 仓库打 annotated `vX.Y.Z` git tag（说明即发布
+  说明，Release 工作流自动生成 Gitea Release），Release 工作流用 ko 构建 manager 镜像并以同名 tag
   推送 [zot](zot.md) `panxiao81/ayatori-manager`。部署 role、Flux 同步的清单与镜像是同一组制品。
 - 完全不可用的 release 不升版本：修复合并后删除并重打同名 tag，Release 覆盖同名镜像
   （CI 身份有 update，本机开发身份可读写删除），部署时 role 重新拉取并按镜像 ID 变化重启。
@@ -144,7 +149,8 @@ warning。告警经 Alertmanager 发往 Telegram：采集标签 `env=dev` 的告
 LXC 内 node_exporter 只开启可信 collector：非特权 LXC 中 loadavg、vmstat、hwmon 是宿主数据，宿主负载
 由宿主自己的 node-exporter 负责。CR 状态（Flux、ExternalSecret/SecretStore、Instance/Database/Tenant）
 由 LXC 上的 kube-state-metrics 导出，ESO v2 自身不导出状态条件指标。
-k0s 客户端证书一年到期尚无告警。
+证书到期：`ayatori-cert-metrics.timer` 每小时导出 k0s PKI 与各 kubeconfig 客户端证书到期时间，剩余 30 天
+warning、7 天 critical；kubeconfig 删除后重跑部署即重签，PKI 服务端证书重启 `k0scontroller` 轮换。
 
 ## 出问题时
 
@@ -194,7 +200,9 @@ SecretStore Valid、ExternalSecret SecretSynced；Instance `Ready=True / Managem
 目录同步），Flux 三个 Kustomization 均 Ready，Instance Ready。随后两环境升级到 v0.1.2（git `843ed2d`，
 首个 buildx 发布的 manager 镜像 `sha256:441480eb6d4b7187782e272aebf969088d49cdb9718368e359e3c582fe4e2a99`，
 增加每日备份），各手动触发一次备份成功并写入备份卷。2026-10-05 两环境升级到 v0.1.3（git `8d04b7b`，
-manager 镜像 `sha256:6bf930d91c73328f4897f545b8c216d3d802a04be325d97aa7567b71f69a9b57`，导出监控指标）。Prod 已经 GitOps 目录承载 `iam-login`
+manager 镜像 `sha256:6bf930d91c73328f4897f545b8c216d3d802a04be325d97aa7567b71f69a9b57`，导出监控指标）。2026-10-07 升级到 v0.1.4（git `1d57f5f`，manager 镜像
+`sha256:6a3fa9fece8e669371e87a2238a2e7c41216365e5366f9528e9efbea74dc64a5`，导出证书到期时间；
+首个由 Release 工作流自动生成发布说明的版本）。Prod 已经 GitOps 目录承载 `iam-login`
 Tenant（Bound / CredentialsAvailable）。
 
 - v0.1.1 GitOps（Dev，以 homelab-infra 分支验证后切回 main）：目录中的 namespace + Tenant 被创建并
@@ -214,6 +222,9 @@ Tenant（Bound / CredentialsAvailable）。
   全部解除，Telegram 发送失败为 0。首版采集因 VMStaticScrape `jobName` 覆盖 endpoint 的 `job` 标签而
   选不到序列，已按组件拆分修复（#260）；首轮测试告警因标签名为 `environment` 进了生产频道，改为 `env`
   （#262）后复测，Dev 告警的 receiver 为 `telegram-dev`。
+- 证书（2026-10-07）：中央两环境各 23 条证书到期指标，最近到期剩余 364 天；三条证书规则已加载，
+  无 Ayatori 告警。observability Kustomization `prune=false`，#260 拆分后残留的旧 `monitoring/ayatori`
+  采集对象造成重复采集，已人工删除。
 - 恢复演练：从 Dev 以 `k0s backup --save-path=-` 流式写入临时 LXC（不落本机），`k0s restore` 后
   apiserver Ready，演练前标记、Instance、Flux 对象与同步的 Secret 均在，CA 指纹一致；演练容器不运行
   controller，结束后删除。
