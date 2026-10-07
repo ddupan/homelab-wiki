@@ -2,8 +2,8 @@
 title: iam-login（sso.ddupan.top）
 lifecycle: experimental
 evidence: live-verified
-last_reviewed: 2026-10-04
-last_verified: 2026-10-04
+last_reviewed: 2026-10-07
+last_verified: 2026-10-07
 sources:
   - https://git.ddupan.top/panxiao81/iam-login/pulls/16
   - https://git.ddupan.top/panxiao81/iam-login/pulls/17
@@ -15,6 +15,11 @@ sources:
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/240
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/241
   - 维护者于 2026-10-04 在 sso.ddupan.top 注册 passkey、登录 /console，并经 Gitea `sso` 登录源返回原账号
+  - https://git.ddupan.top/panxiao81/iam-login/pulls/22
+  - https://git.ddupan.top/panxiao81/homelab-infra/pulls/275
+  - https://git.ddupan.top/panxiao81/homelab-infra/pulls/277
+  - https://git.ddupan.top/panxiao81/terraform-provider-homelab
+  - 维护者于 2026-10-07 确认 Pod 重启后会话保留；Terraform CD plan 以 terraform-plan 身份纳管 gitea（1 import / 0 change）
 ---
 
 # iam-login（sso.ddupan.top）
@@ -43,6 +48,16 @@ sources:
 - `kv/k8s/iam-login`：签名私钥（不可随部署重生成）与 LDAPS truststore。
 - Gitea 登录源 ID 3 `sso`（原名 `hydra`）；iam-login 以 subject 绑定沿用旧 `sub`，账号关联不变。
 
+## 会话与客户端 IaC
+
+- 会话存数据库（Spring Session JDBC，属性为 JSON），部署与重启不登出（2026-10-07 实测）；WebAuthn challenge
+  存 `webauthn_challenge` 表，消费是一条 `DELETE ... RETURNING`。
+- OIDC 客户端由 homelab-infra `apps/iam-login/terraform` 管理（Terraform CD），provider 为自研
+  `terraform.lab.ddupan.top/ddupan/homelab`（静态 registry 在 SeaweedFS，release 由维护者 YubiKey 子钥
+  `8A887573EFE9762D` 签名，CI 只上传构建）。provider 以调用方 JWT-SVID 认证，allowlist 为 CD 的
+  plan/apply job 与笔记本开发身份；`/console` 的改动会表现为 drift。
+- `gitea` 以 import 纳管，secret 仍是人工写入 `kv/k8s/gitea-sso` 的值；交给 Terraform 轮换需同时写 kv 并重启 Gitea。
+
 ## 发布
 
 iam-login main 的 CI（runner：pve1 LXC 104，标签 `iam-build`）在 Native 浏览器测试通过后，把同一个
@@ -61,5 +76,5 @@ join_token Agent 不能重新证明：LXC 停机超过 SVID 有效期（约 1 �
 
 ## 待办
 
-下线 Hydra（含 `ExternalSecret/gitea-hydra-oidc`、`kv/k8s/hydra`）；MFA 自助管理；前端重做；
+Hydra 已下线（数据库与 `kv/k8s/hydra` 待维护者确认后删除）；MFA 自助管理；前端重做；
 SPIFFE 机器登录与 MCP agent 委托设计。
