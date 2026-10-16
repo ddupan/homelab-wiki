@@ -2,7 +2,7 @@
 title: OpenEBS PVC 使用指南
 lifecycle: active
 evidence: documented
-last_reviewed: 2026-09-16
+last_reviewed: 2026-10-16
 last_verified: null
 ---
 
@@ -74,5 +74,30 @@ StorageClass 配置 `WaitForFirstConsumer`，PVC 在没有可调度消费者时�
 运维与 break-glass 入口为 `platform/openebs/README.md`。
 StorageClass 独立于 Helm release 管理；不要通过卸载 chart、删除 CRD 或业务卷验证升级。
 依赖包括 OpenEBS ZFS CSI、宿主 ZFS、文件系统与 Kubernetes 调度。
+
+## 宿主 ZFS 手工调优（不在 IaC）
+
+以下属性由维护者授权于 2026-10-16 在宿主 laptop 上手工设置并回读确认，**没有写入任何 IaC**。
+OpenEBS 的 ZFSVolume 不管理这两个属性，不会被改回；但 PVC 一旦重建就会恢复默认值，需要重新设置。
+
+| zvol（`data/ceph/…`） | 消费方 | 设置 | 理由 |
+|---|---|---|---|
+| `pvc-72a0fa9d-…` | seaweedfs `data1-seaweedfs-volume-0` | `logbias=throughput` | 单盘无 SLOG，大块同步写不再先写 ZIL |
+| `pvc-b6c03920-…` | rustfs `rustfs-data` | `logbias=throughput` | 同上 |
+| `pvc-de06bda2-…` | nexus `nexus-data` | `logbias=throughput` | 同上 |
+| `pvc-8f299ae2-…` | monitoring `vmsingle-main` | `sync=disabled` | 监控数据可接受宕机时丢最近一个 txg |
+| `pvc-f5ea2a99-…` | monitoring `vlsingle-main` | `sync=disabled` | 同上 |
+| `pvc-f3ad36b2-…` | monitoring `vtsingle-main` | `sync=disabled` | 同上 |
+
+`sync=disabled` 在宿主断电或内核崩溃时最多丢最近一个 txg（正常约 5 秒），不会损坏数据。
+grafana 的卷保存 SQLite 配置，不属于 TSDB，保持默认。
+
+池级别的变更与已知问题（`data` 池，单块 KIOXIA EXCERIA SATA SSD，没有 DRAM 和掉电保护）：
+
+- 2026-10-16 首次执行 `zpool trim -r 100M data` 并开启 `autotrim=on`。此前这个池从未 trim。
+- 池的 `ashift` 是 9，而盘内部的页大于 512 字节，小块写入的写放大大约是 3 倍（按 SMART 寿命已用
+  19%、主机写入约 14.6 TB 估算）。`ashift` 不能在线修改，只能新建 `ashift=12` 的池再 send/recv。
+- 这块盘的 flush 会随机停顿 10–65 秒，导致 etcd 一类 fsync 密集的负载超时；Ayatori 控制器
+  频繁重启就是这个原因。
 
 来源文件的固定版本与工作区差异见[来源追溯](../sources.md#openebs)。
