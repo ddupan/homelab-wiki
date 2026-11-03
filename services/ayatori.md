@@ -56,9 +56,10 @@ Tenant 申请供应数据库与登录角色，把应用凭据写入 OpenBao 并�
 | Prod | `ayatori-prod.lab.ddupan.top`（192.168.10.12） | `https://192.168.10.12:6443` | `homelab-prod` → `pg-prod:5432` | `kv/ayatori/prod/applications/` |
 
 - 两台都是 [Incus](incus.md) 上的非特权 LXC，仅 LAN 可达。
-- 登录：当前只有主机管理员入口，`ssh panxiao81@ayatori-<env>.lab.ddupan.top` 后
-  `sudo k0s kubectl ...`。尚未给人或其他系统签发 kubeconfig，也没有接入 IdM。
-- 前提：执行部署的机器只需 Ansible 与到两台 LXC 的 SSH（`panxiao81` 免密 sudo）；部署过程不读取任何凭据。
+- 登录：当前只有主机管理员入口，`ssh panxiao81@ayatori-<env>.lab.ddupan.top`（也接受 Bao SSH CA 签发的
+  短期证书）后 `sudo k0s kubectl ...`。尚未给人或其他系统签发 kubeconfig，也没有接入 IdM。
+- 前提：两台都是 Cinc 节点（[Chef](https://git.ddupan.top/panxiao81/homelab-infra/src/branch/main/infrastructure/chef)），部署只需到 LXC 的 SSH（`panxiao81` 免密 sudo）；
+  首次 SPIRE enrollment 另需操作者的 Bao token。
 
 ## 第一次使用
 
@@ -119,21 +120,24 @@ homelab-infra `infrastructure/openbao/terraform` 为消费方 SA 建 role 与只
 
 - 发布：攒一批变更再发版（功能 PR 不改版本号）。Ayatori 仓库打 annotated `vX.Y.Z` git tag（说明即发布
   说明，Release 工作流自动生成 Gitea Release），Release 工作流用 ko 构建 manager 镜像并以同名 tag
-  推送 [zot](zot.md) `panxiao81/ayatori-manager`。部署 role、Flux 同步的清单与镜像是同一组制品。
+  推送 [zot](zot.md) `panxiao81/ayatori-manager`。Flux 同步的清单与镜像是同一组制品；节点部署
+  （cookbook）是另一条版本线。
 - 完全不可用的 release 不升版本：修复合并后删除并重打同名 tag，Release 覆盖同名镜像
-  （CI 身份有 update，本机开发身份可读写删除），部署时 role 重新拉取并按镜像 ID 变化重启。
-- 部署：在 laptop 执行 homelab-infra `infrastructure/ayatori/ansible/deploy.sh dev|prod`，经 SSH
-  部署；`requirements-<env>.yml` 各钉一个 release。Promotion 即把 prod 改为 Dev 已验收的 tag。
-- Dev 可本地构建镜像直接加载试验；Prod 只走 release + promotion。
-- 运行形态：k0s controller-only（apiserver、etcd、只开 namespace 控制器的 KCM）为 systemd；
+  （CI 身份有 update，本机开发身份可读写删除），policy 中的镜像 digest 随之更新。
+- 部署：homelab-cookbooks 的 `homelab_ayatori` cookbook（节点基线由 `homelab_base` 负责），环境声明是
+  homelab-infra `infrastructure/chef/policies/ayatori-<env>.rb`（release tag 与按 digest 固定的 manager
+  镜像、PostgreSQL、GitOps、LB）。在 laptop 执行 `infrastructure/chef/converge.py -l ayatori-<env>`
+  （先 `--why-run`）。Promotion 即把 prod policy 的 release 与 digest 改为 Dev 已验收的版本。
+- Dev 可用本地构建、按 digest 引用的镜像试验；Prod 只走 release + promotion。
+- 运行形态：k0s controller-only（apiserver、etcd、只开 namespace 与证书签发相关控制器的 KCM）为 systemd；
   ESO、Flux source/kustomize-controller、ayatori-manager 为 podman quadlet（host 网络、只读根、
-  各自 k0s 证书用户）。Flux 从 release tag 同步 Database CRD 与控制面对象；k0s、ESO、Flux 版本与
-  digest 固定在 role defaults。
+  各自的客户端证书，由 client-credentials 容器以 CSR 申请并自行续签，Ayatori ADR-0021）。Flux 从 release tag 同步
+  Database CRD 与控制面对象；k0s、ESO、Flux 版本与 digest 固定在 cookbook 属性。
 - 管理凭据：ESO 以 `kubernetes-ayatori-<env>` 登录 OpenBao，只读
   `kv/infra/postgresql/ayatori/<env>`，同步为 `ayatori-system/homelab-<env>-admin`。
 - 限制：Flux 不选主、单实例；kustomize-controller 为 cluster-admin；第三方镜像只固定 digest，
-  未验签；k0s 客户端证书一年到期，删除 `/etc/ayatori-control-plane/<identity>/kubeconfig` 后重跑
-  部署轮换。宿主负载很高（2026-10-04 约 97/12 核）时 manager 可能因 Lease 超时退出，由
+  未验签；客户端证书在有效期过去 70–90% 时自行续签，续签失败过期时重新
+  converge 即重新签发。宿主负载很高（2026-10-04 约 97/12 核）时 manager 可能因 Lease 超时退出，由
   systemd 自动重启。
 
 ## 监控与告警
@@ -176,9 +180,9 @@ SecretStore Valid、ExternalSecret SecretSynced；Instance `Ready=True / Managem
 
 ## 运维入口
 
-- 部署 role、发布与已知限制：Ayatori [deploy/README.md](https://git.ddupan.top/panxiao81/ayatori/src/tag/v0.1.0/deploy/README.md)；
+- 部署、发布与已知限制：Ayatori [deploy/README.md](https://git.ddupan.top/panxiao81/ayatori/src/branch/main/deploy/README.md)；
   Database 设计：Ayatori `docs/database/`。
-- 环境声明：homelab-infra `infrastructure/ayatori/ansible/`；OpenBao mount/role/policy：
+- 环境声明：homelab-infra `infrastructure/chef/policies/ayatori-<env>.rb`，GitOps 目录 `clusters/ayatori-<env>/`；OpenBao mount/role/policy：
   `infrastructure/openbao/terraform/auth.tf`、`policies/ayatori-*.hcl`；zot 授权：`apps/zot/values.yaml`；
   LXC：`infrastructure/incus/terraform/`。
 - 依赖：Incus、OpenBao、共享 PostgreSQL、zot、Gitea（Flux 拉取与制品下载）、GitHub/ghcr
