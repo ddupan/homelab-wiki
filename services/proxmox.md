@@ -81,7 +81,12 @@ PVE 主机存储、DRBD 副本和 k3s 的 [OpenEBS](openebs.md) 是不同管理�
 
 ## Sandbox LB 与根文件系统恢复
 
-Sandbox 的 VyOS 入口为 PostgreSQL `10.60.0.1:5432`、K3s API
+> 2026-11-03 起 sandbox 入口已从 VyOS HAProxy 迁到 Ayatori LoadBalancer
+> （homelab-infra `clusters/ayatori-prod/sandbox-k8s.yaml`、`sandbox-postgresql.yaml`，commit `0d59044`、`9f040fb`），
+> VyOS 上不再有 `load-balancing haproxy`。下面的入口地址与第 7 步是 2026-09-25 事故时的记录；
+> 根盘与数据库恢复步骤仍然适用，入口检查改按 Ayatori LoadBalancer 的声明进行。
+
+当时 Sandbox 的 VyOS 入口为 PostgreSQL `10.60.0.1:5432`、K3s API
 `10.60.0.13:6443`、OpenSandbox `10.60.0.13:8080`。数据库只转发到
 sandbox1 `10.60.0.11:5432`；K3s 转发到两个节点的 `6443`；OpenSandbox
 转发到两个节点的 `30080`。OpenSandbox `/health` 返回 200 不代表 K3s 控制面可用。

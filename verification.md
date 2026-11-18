@@ -275,3 +275,18 @@ homelab-infra 旧接入材料已由 [PR #238](https://git.ddupan.top/panxiao81/h
 监控与告警已接入（homelab-infra #255、#260，2026-10-05 端到端验证）。
 证书到期告警已接入（#263，2026-10-07）。
 未同步：备份仅本机（无离机副本）。
+
+## VyOS 单一写入方的跨仓库同步（2026-11-18）
+
+homelab-infra：[#819](https://git.ddupan.top/panxiao81/homelab-infra/pulls/819)（`cb5ce88`，vyos_router 改用 enforce）、
+[#822](https://git.ddupan.top/panxiao81/homelab-infra/pulls/822)（`69a1bd5`，OCI vyos.yml 改用 enforce）、
+[#830](https://git.ddupan.top/panxiao81/homelab-infra/pulls/830)（`5deca70`，四个写入方合并为 `vyos_router`）。
+现场验证见 [VyOS 路由器](services/vyos-router.md#当前状态与证据)。
+
+未同步：
+
+- homelab-infra 源码文档（`vyos_router` 注释、`infrastructure/oci/README.md` 与 `ansible/README.md` 的 OSPF 描述、
+  `README-monitoring.md`、`pve_vm`/`pve_ha` 注释、`apps/tailscale/subnet-routes.sh` 注释）在 [#839](https://git.ddupan.top/panxiao81/homelab-infra/pulls/839)，尚未合并。
+  `pve_vm` 中 VM 100 的 description 从 “OSPF peer” 改为 “BGP peer”，合并后下次运行 Proxmox playbook 会同步到 PVE。
+- `platform/observability/metrics/rules/vyos.yaml` 的 `VyosOspfNoAdjacency`、`VyosOspfNeighborNotFull` 在 OSPF 退役后
+  已无数据、永远不会触发；BGP 由 `VyosBgpPeerDown` 覆盖。规则与对应测试待删除。

@@ -49,15 +49,16 @@ sudo tailscale set --accept-routes=true
 LAN 的 [Blocky / 路由器 DNS 设计](lan-dns.md) 不自动证明远程客户端已获得相同解析配置。
 IP 可达而域名失败时，先查看远程客户端 DNS 路径，不直接改 LAN DNS。
 
-脚本记录两个 SDN 网段由 laptop 从 VyOS 通过 OSPF 学习。
-即使 Tailscale 仍广播这两个前缀，底层 OSPF 路由缺失也会导致转发失败。
+脚本广播的 `10.60.0.0/14` 是 laptop 经 BGP 学到的路由：laptop 与 NEC IX 建邻居，IX 转发
+[VyOS](vyos-router.md) 的汇总，下一跳保持 `192.168.10.2`（OSPF 已于 2026-10-16 退役）。
+即使 Tailscale 仍广播该前缀，laptop 上 BGP 路由缺失也会导致转发失败；用 `ip route show proto bgp` 核对。
 新增路由还需 tailnet 批准及访问规则配合，单看广播配置不足以验收。
 
 `apps/tailscale/subnet-routes.sh` 是维护端脚本，`--advertise-routes` 替换完整集合；
 普通客户端接入无需执行它。新增网段时按完整声明审查，避免意外移除既有路由。
 现有脚本提供批准信息的查看方法；执行现场检查前仍需按本库规则对齐范围。
 
-依赖为 Tailscale 控制与数据路径、laptop 转发及目标网络；SDN 另依赖 VyOS/OSPF，
+依赖为 Tailscale 控制与数据路径、laptop 转发及目标网络；SDN 另依赖 [VyOS](vyos-router.md) 与 IX 之间的 BGP，
 operator Service 另依赖 Kubernetes 和 operator。
 本页没有记录 tailnet OAuth、设备密钥或凭据内容。
 

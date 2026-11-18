@@ -29,6 +29,7 @@ last_reviewed: 2026-10-04
 | 调用模型或处理文档 | [LiteLLM](../services/litellm-gateway.md)、[Marker](../services/marker.md) | [OpenViking](../services/openviking.md)，如果需要检索 |
 | 让应用发送邮件 | [SMTP relay](../services/smtp-relay.md) | 消费者的发信配置 |
 | 远程访问或查看网络资产 | [Tailscale](../services/tailscale.md)、[NetBox](../services/netbox.md) | NetBox 的权威来源是 Git，不能代替运行状态 |
+| 改路由、SDN 网关/DHCP、到 OCI 或 DN42 的连通 | [VyOS 路由器](../services/vyos-router.md) | [OCI](../services/oci.md)、[Proxmox](../services/proxmox.md)；网络规划见 homelab-infra `infrastructure/network/` |
 | 管理云主机或虚拟机 | [OCI](../services/oci.md)、[Proxmox](../services/proxmox.md) | 对应 IaC 和网络/HA runbook |
 | 使用 PS3 内容或 KMS 服务 | [ps3netsrv](../services/ps3netsrv.md)、[vlmcsd](../services/vlmcsd.md) | 各自客户端配置 |
 

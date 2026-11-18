@@ -26,6 +26,7 @@
 | DNS 各视图保留权威边界；只管理明确声明的 RRset | 不清理 Samba 自动维护的域记录；LAN 现状按维护者说明对齐，旧源码文档待同步 | `infrastructure/dns/README.md`、[LAN DNS](../services/lan-dns.md) |
 | 关键服务 DNS 应容忍单 DC 故障；完整 AD HA 不是前置条件 | 2026-09-30 已接受、待实现；备用需独立提供受保护记录并跨宿主故障域，保留 AD 动态记录所有权；冷启动和缓存过期也须通过验收 | [LAN DNS](../services/lan-dns.md)、[事故报告](../incidents/2026-09-30-dc-dns-openbao.md) |
 | DHCP 下发主 DNS Blocky、副 DNS 路由器；Blocky 上游为路由器 | 路由器同时承担上游与客户端备用角色；Samba AD 保留域 DNS 职责，不能把所有条件转发合并成一条普通上游 | [LAN DNS](../services/lan-dns.md)，维护者于 2026-09-16 说明 |
+| vyos-rtr 的 CLI 配置只有一个写入方 `vyos_router`，受管路径以 `match: enforce` 整体收敛 | 新规则（2026-11-18）：原先两个项目四个 play 各自追加 `set` 行，删不掉旧值，各自维护的归属范围一旦重叠就会互删；合并后模板即受管路径的全部事实。不得新增第二个写入方；不得把机器自生成的内容（wg42 私钥、login、hw-id）纳入受管路径 | [VyOS 路由器](../services/vyos-router.md)、homelab-infra #830 |
 | Docker 地址池不得与 DN42 的 172.20.0.0/14 重叠 | 本地直连路由会干扰 DN42；已有网络不自动改地址 | `infrastructure/docker/README.md` |
 | NetBox 目前是评估，拓扑由 Git 管理 | 不把网页编辑结果当作新的权威数据 | `apps/netbox/README.md`、`CLAUDE.md` |
 | 现有 privileged DinD runner 只运行可信 workflow | 实例级 runner 不能视为不可信任务隔离边界 | `platform/gitea-runner/README.md` |
