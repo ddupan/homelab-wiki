@@ -67,3 +67,26 @@ class DocumentChecks(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+
+
+SOP = ("---\ntitle: X\nlast_reviewed: 2026-11-18\nwatch: [homelab-infra:apps/x/]\n---\n# X\n"
+       "## 什么时候用\n## 先确认\n## 操作步骤\n## 验证\n## 回滚 / 升级\n")
+
+
+class SopChecks(unittest.TestCase):
+    run_check = DocumentChecks.run_check
+
+    def test_complete_indexed_sop_passes(self):
+        self.assertEqual([], self.run_check({"sop/index.md": "[x](x.md)\n", "sop/x.md": SOP}))
+
+    def test_missing_section_and_index(self):
+        errors = self.run_check({"sop/index.md": "# 索引\n", "sop/x.md": SOP.replace("## 验证\n", "")})
+        self.assertTrue(any("缺少小节：验证" in e for e in errors))
+        self.assertTrue(any("未被 sop/index.md 链接" in e for e in errors))
+
+    def test_watch_format(self):
+        ok = {"title": "X", "last_reviewed": "2026-11-18",
+              "watch": ["homelab-infra:apps/x/", "other/repo:a.md"]}
+        self.assertEqual([], metadata_errors(ok))
+        for bad in [["apps/x"], ["repo: spaced"], "repo:x"]:
+            self.assertTrue(metadata_errors({**ok, "watch": bad}), bad)

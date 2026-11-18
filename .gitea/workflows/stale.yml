@@ -1,0 +1,24 @@
+name: stale
+
+on:
+  schedule:
+    - cron: '0 0 * * 1'
+  workflow_dispatch:
+
+jobs:
+  stale:
+    runs-on: [self-hosted, pod]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Install dependencies
+        run: |
+          python3 -m venv .venv
+          .venv/bin/python -m pip install --disable-pip-version-check -r requirements-docs.txt
+      # 源码仓库都是公开的，读提交不需要凭据；token 只用来维护本仓库的「文档待复核」issue。
+      - name: Sync stale-page issue
+        env:
+          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+        run: .venv/bin/python scripts/stale_pages.py --issue

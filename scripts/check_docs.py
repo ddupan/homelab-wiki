@@ -19,6 +19,10 @@ LIFECYCLES = {"planned", "experimental", "active", "retired", "unknown"}
 EVIDENCE = {"configuration", "documented", "live-verified"}
 # These two pages are navigation/scope descriptions, not individual services.
 SERVICE_INDEXES = {"services/index.md", "services/external-consumers.md"}
+# A reader in the middle of an incident relies on every SOP having the same shape.
+SOP_SECTIONS = ["什么时候用", "先确认", "操作步骤", "验证", "回滚 / 升级"]
+# <repo>:<path> or <owner>/<repo>:<path>; parsed again by stale_pages.py.
+WATCH = re.compile(r"(?:[\w.-]+/)?[\w.-]+:[^\s:]+")
 
 
 class UniqueLoader(yaml.SafeLoader):
@@ -95,6 +99,9 @@ def metadata_errors(meta, required=False, template=False):
     if "sources" in meta and (not isinstance(meta["sources"], list) or
                              any(not isinstance(x, str) or not x.strip() for x in meta["sources"])):
         errors.append("sources 必须是非空字符串组成的列表（可为空列表）")
+    if "watch" in meta and (not isinstance(meta["watch"], list) or
+                           any(not isinstance(x, str) or not WATCH.fullmatch(x) for x in meta["watch"])):
+        errors.append("watch 必须是 <仓库>:<路径> 或 <所有者>/<仓库>:<路径> 组成的列表")
     return errors
 
 
@@ -123,12 +130,14 @@ class HTMLLinks(HTMLParser):
 
 def parse_body(body):
     tokens = MarkdownIt("commonmark").enable("table").parse(body)
-    anchors, links = set(), []
+    anchors, links, sections = set(), [], []
     for i, token in enumerate(tokens):
         if token.type == "heading_open":
             inline = tokens[i + 1]
             text = "".join(t.content for t in inline.children or []
                            if t.type in {"text", "code_inline", "image"})
+            if token.tag == "h2":
+                sections.append(text.strip())
             base = slug(text)
             candidate, suffix = base, 0
             while candidate in anchors:
@@ -150,7 +159,7 @@ def parse_body(body):
             for child in t.children or []:
                 visit(child, line)
         visit(token, 1)
-    return anchors, links
+    return anchors, links, sections
 
 
 def check(root, files):
@@ -166,11 +175,15 @@ def check(root, files):
             errors.extend(f"{relative}:1: {e}" for e in metadata_errors(
                 meta, required=required, template=relative.startswith("templates/")))
             documents[relative] = parse_body(body)
+            if is_sop(relative):
+                missing = [h for h in SOP_SECTIONS if h not in documents[relative][2]]
+                if missing:
+                    errors.append(f"{relative}:1: SOP 缺少小节：{'、'.join(missing)}")
         except (ValueError, OSError, yaml.YAMLError) as exc:
             # Do not print YAML source lines: malformed frontmatter may contain secrets.
             errors.append(f"{relative}:1: 无法解析文件或 frontmatter（{type(exc).__name__}）")
     indexed = set()
-    for relative, (_, links) in documents.items():
+    for relative, (_, links, _) in documents.items():
         for line, url in links:
             prefix = f"{relative}:{line}: "
             try:
@@ -191,7 +204,7 @@ def check(root, files):
                 errors.append(prefix + f"目标不存在：{unquote(parsed.path)}")
                 continue
             dest = target.relative_to(root).as_posix()
-            if relative == "services/index.md":
+            if relative in {"services/index.md", "sop/index.md"}:
                 indexed.add(dest)
             anchor = unquote(parsed.fragment)
             if anchor and dest in documents and anchor not in documents[dest][0]:
@@ -199,7 +212,13 @@ def check(root, files):
     for relative in documents:
         if relative.startswith("services/") and relative not in SERVICE_INDEXES and relative not in indexed:
             errors.append(f"{relative}:1: 服务页未被 services/index.md 链接")
+        if is_sop(relative) and relative not in indexed:
+            errors.append(f"{relative}:1: SOP 未被 sop/index.md 链接")
     return errors
+
+
+def is_sop(relative):
+    return relative.startswith("sop/") and relative != "sop/index.md"
 
 
 def main():

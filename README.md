@@ -4,12 +4,13 @@
 
 ## 从这里开始
 
+- [SOP 索引](sop/index.md)：出了状况或要做运维操作时，按步骤处理。
 - [按任务查找文档](guides/task-index.md)：接入服务、写 CI、查日志、取秘密或接续 AI 任务。
 - [服务总览](services/index.md)：组件、用途、入口和状态依据。
 - [发布新服务](guides/publish-service.md)：LAN DNS、证书、HTTPRoute、认证与 GitOps。
 - [架构约束](architecture/constraints.md)：修改环境前必须遵守的设计。
 - [来源追溯](sources.md)：固定源码版本，以及与工作区的差异。
-- [文档维护规则](CONTRIBUTING.md)、[服务模板](templates/service.md)、[AI 工作入口](AGENTS.md)：如何共同维护知识。
+- [文档维护规则](CONTRIBUTING.md)、[服务模板](templates/service.md)、[SOP 模板](templates/sop.md)、[AI 工作入口](AGENTS.md)：如何共同维护知识。
 - [首轮状态对齐记录](verification.md)：已完成的澄清与历史处置。
 - [文档完善清单](documentation-backlog.md)：已补指南与暂缓事项。
 

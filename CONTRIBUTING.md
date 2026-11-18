@@ -1,81 +1,88 @@
 # 文档维护规则
 
-## 查询前先对齐
+## 这个库给谁看
 
-查询项目状态前，先询问维护者正在进行的工作、跟踪 ticket 和尚未成文的现状。
-已有明确授权则在该范围内继续，不重复询问；文档查询授权不自动扩展为现场检查。
-2026-09-16 维护者指定 SPIFFE/SPIRE 基本以 homelab-infra #34 的记录为依据；
-本轮仅查该 ticket 及其直接引用的 runbook，没有查询现场。其他项目仍需先询问。
+**wiki 写给人看**，由人和 AI 共同维护。各源码仓库的 README / `AGENTS.md` 写给 AI 和改代码的人，
+讲实现细节与陷阱；wiki 不复制它们，需要原理时链接过去。
 
-2026-09-16 维护者指定 Samba AD、OCI、Proxmox 优先 IaC、以代码为准。
-可直接核对其仓库中的配置与任务，README 与代码不一致时优先解释代码；此授权不等于现场变更或验收。
+判断一段内容该放哪里：
 
-稳定设计与使用方法放知识库，动态进度链接到 ticket。知识库只保留注明查阅日期的阶段摘要，
-不复制维护第二份实时任务列表。issue open 可能表示后续阶段未完成，不能据此推断基础服务未部署。
+| 内容 | 位置 |
+|---|---|
+| 出了状况怎么处理、计划内的运维操作 | wiki `sop/` |
+| 怎么使用一个服务（入口、登录、第一次使用） | wiki `services/` |
+| 跨服务的任务（发布新服务、写 CI） | wiki `guides/` |
+| 跨服务的设计约束、事故复盘 | wiki `architecture/`、`incidents/` |
+| 某个配置为什么这样写、改代码会踩的坑 | 源码仓库 README / `AGENTS.md` |
+| 进行中的工作 | 源码仓库的 issue / PR |
 
-## 状态与证据
+## 怎么写
 
-分别记录服务生命周期和验证程度，避免一个“完成”掩盖多个状态：
+- **按读者要做的事来组织，不按系统结构。** 标题写"Bao 被 seal 了怎么办"，不写"OpenBao seal 机制"。
+- **正文只写读者需要的内容。** 不写"本页依据……整理""本轮未查询现场"这类整理过程；
+  来源、验证状态放进 frontmatter（见下文），正文最多在末尾用一句话说明状态。
+- **命令可以直接复制。** 写明在哪台机器、以哪个身份执行；需要替换的值用 `<尖括号>` 标出。
+- **写出预期结果。** 每条检查命令都说明正常时输出什么样。
+- 凭据只写取得方式和存放位置，不写值。
+- 中文正文；命令、配置键和上游专有名词保留原文。
 
-- 生命周期：planned（计划）、experimental（试验）、active（投入使用）、retired（退役）、unknown（未知）。
-- 证据：configuration（仅配置）、documented（已有实施记录）、live-verified（现场验证）。
-- 存在冲突时明确标记 conflict，并链接待核实项；不按文件日期自动决定谁正确。
+### SOP
 
-设计另用 draft / accepted / implementing / implemented / superseded 表示进度；
-accepted 不代表部署完成，implemented 必须附实现和验收依据。
+放在 `sop/`，从 [templates/sop.md](templates/sop.md) 复制，必须包含模板中的五个小节：
+什么时候用、先确认、操作步骤、验证、回滚 / 升级。新增的 SOP 要加进 [sop/index.md](sop/index.md)。
 
-`last_reviewed` 是文档审阅日期；`last_verified` 是对应运行事实的最近核实日期。
-没有核实就写 null。历史验证要说明日期、范围和来源，不能冒充本轮验证。
+SOP 从实际处理过的事情里提炼，不凭空预写。处理完一次事故或一次计划操作后，
+在同一次工作中新建或更新对应的 SOP；告警的 `runbook_url` 指向 SOP 的对应小节。
 
-## 一项工作的完成条件
+### 服务页
 
-1. 先按上述规则对齐查询范围，再读取服务文档、相关 ticket 和约束，区分动态工作与事实冲突。
-2. 实施和必要验证后，同步用途、入口、使用方法、依赖和恢复步骤中的变化。
-3. 新增或退役服务时更新服务总览；退役文档保留替代入口和原因。
-4. 代码与文档分属仓库时互相链接 commit/PR；未部署或未同步的部分明确写出。
-5. 报告分别说明已实施、已验证、仍待完成的内容。
+放在 `services/`，从 [templates/service.md](templates/service.md) 复制；新增或退役时同步
+[services/index.md](services/index.md)。退役的服务页标为 `lifecycle: retired`，开头写明替代方案。
 
-新增服务至少提供一次真实的使用路径。部署步骤不等于使用说明；不能只有 Helm/Compose 命令。
-页面上半部分面向使用者，下半部分说明运维和证据。
+## frontmatter
 
-## 来源与归属
+```yaml
+---
+title: 页面标题
+last_reviewed: 2026-11-18   # 最近一次按现状核对正文的日期
+watch:                      # 本页依赖的源码路径，变化后会提示复核
+  - homelab-infra:infrastructure/openbao/
+  - homelab-cookbooks:cookbooks/homelab_bao/
+---
+```
 
-每份事实只维护一个权威正文位置，其他页面链接到它。链接源码时标明仓库与路径；
-历史验收尽量使用 commit permalink，现状入口可指向默认分支。引用未提交工作区时明确标记，
-合并后补正式链接。禁止把所有来源路径一律转换成可能不存在的远端链接。
+服务页另有 `lifecycle`（planned / experimental / active / retired / unknown）、
+`evidence`（configuration / documented / live-verified）和 `last_verified`（最近一次现场验证日期，
+没有验证写 null，不能因为编辑文字就刷新）。`sources` 是可选的自由文本来源列表。
 
-发生冲突时在 verification.md 记录两边来源、影响、核实方法和结果。核实完成后更新权威
-文档及引用它的总览，保留决策原因；不要长期维护两种“现状”。
+### `watch` 与过时提醒
 
-## 格式与检查
+`watch` 中每项为 `<仓库>:<路径>`，仓库默认属于 `panxiao81`，其他所有者写成 `<所有者>/<仓库>:<路径>`；
+路径可以是目录。定时任务 [stale.yml](.gitea/workflows/stale.yml) 每周查询这些路径在
+`last_reviewed` 之后的提交（跳过 Renovate 依赖升级与 merge commit），把需要复核的页面汇总到一个
+固定 issue「文档待复核」。路径已不存在的也会列出，通常表示代码搬了家。
 
-使用普通 Markdown 链接、相对附件路径和文字说明；关键事实直接写入正文。
-可选 Obsidian 编辑，个人布局、缓存、插件和同步配置不提交。对外分享前检查敏感内容。
-提交前检查相对链接、服务目录覆盖，以及新增内容是否混淆计划和运行事实。
+复核时对照列出的提交修改正文，然后更新 `last_reviewed`；内容不受影响时也只更新日期。
+没有对应源码的页面（例如纯人工流程）可以不写 `watch`。
 
+## 一次变更应更新哪里
 
-## 一次服务变更应更新哪里
-
-| 变化 | 必须查看的文档 |
+| 变化 | 要看的页面 |
 |---|---|
 | 使用入口、认证、权限、客户端参数 | 对应 `services/` 页面；入口变化同时更新服务总览 |
 | 新增或退役组件 | 服务页、`services/index.md`；任务入口变化再改 `guides/task-index.md` |
-| 跨服务设计或边界 | `architecture/constraints.md` 及受影响指南 |
-| 只有开发进度变化 | 原项目 ticket；wiki 仅在阶段摘要需要变化时更新并注明日期 |
-| 取得新的验证结果 | 服务页说明日期与验证范围，据实更新 `last_verified` |
-| 工作区来源已合并 | 核对实际内容后更新 `sources.md` 的固定链接及差异标记 |
+| 处理了一次故障或做了一次运维操作 | 对应 SOP；没有就新建 |
+| 跨服务设计或边界 | `architecture/constraints.md` 及受影响的页面 |
+| 只有开发进度变化 | 不改 wiki，记在源码仓库的 ticket |
 
-先修改最接近事实的页面，再同步导航，避免把同一套操作复制到多份文档。
-无需每次修改都更新首页、所有服务页或整个来源索引。
-原仓库 README 同步按维护者要求暂缓，不阻塞 wiki 的维护。
+先改最接近事实的页面，再同步导航；同一套操作不在多处复制。
 
-按维护者 2026-09-27 的明确约定，本 Wiki 的修改完成检查后直接提交并推送 `main`，
-无需创建 PR。此规则仅适用于 Wiki；代码仓库仍按各自约定新建分支并提交 PR。
-不得跳过文档检查或覆盖其他工作区修改。
+本 wiki 的修改在检查通过后直接提交并推送 `main`，无需 PR（维护者 2026-09-27 约定）；
+代码仓库仍按各自约定走分支和 PR。不得跳过检查，也不得覆盖其他工作区的修改。
 
 ## 本地与 CI 检查
 
-需要 Python 3.10 或更新版本；首次在 wiki 根目录准备环境：
+需要 Python 3.10 或更新版本：
 
 ```bash
 python3 -m venv .venv
@@ -85,22 +92,12 @@ python3 -m venv .venv
 git diff --check
 ```
 
-依赖版本固定在 [requirements-docs.txt](requirements-docs.txt)。安装依赖需要网络，检查器本身离线运行。
-Gitea 工作流 [.gitea/workflows/docs.yml](.gitea/workflows/docs.yml) 在 main push、PR 和手动触发时运行，
-使用 `[self-hosted, pod]` 的 Python 虚拟环境；无需业务秘密或集群权限。
-不设置 job `container`：此次 Pod runner 日志确认没有 Docker socket，额外启动 job 容器会在检查前失败。
-CI 获取 checkout action 和依赖仍需要对应网络可用。
+[docs.yml](.gitea/workflows/docs.yml) 在 push、PR 和手动触发时运行同样的检查。它不设置 job
+`container`，因为 Pod runner 没有 Docker socket。检查器离线运行，检查内容：
 
-检查范围：
+- 相对链接、图片、引用式链接与标题锚点；不探测远端 URL。
+- frontmatter 的类型、重复键、枚举值、日期，`live-verified` 必须有验证日期，`watch` 的格式。
+- 服务页字段齐全且被服务总览链接；SOP 包含五个必需小节且被 SOP 索引链接。
 
-- Markdown 的相对文件链接、图片、引用式链接及本地标题锚点；不探测远端 URL。
-- frontmatter 的类型、重复键、状态枚举、日期与 `live-verified` 必须有验证日期的约束。
-- `services/` 下的服务页必须有完整状态字段，并由服务总览链接；总览及外部消费者范围页除外。
-- 已有 frontmatter 的其他页面校验 title 和审阅日期；`templates/` 允许日期占位为 null。
-
-标题锚点按常见 Gitea/GitHub 规则处理中文、字母、数字、连字符和重复标题。
-需要特殊字符锚点时可声明 HTML `id`，不要依赖 Obsidian 插件或非标准 heading 属性。
-代码块和行内代码里的路径是示例或说明，不当链接执行或检查；源码路径的存在性由 `sources.md` 的明确核对维护。
-检查错误带文件与行号，但不打印原始 frontmatter 内容。
-
-检查器不证明命令正确、外链可达、事实最新或服务健康，也不自动获取凭据或执行文档中的示例。
+标题锚点按 Gitea/GitHub 规则处理中文；需要特殊字符锚点时用 HTML `id`。
+检查器不证明命令正确、外链可达、事实最新或服务健康。
