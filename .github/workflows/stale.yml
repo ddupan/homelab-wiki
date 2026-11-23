@@ -5,9 +5,13 @@ on:
     - cron: '0 0 * * 1'
   workflow_dispatch:
 
+permissions:
+  contents: read
+  issues: write   # the 「文档待复核」 issue in this repository
+
 jobs:
   stale:
-    runs-on: [self-hosted, pod]
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -17,8 +21,9 @@ jobs:
         run: |
           python3 -m venv .venv
           .venv/bin/python -m pip install --disable-pip-version-check -r requirements-docs.txt
-      # 源码仓库都是公开的，读提交不需要凭据；token 只用来维护本仓库的「文档待复核」issue。
+      # Watched repositories are public on Gitea or GitHub (moved ones are followed automatically). The
+      # job token raises GitHub's read limit (60/h unauthenticated) and maintains this repository's issue.
       - name: Sync stale-page issue
         env:
-          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
         run: .venv/bin/python scripts/stale_pages.py --issue

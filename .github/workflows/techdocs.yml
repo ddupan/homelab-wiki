@@ -1,0 +1,33 @@
+name: techdocs
+
+# Push only: the publisher identity's SPIRE entry matches push events on main. Retry with "Re-run jobs".
+on:
+  push:
+    branches: [main]
+    paths:
+      - '**.md'
+      - mkdocs.yml
+      - catalog-info.yaml
+      - .github/workflows/techdocs.yml
+
+permissions:
+  contents: read
+
+jobs:
+  # The file name is part of this job's SPIFFE ID (…/homelab-wiki/techdocs); OpenBao role
+  # ci-techdocs-publisher only accepts IDs ending in /techdocs.
+  techdocs:
+    runs-on: homelab
+    permissions:
+      contents: read
+      id-token: write # GitHub OIDC token, one half of the exchange's proof
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Stage Markdown into docs/
+        run: |
+          mkdir docs
+          git ls-files -z -- '*.md' ':!:.github/**' | xargs -0 cp --parents -t docs/
+      - uses: ddupan/ci-actions/publish-techdocs@v1
