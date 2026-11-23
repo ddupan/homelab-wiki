@@ -315,6 +315,6 @@ wiki 侧已无待确认项。以下是源码仓库的同步工作，应在 homel
   `scrapes/vyos.yaml` 与 `rules/vyos.yaml` 的 homelab-pg-proxy 指标、samba-ad `dns.yml` 的 `pg-prod.ad` A 记录。
 - 过时的源码 README：`apps/seaweedfs`（仍写 `s3.ad`）、`apps/iam-login`（管理组写 Domain Admins）、samba-ad（`--ask-vault-pass`）、
   chef（LB 节点“待部署”）、loadbalancer（部署步骤）、gcp-billing（gcp-ci 是否在 CI）、shared-postgresql、blocky/dns（“尚未成为 LAN resolver”）。
-- 本库 `.gitea/workflows/`（docs、techdocs、stale）仍用 `[self-hosted, pod]`，依赖 sandbox 池迁移期的 `pod` 别名；别名取消前改为 `[self-hosted]`。
+- 本库已迁到 GitHub（2026-11-23）：docs、stale 在 GitHub 托管 runner，techdocs 在 homelab ARC runner（`runs-on: homelab`）。
 
 本次同时按 4e0fdb8 的新写作规则，去掉了服务页正文中的整理过程说明，来源移入 frontmatter，并为依赖源码的页面加上 `watch`。

@@ -57,8 +57,9 @@ watch:                      # 本页依赖的源码路径，变化后会提示�
 
 ### `watch` 与过时提醒
 
-`watch` 中每项为 `<仓库>:<路径>`，仓库默认属于 `panxiao81`，其他所有者写成 `<所有者>/<仓库>:<路径>`；
-路径可以是目录。定时任务 [stale.yml](.gitea/workflows/stale.yml) 每周查询这些路径在
+`watch` 中每项为 `<仓库>:<路径>`，仓库默认属于 Gitea 的 `panxiao81`，其他所有者写成 `<所有者>/<仓库>:<路径>`；
+已迁到 GitHub 的仓库（在 Gitea 上归档且网站指向 github.com）自动改查 GitHub，`watch` 不用改。
+路径可以是目录。定时任务 [stale.yml](.github/workflows/stale.yml) 每周查询这些路径在
 `last_reviewed` 之后的提交（跳过 Renovate 依赖升级与 merge commit），把需要复核的页面汇总到一个
 固定 issue「文档待复核」。路径已不存在的也会列出，通常表示代码搬了家。
 
@@ -92,8 +93,8 @@ python3 -m venv .venv
 git diff --check
 ```
 
-[docs.yml](.gitea/workflows/docs.yml) 在 push、PR 和手动触发时运行同样的检查。它不设置 job
-`container`，因为 Pod runner 没有 Docker socket。检查器离线运行，检查内容：
+[docs.yml](.github/workflows/docs.yml) 在 push、PR 和手动触发时于 GitHub 托管 runner 运行同样的检查。
+检查器离线运行，检查内容：
 
 - 相对链接、图片、引用式链接与标题锚点；不探测远端 URL。
 - frontmatter 的类型、重复键、枚举值、日期，`live-verified` 必须有验证日期，`watch` 的格式。
