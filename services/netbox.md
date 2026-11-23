@@ -44,5 +44,3 @@ NetBox 是一份没人读的派生镜像，对单节点 laptop 又太重。
 登录经 Authelia forward-auth 限制为 AD `netbox-admins` 组，另有面向 VyOS OSPF 与 Samba AD DNS 的配置生成试验。
 这些路径随 9532e11 一并删除；OSPF 已于 2026-10-16 退役（见 [VyOS 路由器](vyos-router.md)），
 Authelia 已于 2026-10-11 退役（见 [Authelia](authelia.md)）。原页面的浏览与修改步骤已不适用，不再保留。
-
-旧版来源文件的固定版本见[来源追溯](../sources.md#netbox)。

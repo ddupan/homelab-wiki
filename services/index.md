@@ -12,17 +12,17 @@
 | [blocky](lan-dns.md) | LAN 主 DNS、广告过滤、分流 | `192.168.10.127:53` | 维护者说明已作为 DHCP 主 DNS，上游为路由器 | 维护者 2026-09-16 说明、`apps/blocky/README.md` | 无需逐台确认主机；旧源码说明待同步 |
 | [gitea](gitea.md) | 代码托管与 Actions | `git.ddupan.top`（OCI，Cloudflare 代理） | 2026-11-05 迁到 OCI A1（Compose + SQLite）；k3s 副本 2026-11-11 删除 | `infrastructure/oci/ansible`（role `gitea`） | 备份：OCI 2 天 → Google Drive 30 天；GitHub `ddupan` 镜像 |
 | http-echo | Flux 部署与漂移修复 canary | `集群内` | 记录已验证 | `apps/http-echo/README.md` | 已有验证步骤 |
-| [marker](marker.md) | GPU 文档转换 API | `集群内端口 8001` | 配置与部署指南；未附上线记录 | `apps/marker/README.md` | 已有转换示例；部署镜像仍为占位符 |
+| [marker](marker.md) | GPU 文档转换 API | `集群内端口 8001` | 未部署（镜像仍为占位符） | `apps/marker/README.md` | 已有转换示例；部署镜像仍为占位符 |
 | netboot | PXE 与系统安装 | `192.168.10.127` | 有部署及使用记录 | `apps/netboot/README.md` | 已有客户端启动说明 |
 | [nexus](nexus.md) | 制品仓库；少量尚未迁移的 CI 依赖 | `nexus.lab.ddupan.top` | 正式使用；AD LDAPS 登录；维护者 2026-11-18 说明多数 CI 依赖已改走 artifact-keeper | `apps/nexus/README.md` | 列出并迁走剩余 CI 消费者；外部 PostgreSQL 与备份恢复测试 |
-| [openviking](openviking.md) | 上下文检索服务 | `记录端口 1933 / 8020` | 配置与部署指南；未附上线记录 | `apps/openviking/README.md` | 已有导入、任务查询、检索与原文读取指南 |
-| [ps3netsrv](ps3netsrv.md) | PS3 网络内容服务 | `宿主 TCP 38008；地址未记录` | Docker 运维文档记录运行 | `apps/ps3netsrv/docker-compose.yml` | 已有客户端与内容目录指南 |
+| [openviking](openviking.md) | 上下文检索服务 | `端口 1933 / 8020` | 未部署 | `apps/openviking/README.md` | 已有导入、任务查询、检索与原文读取指南 |
+| [ps3netsrv](ps3netsrv.md) | PS3 网络内容服务 | `192.168.10.127:38008` | 笔记本上 Docker 运行 | `apps/ps3netsrv/docker-compose.yml` | 已有客户端与内容目录指南 |
 | [seaweedfs](seaweedfs.md) | S3 对象存储 | `s3.lab.ddupan.top` | zot、Terraform state、artifact-keeper 使用 | `apps/seaweedfs/README.md` | 源码 README 仍写旧名 `s3.ad` |
 | [shared-etcd](shared-etcd.md) | homelab 共享协调与选主存储 | etcd-pve1/2/3，mTLS，见服务页 | 三成员均在 PVE（etcd-pve3 取代 laptop，#570），由 Cinc 管理；消费者 Patroni pg-prod、pg-sandbox | `infrastructure/etcd/README.md` | 原生指标、续签与维护告警已接入 |
 | [shared-postgresql](shared-postgresql.md) | k3s 外共享 PostgreSQL（Patroni） | `pg-prod.lab.ddupan.top`（Ayatori LB）/ `pg-dev` | 生产主从运行；租户经 Ayatori 申请；CNPG 2026-10-13 退役、应用已全部迁移 | `infrastructure/shared-postgresql/README.md`、`clusters/ayatori-*/` | 源码仍有 VyOS 旧入口遗留（README、探测、`pg-prod.ad` 记录） |
 | [smtp-relay](smtp-relay.md) | 应用发信中继（boky/postfix → OCI Email Delivery） | `smtp-relay.smtp-relay.svc.cluster.local:25`；PVE 节点经 `192.168.10.127:25` | 2026-11-12 起改走 OCI Email Delivery（#735）；发件人仅 `noreply@ddupan.top` | `apps/smtp-relay/README.md` | 来源网段是唯一门禁 |
 | [tailscale](tailscale.md) | 远程网络与子网路由 | `Tailscale 网络` | 有配置 | `apps/tailscale/subnet-routes.sh` | 已有远程访问与路由边界指南 |
-| [vlmcsd](vlmcsd.md) | KMS 兼容服务，使用范围未记录 | `宿主 TCP 1688；地址未记录` | 仅发现配置 | `apps/vlmcsd/compose.yaml` | 已有协议入口与客户端指南；未查询现场 |
+| [vlmcsd](vlmcsd.md) | KMS 兼容服务，域内 Windows 自动发现 | `kms.ad.ddupan.top:1688` | 笔记本上 Docker 运行 | `apps/vlmcsd/compose.yaml` | 已有客户端指南 |
 | [ai-gateway](ai-gateway.md) | LLM 统一入口，按客户端发 key（Anthropic 经 SPIRE WIF、ChatGPT Plus 经 CLIProxyAPI） | `ai.lab.ddupan.top`；key 管理 `ai-keys.lab.ddupan.top` | 配置；2026-11-03 起为模型 API 入口 | `apps/ai-gateway/README.md` | 未现场验证 |
 | [artifact-keeper](artifact-keeper.md) | CI 依赖下载的主要 pull-through 缓存（PyPI/npm/Go/Galaxy/Terraform/Docker Hub 等） | `artifacts.lab.ddupan.top` | 配置；维护者 2026-11-18 说明多数 CI 流量已迁入 | `apps/artifact-keeper/values.yaml`（无 README） | 剩余 Nexus 消费者未列出 |
 | [homepage](homepage.md) | 所有应用的起始页 | `home.lab.ddupan.top` | 配置；2026-11-03 上线 | `apps/homepage/README.md` | 未现场验证 |

@@ -89,7 +89,6 @@ env:
 部署和接管细节回到 `platform/external-secrets/README.md`。
 依赖包括 OpenBao、Kubernetes TokenReview、集群 DNS 与 ESO controller。
 
-来源文件的固定版本与工作区差异见[来源追溯](../sources.md#external-secrets)。
 
 ## 当前声明位置
 

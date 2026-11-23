@@ -2,11 +2,13 @@
 title: PostgreSQL Tenant Operator（计划中的 DBaaS）
 lifecycle: planned
 evidence: documented
-last_reviewed: 2026-10-04
+last_reviewed: 2026-11-23
 last_verified: null
 sources:
   - https://git.ddupan.top/panxiao81/postgresql-tenant-operator
   - https://git.ddupan.top/panxiao81/postgresql-tenant-operator/src/branch/main/docs/architecture.md
+watch:
+  - postgresql-tenant-operator:README.md
 ---
 
 # PostgreSQL Tenant Operator
@@ -20,7 +22,6 @@ homelab 资源有限，为每个应用维护一套数据库会浪费资源。绝
 因此集群内目前已经共用一套 PostgreSQL 实例，但数据库、账号、权限和凭据仍不容易维护。
 计划自行实现这个中间层，让下游通过统一接口申请可消费的数据库，降低共享实例的管理成本。
 
-这段现状和设计动机由维护者于 2026-09-16 提供；本轮没有查询数据库或集群。
 现有实例的日常接入见[共享 PostgreSQL 使用指南](shared-postgresql.md)。
 现有实例的源码入口为 homelab-infra 的 `apps/shared-postgresql/`。
 

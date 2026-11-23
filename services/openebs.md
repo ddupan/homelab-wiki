@@ -2,8 +2,10 @@
 title: OpenEBS PVC 使用指南
 lifecycle: active
 evidence: documented
-last_reviewed: 2026-10-16
+last_reviewed: 2026-11-23
 last_verified: null
+watch:
+  - homelab-infra:platform/openebs/
 ---
 
 # OpenEBS 本地持久存储
@@ -12,9 +14,7 @@ last_verified: null
 provisioner 为 `zfs.csi.openebs.io`，底层来自宿主 `data/ceph` ZFS pool/dataset。
 名称中的 `ceph` 不代表它提供 Ceph 分布式存储能力。
 
-本页依据 homelab-infra `platform/openebs/README.md` 与 `storageclasses.yaml` 整理，
-未查询 PVC、宿主存储或现场容量。源码 README 的历史消费者列表包含已退役项目，
-当前服务归属以[服务总览](index.md)为准，不照抄为现役卷清单。
+源码 README 里的消费者列表包含已退役项目，哪些服务在用以[服务总览](index.md)为准。
 
 ## 为应用声明 PVC
 
@@ -53,7 +53,7 @@ volumeMounts:
 
 后两段分别是 Pod 与容器配置片段，不是独立 Kubernetes 对象。
 应用与 PVC 必须位于同一 namespace；挂载路径及文件权限以应用要求为准。
-把声明纳入应用既有的 GitOps/部署入口，本轮未创建或挂载 PVC。
+把声明放进应用既有的 GitOps 目录，不要手工 `kubectl apply`。
 
 ## 等待绑定与节点约束
 
@@ -99,5 +99,3 @@ grafana 的卷保存 SQLite 配置，不属于 TSDB，保持默认。
   19%、主机写入约 14.6 TB 估算）。`ashift` 不能在线修改，只能新建 `ashift=12` 的池再 send/recv。
 - 这块盘的 flush 会随机停顿 10–65 秒，导致 etcd 一类 fsync 密集的负载超时；Ayatori 控制器
   频繁重启就是这个原因。
-
-来源文件的固定版本与工作区差异见[来源追溯](../sources.md#openebs)。

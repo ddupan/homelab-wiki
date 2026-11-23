@@ -111,7 +111,6 @@ SAMR/LSARPC pipe 断连，以及 AppArmor `samba-rpcd` profile 拒绝
 第二域控与恢复方案见源码 README；恢复尚未演练过。
 域控身份数据库与应用数据不同，不能通过重跑建域、清空数据库来排查普通登录失败。
 
-来源文件的固定版本见[来源追溯](../sources.md#samba-ad)。
 
 ## 更新后 DNS 不响应与 Samba 启动失败
 

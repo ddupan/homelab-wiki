@@ -86,7 +86,6 @@ kubectl --context default -n smtp-relay logs deploy/smtp-relay --tail=40   # 找
 relay 自 2026-11-12 起使用 OCI 上游（[PR #735](https://git.ddupan.top/panxiao81/homelab-infra/pulls/735)）；
 切换后尚未做过端到端送达验证。
 
-来源文件的固定版本见[来源追溯](../sources.md#smtp-relay)。
 
 ## 历史：Microsoft 365 上游（2026-11 前）
 

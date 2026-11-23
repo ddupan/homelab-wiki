@@ -84,7 +84,6 @@ AI 接续任务时先确认操作范围，再执行现场查询；不能因为�
 
 源码入口为 homelab-infra `infrastructure/shared-postgresql/README.md`；租户清单在 `clusters/ayatori-*/`。
 
-来源文件的固定版本与工作区差异见[来源追溯](../sources.md#shared-postgresql)。
 
 ## 历史：CNPG shared-db（2026-10-13 退役）
 

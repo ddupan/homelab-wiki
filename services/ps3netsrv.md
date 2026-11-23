@@ -1,17 +1,17 @@
 ---
 title: ps3netsrv 使用指南
-lifecycle: unknown
+lifecycle: active
 evidence: configuration
-last_reviewed: 2026-09-16
+last_reviewed: 2026-11-23
 last_verified: null
+watch:
+  - homelab-infra:apps/ps3netsrv/
 ---
 
 # ps3netsrv
 
 为 PS3 客户端通过网络读取游戏内容提供服务。
-维护者于 2026-09-16 表示没有需补充的动态事项；本页依据工作区
-`apps/ps3netsrv/docker-compose.yml` 整理。该文件有未提交修改，以此处注明的工作区为来源。
-本轮没有查询容器、磁盘内容或客户端状态。
+以 Docker Compose 运行在笔记本（192.168.10.127）上。
 
 ## 入口与内容目录
 
@@ -22,7 +22,7 @@ last_verified: null
 | 宿主内容目录 | `/mnt/pool/games/ps3` |
 | 容器内目录 | `/games`，当前映射为读写 |
 
-所读 Compose 没有指定客户端应使用的宿主 IP 或域名，接入时由维护者提供实际地址。
+客户端填写服务器地址 `192.168.10.127`、端口 `38008`。
 这不是浏览器 HTTP 服务，也不能将路径挂载成功等同于客户端已发现内容。
 
 ## 第一次从 PS3 浏览内容
@@ -34,16 +34,14 @@ last_verified: null
 
 目录结构见 [容器项目说明](https://github.com/shawly/docker-ps3netsrv)，客户端操作见
 [webMAN MOD PS3 NET Server](https://github.com/aldostools/webMAN-MOD/wiki/~-PS3-NET-Server)。
-本轮未执行以上步骤；具体客户端版本的菜单名称可能不同。
+不同客户端版本的菜单名称可能不同。
 
 ## 排障与维护边界
 
-- 无法连接：核对实际宿主地址、TCP 端口和客户端到宿主的网络。
+- 无法连接：先在笔记本上确认容器在运行（`docker ps | grep ps3netsrv`），再核对客户端到笔记本的网络。
 - 列表为空：核对宿主目录、子目录结构、文件权限与客户端扫描设置。
 - 发现内容但读取失败：核对文件可读性及客户端格式支持，再看服务日志。
 
 Compose 的 `USER_ID` / `GROUP_ID` 控制容器读文件时的身份；调整前核对宿主所有权，
 不要为排障递归修改整个存储池的权限。挂载目录属于内容数据，重建容器不会替代数据备份。
-依赖为 Docker、宿主存储、网络和相容客户端；本页不修改容器或数据目录。
-
-来源文件的固定版本与工作区差异见[来源追溯](../sources.md#ps3netsrv)。
+依赖为 Docker、宿主存储、网络和相容客户端。

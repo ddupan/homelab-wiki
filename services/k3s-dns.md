@@ -74,5 +74,3 @@ pdns 在本地快速应答且有缓存，因此这些排列无害。
 故障定位先区分集群 Service 解析、AD 转发、固定分流、默认上游和客户端搜索域。
 依赖包括 CoreDNS、Kubernetes API、网络、Samba AD DNS、Blocky/PowerDNS 及默认上游；
 split-horizon 名字的业务可达性还依赖 Envoy 和各自后端。
-
-来源文件的固定版本见[来源追溯](../sources.md#k3s-dns)。

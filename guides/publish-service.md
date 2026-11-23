@@ -205,5 +205,3 @@ curl --silent --show-error --output /dev/null --write-out '%{http_code}\n' \
 旧版本中引用的 `apps/netbox/*`（2026-10-04 删除）与 `apps/authelia/*`（2026-10-11 随 Authelia 退役）已不存在；
 Gitea 已迁到 OCI，不再经本 Gateway 发布。`apps/http-echo/httproute.yaml` 是已排除出 Kustomization 的历史 Contour 示例，
 `archive/traefik/` 也不是当前接入模板；不要因文件存在就直接应用。
-
-旧版来源文件的固定版本见[来源追溯](../sources.md#publish-service)。

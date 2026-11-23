@@ -96,7 +96,6 @@ zot 的持久数据在 SeaweedFS `zot` bucket 的 `registry/` 前缀；zot Pod �
 
 部署、授权变更、凭据轮换及验收细节以 homelab-infra `apps/zot/README.md` 为准。
 
-来源文件的固定版本见[来源追溯](../sources.md#zot)。
 
 ## GC 与 SHA tag 清理
 

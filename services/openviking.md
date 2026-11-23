@@ -2,15 +2,17 @@
 title: OpenViking 导入与查询指南
 lifecycle: unknown
 evidence: documented
-last_reviewed: 2026-09-16
+last_reviewed: 2026-11-23
 last_verified: null
+watch:
+  - homelab-infra:apps/openviking/
 ---
 
 # OpenViking
 
 OpenViking 为文档和 agent 上下文提供导入与检索能力。
-本页依据 homelab-infra `apps/openviking/README.md`、Compose 和上游接口文档整理，未访问实例。
-仓库提供部署方案，未据此断言服务已上线或 wiki 已自动同步到索引。
+**目前没有部署**：笔记本上没有运行对应的 Compose 栈（2026-11-23）。
+以下入口和步骤来自 homelab-infra `apps/openviking/` 的配置，供部署之后使用；wiki 也没有自动导入索引。
 
 ## 入口与数据位置
 
@@ -31,7 +33,7 @@ OpenViking 为文档和 agent 上下文提供导入与检索能力。
 
 先设置 `OPENVIKING_BASE_URL` 为已授权的 API 根地址；入口需要 key 时，通过既有秘密注入方式
 提供 `OPENVIKING_API_KEY`。以下 Python 标准库片段共用同一会话；只处理一份公开上游 README，
-会写入索引并触发模型处理。本轮没有执行导入或请求。
+会写入索引并触发模型处理。
 
 ```python
 import json
@@ -65,7 +67,6 @@ print(request("/api/v1/tasks/" + urllib.parse.quote(task_id, safe="")))
 
 任务到达 `completed` 后再搜索；`failed` 或 `cancelled` 应先处理原因，不能当作入库成功。
 避免因请求超时直接反复导入同一来源。参见上游
-[资源 API](https://github.com/volcengine/OpenViking/blob/main/docs/en/api/02-resources.md) 和
 [任务 API](https://github.com/volcengine/OpenViking/blob/main/docs/zh/api/17-tasks.md)。
 
 ```python
@@ -98,5 +99,3 @@ HTTP 成功之外，还要检查各次响应中的应用状态与错误信息；
 连接失败核对宿主端口；导入失败区分来源可达性与解析；任务卡住或结果缺失再查看 VLM、embedding
 与队列处理。数据在 `./data`，模型缓存可重新下载，两者不能按同一种可丢弃缓存处理。
 部署、模型初始化与认证维护回到 `apps/openviking/README.md`。
-
-来源文件的固定版本与工作区差异见[来源追溯](../sources.md#openviking)。

@@ -102,5 +102,3 @@ README 中的历史配额与免费机型检查不是持续费用保证，新增�
 
 恢复设计和接管历史见 `infrastructure/oci/README.md`，网络维护及私钥边界见 `ansible/README.md`。
 不把旧 state 恢复步骤、迁移收尾 playbook 或历史验证命令当作每次登录前要执行的初始化。
-
-来源文件的固定版本见[来源追溯](../sources.md#oci)。

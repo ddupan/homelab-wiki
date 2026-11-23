@@ -77,7 +77,6 @@ PVE 主机存储、DRBD 副本和 k3s 的 [OpenEBS](openebs.md) 是不同管理�
 涉及 quorum、fencing 或 watchdog 的处理先读 `README-ha.md`，不要套用普通单机重启排障。
 长期配置入口为 `infrastructure/proxmox/ansible/`，按实际变更选择对应 playbook。
 
-来源文件的固定版本见[来源追溯](../sources.md#proxmox)。
 
 ## Sandbox LB 与根文件系统恢复
 

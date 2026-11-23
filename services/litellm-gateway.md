@@ -33,5 +33,3 @@ last_verified: null
 
 退役 commit 记录 `.gitignore` 中的 `auth.json` 条目暂留，直到本地凭据文件删除；该文件含上游凭据，
 不进入 wiki、日志或 AI 上下文。
-
-来源文件在退役前的固定版本见[来源追溯](../sources.md#litellm-gateway)。

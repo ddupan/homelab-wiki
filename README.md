@@ -9,7 +9,6 @@
 - [服务总览](services/index.md)：组件、用途、入口和状态依据。
 - [发布新服务](guides/publish-service.md)：LAN DNS、证书、HTTPRoute、认证与 GitOps。
 - [架构约束](architecture/constraints.md)：修改环境前必须遵守的设计。
-- [来源追溯](sources.md)：固定源码版本，以及与工作区的差异。
 - [文档维护规则](CONTRIBUTING.md)、[服务模板](templates/service.md)、[SOP 模板](templates/sop.md)、[AI 工作入口](AGENTS.md)：如何共同维护知识。
 - [首轮状态对齐记录](verification.md)：已完成的澄清与历史处置。
 - [文档完善清单](documentation-backlog.md)：已补指南与暂缓事项。
@@ -24,7 +23,7 @@
 页面依赖的源码路径列在 frontmatter `watch` 中，源码变化后由每周的过时检查提醒复核。
 
 `last_verified` 是最近一次现场验证的日期，没有就为 null；代码存在不代表服务此刻健康。
-历史上的盘点与状态对齐记录见[首轮状态对齐记录](verification.md)与[来源追溯](sources.md)。
+历史上的盘点与状态对齐记录见[首轮状态对齐记录](verification.md)。
 
 ## 内容归属
 
