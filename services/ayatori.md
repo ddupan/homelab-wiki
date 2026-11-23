@@ -2,7 +2,7 @@
 title: Ayatori 控制面
 lifecycle: experimental
 evidence: live-verified
-last_reviewed: 2026-10-07
+last_reviewed: 2026-11-23
 last_verified: 2026-10-07
 sources:
   - https://git.ddupan.top/panxiao81/ayatori/src/tag/v0.1.0/deploy/README.md
@@ -34,6 +34,22 @@ sources:
   - 2026-10-07 v0.1.4 部署与证书到期指标、规则加载现场验证
   - 维护者于 2026-10-04 授权部署 Dev 与 Prod，并确认 Dev 可直接试验、Prod 只走发布流程
   - 2026-10-04 Dev/Prod 部署、幂等重跑与 Database 端到端验收（本页“当前状态与证据”）
+  - homelab-infra：clusters/ayatori-*/、infrastructure/chef/policies/ayatori-{dev,prod}.rb、infrastructure/loadbalancer/README.md、infrastructure/compute/README.md
+  - https://git.ddupan.top/panxiao81/homelab-infra/commit/cd0e04b
+  - https://git.ddupan.top/panxiao81/homelab-infra/commit/ea95b32
+  - https://git.ddupan.top/panxiao81/homelab-infra/commit/bc99d20
+  - 维护者 2026-11-18 说明：ayatori-prod iam-login 登录不在进行中（视为完成）；compute 仍在进行中
+watch:
+  - homelab-infra:clusters/ayatori-dev/
+  - homelab-infra:clusters/ayatori-prod/
+  - homelab-infra:infrastructure/chef/policies/ayatori-dev.rb
+  - homelab-infra:infrastructure/chef/policies/ayatori-prod.rb
+  - homelab-infra:infrastructure/chef/policies/compute-dev.rb
+  - homelab-infra:infrastructure/loadbalancer/README.md
+  - homelab-infra:infrastructure/compute/
+  - homelab-infra:platform/observability/metrics/scrapes/ayatori.yaml
+  - homelab-infra:platform/observability/metrics/rules/ayatori.yaml
+  - homelab-infra:apps/iam-login/terraform/clients.tf
 ---
 
 # Ayatori 控制面
@@ -41,12 +57,15 @@ sources:
 ## 它解决什么问题
 
 Ayatori 是 homelab 的基础设施控制平面：以 kube-apiserver + CRD 提供版本化 API，由
-ayatori-manager 协调后端。当前上线的唯一领域是 Database：在共享 PostgreSQL 上按
+ayatori-manager 协调后端。已上线两个领域：Database 与 LoadBalancer（见下方[负载均衡](#负载均衡loadbalancer)）。
+Database：在共享 PostgreSQL 上按
 Tenant 申请供应数据库与登录角色，把应用凭据写入 OpenBao 并在 Tenant status 公布位置，
 释放后按 Retain/Delete 处置，支持导入已有数据库与重新开放。边界见
 [控制面边界](../architecture/ayatori-control-plane.md)，资源模型见
 [DBaaS 设计](postgresql-tenant-operator.md)。成熟度为 experimental：Dev 与 Prod 已上线并完成
-端到端验收；Prod 已承载首个真实 Tenant（`iam-login`）；控制面每日本机备份，尚无离机副本。
+端到端验收；Prod 的 GitOps 目录承载 `artifact-keeper`、`backstage`、`e5renew`、`iam-login`、`research-auto`、
+`spire-server` 六个 PostgreSQLTenant（`clusters/ayatori-prod/`）；控制面每日本机备份，尚无离机副本。
+计算领域（infrastructure/compute，Dev 节点 VMID 170–172）仍在建设中，见[当前状态与证据](#当前状态与证据)。
 
 ## 从哪里使用
 
@@ -56,8 +75,15 @@ Tenant 申请供应数据库与登录角色，把应用凭据写入 OpenBao 并�
 | Prod | `ayatori-prod.lab.ddupan.top`（192.168.10.12） | `https://192.168.10.12:6443` | `homelab-prod` → `pg-prod:5432` | `kv/ayatori/prod/applications/` |
 
 - 两台都是 [Incus](incus.md) 上的非特权 LXC，仅 LAN 可达。
-- 登录：当前只有主机管理员入口，`ssh panxiao81@ayatori-<env>.lab.ddupan.top`（也接受 Bao SSH CA 签发的
-  短期证书）后 `sudo k0s kubectl ...`。尚未给人或其他系统签发 kubeconfig，也没有接入 IdM。
+- 登录：人经 Ayatori CLI（`ayatori config add`）或 kubectl + kubelogin 用 [iam-login](iam-login.md)
+  （issuer `https://sso.ddupan.top`）登录；每个环境只认自己的客户端（`ayatori-dev` / `ayatori-prod`，
+  `apps/iam-login/terraform/clients.tf`），`platform-admins` 绑定 cluster-admin。配置在
+  `infrastructure/chef/policies/ayatori-{dev,prod}.rb` 的 `oidc` 属性（Prod 见 [ea95b32](https://git.ddupan.top/panxiao81/homelab-infra/commit/ea95b32)，
+  CLI 登录发现信息 `kube-public/ayatori-login` 见 [bc99d20](https://git.ddupan.top/panxiao81/homelab-infra/commit/bc99d20)，2026-11-18）。
+  据 ea95b32 说明，Dev 已于 2026-11-18 用 kubelogin device code 验证。
+  bc99d20 说明升级后需各重启一次 `k0scontroller` 才会放开匿名读取发现信息。
+- 主机管理员入口仍在：`ssh panxiao81@ayatori-<env>.lab.ddupan.top`（也接受 Bao SSH CA 签发的
+  短期证书）后 `sudo k0s kubectl ...`。
 - 前提：两台都是 Cinc 节点（[Chef](https://git.ddupan.top/panxiao81/homelab-infra/src/branch/main/infrastructure/chef)），部署只需到 LXC 的 SSH（`panxiao81` 免密 sudo）；
   首次 SPIRE enrollment 另需操作者的 Bao token。
 
@@ -83,7 +109,9 @@ spec:
   extensions: [pgcrypto]
 ```
 
-合并后约 1 分钟内同步。目录只允许 Namespace、PostgreSQLTenant、PostgreSQLDatabase，其他对象会
+合并后约 1 分钟内同步。Dev 目录只允许 Namespace、PostgreSQLTenant、PostgreSQLDatabase、LoadBalancerHost；Prod 另允许
+LoadBalancer 与 Backend（见各目录 `kustomization.yaml` 注释）。LoadBalancerHost 由各 LB 主机的 lb-agent 自行注册
+（ADR-0022），不在目录中声明。其他对象会
 使整个同步失败（`gitops-tenants` 无权限），需先移除。`prune` 开启：从目录删除 Tenant 即释放其
 Database（默认 Retain，不删数据）；删除 namespace 会连带释放其中所有 Tenant。导入已有数据库
 （`source: Import`）同样在此声明 PostgreSQLDatabase。
@@ -124,10 +152,12 @@ homelab-infra `infrastructure/openbao/terraform` 为消费方 SA 建 role 与只
   （cookbook）是另一条版本线。
 - 完全不可用的 release 不升版本：修复合并后删除并重打同名 tag，Release 覆盖同名镜像
   （CI 身份有 update，本机开发身份可读写删除），policy 中的镜像 digest 随之更新。
-- 部署：homelab-cookbooks 的 `homelab_ayatori` cookbook（节点基线由 `homelab_base` 负责），环境声明是
+- 部署：homelab-cookbooks 的 `homelab_ayatori` cookbook（节点基线由 `homelab_base` 负责）；原 Ansible 部署声明
+  `infrastructure/ayatori/ansible` 已于 2026-11-03 删除（[cd0e04b](https://git.ddupan.top/panxiao81/homelab-infra/commit/cd0e04b)）。环境声明是
   homelab-infra `infrastructure/chef/policies/ayatori-<env>.rb`（release tag 与按 digest 固定的 manager
   镜像、PostgreSQL、GitOps、LB）。在 laptop 执行 `infrastructure/chef/converge.py -l ayatori-<env>`
   （先 `--why-run`）。Promotion 即把 prod policy 的 release 与 digest 改为 Dev 已验收的版本。
+- 两个环境都固定 release `v0.4.0`（`default['homelab_ayatori']['release']`）。
 - Dev 可用本地构建、按 digest 引用的镜像试验；Prod 只走 release + promotion。
 - 运行形态：k0s controller-only（apiserver、etcd、只开 namespace 与证书签发相关控制器的 KCM）为 systemd；
   ESO、Flux source/kustomize-controller、ayatori-manager 为 podman quadlet（host 网络、只读根、
@@ -139,6 +169,24 @@ homelab-infra `infrastructure/openbao/terraform` 为消费方 SA 建 role 与只
   未验签；客户端证书在有效期过去 70–90% 时自行续签，续签失败过期时重新
   converge 即重新签发。宿主负载很高（2026-10-04 约 97/12 核）时 manager 可能因 Lease 超时退出，由
   systemd 自动重启。
+
+## 负载均衡（LoadBalancer）
+
+Ayatori LoadBalancer（Ayatori ADR-0012）的数据面是 PVE 上的 LB 主机（HAProxy + Data Plane API + LB agent，
+agent 内嵌 GoBGP 只连 VyOS）：Prod 为 lb-prod-1/2（10.60.0.30/31），Dev 为 lb-dev-1/2（10.60.0.32/33），
+主机配置由 Cinc（`homelab_loadbalancer`）负责，详见 homelab-infra `infrastructure/loadbalancer/README.md`。
+VIP 由 Ayatori 分配，不写死；Prod 的 LB Hostname 写入 Ayatori 独占的 zone `lb.lab.ddupan.top`
+（`ayatori-prod.rb` 的 `loadbalancer.dns`），客户端用的服务名在 `infrastructure/dns/terraform/hosts.tf` 中作为 CNAME 指向它。
+
+`clusters/ayatori-prod/` 声明了三个 LoadBalancer：
+
+| 文件 | 入口 | 来源 |
+|---|---|---|
+| `sandbox-k8s.yaml` | sandbox k3s API（`sandbox-k8s.lab.ddupan.top`），自 VyOS HAProxy 迁入 | 2026-11-03 加入 |
+| `sandbox-postgresql.yaml` | sandbox k3s datastore（`pg-sandbox.lab.ddupan.top`），自 VyOS HAProxy 迁入 | 2026-11-03 加入 |
+| `pg-prod.yaml` | 生产 PostgreSQL（`pg-prod.lab.ddupan.top`，5432 直连 / 6432 PgBouncer），自 VyOS homelab-pg-proxy 迁入 | [062c1e4](https://git.ddupan.top/panxiao81/homelab-infra/commit/062c1e4)，2026-11-09 |
+
+新增 LB 入口在 Prod 目录声明 Backend 与 LoadBalancer，写法参照上述文件。使用说明另见 [Ayatori 负载均衡](ayatori-loadbalancer.md)。
 
 ## 监控与告警
 
@@ -182,7 +230,8 @@ SecretStore Valid、ExternalSecret SecretSynced；Instance `Ready=True / Managem
 
 - 部署、发布与已知限制：Ayatori [deploy/README.md](https://git.ddupan.top/panxiao81/ayatori/src/branch/main/deploy/README.md)；
   Database 设计：Ayatori `docs/database/`。
-- 环境声明：homelab-infra `infrastructure/chef/policies/ayatori-<env>.rb`，GitOps 目录 `clusters/ayatori-<env>/`；OpenBao mount/role/policy：
+- 环境声明：homelab-infra `infrastructure/chef/policies/ayatori-<env>.rb`，GitOps 目录 `clusters/ayatori-<env>/`；
+  LB 主机：`infrastructure/loadbalancer/`；OpenBao mount/role/policy：
   `infrastructure/openbao/terraform/auth.tf`、`policies/ayatori-*.hcl`；zot 授权：`apps/zot/values.yaml`；
   LXC：`infrastructure/incus/terraform/`。
 - 依赖：Incus、OpenBao、共享 PostgreSQL、zot、Gitea（Flux 拉取与制品下载）、GitHub/ghcr
@@ -233,5 +282,15 @@ Tenant（Bound / CredentialsAvailable）。
   apiserver Ready，演练前标记、Instance、Flux 对象与同步的 Secret 均在，CA 指纹一致；演练容器不运行
   controller，结束后删除。
 - 消费方：`iam-login` 以自有 SA `iam-login-database` 经 OpenBao 只读其凭据（homelab-infra
-  `apps/iam-login/README.md`），本页未独立验证其运行。
+  `apps/iam-login/README.md`）。
 - 未验证：导入（`source: Import`）在真实环境的路径、按原地址重建后的完整恢复、k0s 证书轮换。
+
+以上为 2026-10-04 至 10-07 的现场记录。之后的变化：
+
+- 两个环境的 policy 固定 release `v0.4.0`；部署只经 Chef（[cd0e04b](https://git.ddupan.top/panxiao81/homelab-infra/commit/cd0e04b)）。
+- LoadBalancer 领域已在 Prod 承载 sandbox-k8s、sandbox-postgresql、pg-prod 三个入口（见[负载均衡](#负载均衡loadbalancer)）。
+- Prod 租户：`artifact-keeper`、`backstage`、`e5renew`、`iam-login`、`research-auto`、`spire-server`；
+  其中 backstage、e5renew、research-auto、spire-server 于 2026-10-13 自 CNPG shared-db 迁入。Dev 目录当前为空。
+- iam-login OIDC 登录在两个环境的 policy 中配置（见[从哪里使用](#从哪里使用)）。
+- 进行中：Ayatori 自建计算后端（Ayatori ADR-0015）的 Dev 节点 compute-dev-1/2/3（PVE VMID 170–172，
+  10.60.0.50–52）由 `infrastructure/compute/` 与 Cinc policy `compute-dev.rb` 声明，尚未上线（维护者 2026-11-18 说明）。

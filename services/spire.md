@@ -2,12 +2,15 @@
 title: SPIFFE/SPIRE 使用入口与阶段状态
 lifecycle: active
 evidence: documented
-last_reviewed: 2026-09-21
+last_reviewed: 2026-11-23
 last_verified: null
 sources:
   - https://git.ddupan.top/panxiao81/homelab-infra/issues/34
   - https://git.ddupan.top/panxiao81/homelab-infra/src/branch/main/platform/spire/RUNBOOK.md
   - https://git.ddupan.top/panxiao81/ci-actions/src/tag/v1/spiffe-openbao-login
+  - homelab-infra platform/spire/README.md
+watch:
+  - homelab-infra:platform/spire/
 ---
 
 # SPIFFE/SPIRE
@@ -32,7 +35,7 @@ SPIFFE/SPIRE 取代了原计划中由 **workload-sts 承担统一 IAM 平台**�
 
 例如 OpenBao 验证 JWT-SVID 后，按照自己的 role/policy 签发短期 Bao token。
 能够直接验证 SVID 的服务也可以直接消费身份，授权仍由该服务决定。
-人类登录继续使用 Samba AD 与 Authelia。
+人类登录使用 [iam-login](iam-login.md)（`sso.ddupan.top`，用户目录为 Samba AD）；Authelia 已于 2026-10-11 退役。
 
 这一设计有两个主要优势：
 
@@ -42,7 +45,7 @@ SPIFFE/SPIRE 取代了原计划中由 **workload-sts 承担统一 IAM 平台**�
 - **控制现有系统的改造量。** 优先利用目标服务已有的身份验证、token 交换和权限机制，
   增加对 SPIFFE 的信任与身份映射，保留各服务已有的授权模型。
 
-设计定位由维护者于 2026-09-16 补充。workload-sts 项目已归档，停止开发且不部署现有 PoC，
+workload-sts 项目已归档，停止开发且不部署现有 PoC，
 仓库保留早期设计与验证历史。原方案也将最终资源权限留给下游服务；
 此次替代主要将自建的机器身份入口与签发能力交给 SPIRE。
 详细脉络和历史文档入口见 [workload-sts 设计历史](../architecture/workload-sts-history.md)。
@@ -53,10 +56,8 @@ SPIFFE/SPIRE 取代了原计划中由 **workload-sts 承担统一 IAM 平台**�
 **基础设施与最小 OpenBao PoC 已完成，真实 workload 的推广接入仍在推进。**
 `active` 仅描述已有基础设施，不表示所有消费者均已迁移。
 
-维护者指定以 [homelab-infra #34](https://git.ddupan.top/panxiao81/homelab-infra/issues/34)
-为主要状态依据。2026-09-16 查阅时 issue 为 open，最后更新时间为
-2026-09-14 12:43:54 UTC；本页是该次查阅的阶段摘要，不替代 ticket 的动态进度。
-基础设施阶段结论来自 ticket；2026-09-21 另对下表中的可复用 Action 做了现场验证。
+推广进度以 [homelab-infra #34](https://git.ddupan.top/panxiao81/homelab-infra/issues/34) 为准。
+下表是已完成的阶段；可复用 Action 于 2026-09-21 现场验证。
 
 | 已完成阶段 | 记录依据 |
 |---|---|
@@ -99,11 +100,16 @@ Workload API socket，role、audience 与调用时机必须由受审查的 workf
 运行配置使用的 Kubernetes 身份约定为
 `spiffe://ddupan.top/ns/<namespace>/sa/<service-account>`。
 ticket 目标章节列出的其他身份形式是设计示例，不应直接替换现有 subject。
-OIDC issuer 为 `https://spire-oidc.ad.ddupan.top`，其 discovery/JWKS 用于机器验签。
+OIDC issuer 为 `https://spire-oidc.ddupan.top`，其 discovery/JWKS 用于机器验签。issuer 经两次迁移：
+2026-10 由 `spire-oidc.ad` 改为 `spire-oidc.lab`，2026-11 再改为公网可解析的 `spire-oidc.ddupan.top`，
+供 Entra、Google、OCI 等外部验证方取 issuer。
+公网经 cloudflared 只放行 discovery 与 JWKS；旧名 `spire-oidc.lab.ddupan.top` 继续提供 JWKS，
+Bao 的 `jwks_url` 与 iam-login 的 `jwk-set-uri` 仍用该名。校验 `iss` 的有 Bao `jwt-spire`、zot、iam-login，
+以及 Anthropic Console 中手工维护的 federation issuer；issuer 不得随意修改。
 
 ## 仍在 ticket 中跟踪
 
-截至本次查阅，后续范围包括在真实 Gitea CI/AI Agent 中验收已发布的登录 Action、
+截至 2026-09-16，后续范围包括在真实 Gitea CI/AI Agent 中验收已发布的登录 Action、
 SeaweedFS Web Identity/STS、非 Kubernetes 主机与临时 VM 的证明和回收、
 Compute/DBaaS 消费身份，以及 HA、备份恢复和多 issuer 约定。
 这些是 #34 的开放范围；单个消费者已有其他 PoC，不等于整项已完成。
@@ -121,7 +127,7 @@ Compute/DBaaS 消费身份，以及 HA、备份恢复和多 issuer 约定。
 
 - SPIFFE ID 是身份，不自动授予资源权限；资源授权仍由目标服务执行。
 - audience 按目标服务绑定，OpenBao role 精确限制 subject；不授予整个 trust domain 通用权限。
-- 人类身份保持 Samba AD / Authelia，当前方案不依赖迁移 Keycloak。
+- 人类身份由 iam-login（Samba AD 目录）负责，当前方案不依赖迁移 Keycloak。
 - 不因能访问 Agent socket 就允许任意身份；不将短期凭据持久化到镜像、Secret、artifact 或日志。
 - PostgreSQL registration state 与 signing-key PVC 必须分别考虑备份；恢复路径不能形成循环依赖。
 - PoC 和推广期间保留现有认证回退路径，不能把目标架构当作已经完成的凭据迁移。

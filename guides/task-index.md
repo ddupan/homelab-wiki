@@ -1,6 +1,6 @@
 ---
 title: 按任务查找文档
-last_reviewed: 2026-10-04
+last_reviewed: 2026-11-18
 ---
 
 # 按任务查找文档
@@ -10,12 +10,12 @@ last_reviewed: 2026-10-04
 
 | 要做什么 | 先读 | 需要时再读 |
 |---|---|---|
-| 评估独立 IAM 与 AI agent 身份 | [独立 IAM 草案](../architecture/independent-iam-draft.md) | [Hydra 人类登录 PoC](../services/hydra.md)；完整 IAM 仍为草案 |
+| 评估独立 IAM 与 AI agent 身份 | [iam-login](../services/iam-login.md)、[独立 IAM 草案](../architecture/independent-iam-draft.md) | [Hydra（已退役）](../services/hydra.md) 的 PoC 记录 |
 | 设计或实现 Ayatori 控制面能力 | [Ayatori 控制面边界](../architecture/ayatori-control-plane.md) | Ayatori 仓库 ADR、对应领域 API 与 adapter 文档 |
 | 部署、发布 Ayatori 或用它申请数据库 | [Ayatori 控制面](../services/ayatori.md) | [Incus](../services/incus.md)、[OpenBao](../services/openbao.md)、[共享 PostgreSQL](../services/shared-postgresql.md) |
-| 发布新的 LAN Web 服务 | [发布新服务](publish-service.md) | [DNS](../services/lan-dns.md)、[Authelia](../services/authelia.md) |
+| 发布新的 LAN Web 服务 | [发布新服务](publish-service.md) | [DNS](../services/lan-dns.md)、[iam-login](../services/iam-login.md)、[homepage](../services/homepage.md) |
 | 写 CI 或选择 Pod/VM runner | [Gitea / Actions](../services/gitea.md) | [Dynamic Runner](../services/gitea-dynamic-runner.md)、[SPIFFE](../services/spire.md)、[`ci-actions@v1`](https://git.ddupan.top/panxiao81/ci-actions/src/tag/v1) |
-| 为 CI 缓存 Ansible/Go 依赖 | [Nexus POC](../services/nexus.md) | [Dynamic Runner](../services/gitea-dynamic-runner.md)、[OpenBao](../services/openbao.md) |
+| 为 CI 缓存依赖（PyPI/npm/Go/Galaxy/Terraform 等） | [artifact-keeper](../services/artifact-keeper.md) | 少量未迁移的仍在 [Nexus](../services/nexus.md)；另见 [Dynamic Runner](../services/gitea-dynamic-runner.md)、[OpenBao](../services/openbao.md) |
 | 拉取或发布容器镜像 | [zot](../services/zot.md) | [SPIFFE](../services/spire.md)；S3 后端维护才读 SeaweedFS |
 | 使用 S3 对象存储 | [SeaweedFS](../services/seaweedfs.md) | [OpenBao](../services/openbao.md) |
 | 给应用分配数据库 | [共享 PostgreSQL](../services/shared-postgresql.md) | [计划中的 DBaaS](../services/postgresql-tenant-operator.md) |
@@ -23,13 +23,16 @@ last_reviewed: 2026-10-04
 | 盘点或补齐监控与告警 | [监控覆盖与补齐计划](monitoring-coverage.md) | [基础监控运维](monitoring-foundation.md)、[Grafana](../services/grafana.md) |
 | 排查内存、日志或追踪 | [Grafana](../services/grafana.md) | 对应服务源码 runbook |
 | 排查域名解析 | [LAN DNS](../services/lan-dns.md)或[Pod DNS](../services/k3s-dns.md) | [Tailscale](../services/tailscale.md)，如果请求来自远程客户端 |
-| 排查登录或域权限 | [Authelia](../services/authelia.md)、[Samba AD](../services/samba-ad.md) | 具体应用的权限说明 |
+| 排查登录或域权限 | [iam-login](../services/iam-login.md)、[Samba AD](../services/samba-ad.md) | 具体应用的权限说明 |
 | 为 workload 提供机器身份 | [SPIFFE](../services/spire.md) | 目标服务的 token 与权限规则；进度回到 #34 |
 | 使用消息队列 | [NATS](../services/nats.md) | consumer 项目自己的协议与队列文档 |
-| 调用模型或处理文档 | [LiteLLM](../services/litellm-gateway.md)、[Marker](../services/marker.md) | [OpenViking](../services/openviking.md)，如果需要检索 |
+| 调用模型或处理文档 | [ai-gateway](../services/ai-gateway.md)、[Marker](../services/marker.md) | [OpenViking](../services/openviking.md)，如果需要检索 |
 | 让应用发送邮件 | [SMTP relay](../services/smtp-relay.md) | 消费者的发信配置 |
-| 远程访问或查看网络资产 | [Tailscale](../services/tailscale.md)、[NetBox](../services/netbox.md) | NetBox 的权威来源是 Git，不能代替运行状态 |
+| 远程访问或查看地址规划 | [Tailscale](../services/tailscale.md) | 地址规划见 homelab-infra `infrastructure/network/ipam.yml`；已用地址以 DNS 为准 |
 | 改路由、SDN 网关/DHCP、到 OCI 或 DN42 的连通 | [VyOS 路由器](../services/vyos-router.md) | [OCI](../services/oci.md)、[Proxmox](../services/proxmox.md)；网络规划见 homelab-infra `infrastructure/network/` |
+| 改节点配置（etcd、Ayatori、LB、dc1 等） | [Chef / Cinc](../services/chef.md) | 对应 policy 与 cookbook |
+| 申请负载均衡 VIP | [Ayatori LoadBalancer](../services/ayatori-loadbalancer.md) | [Ayatori](../services/ayatori.md)、[VyOS 路由器](../services/vyos-router.md) |
+| 用云端 runner 或查看云账单 | [GCP](../services/gcp.md) | [Dynamic Runner](../services/gitea-dynamic-runner.md) |
 | 管理云主机或虚拟机 | [OCI](../services/oci.md)、[Proxmox](../services/proxmox.md) | 对应 IaC 和网络/HA runbook |
 | 使用 PS3 内容或 KMS 服务 | [ps3netsrv](../services/ps3netsrv.md)、[vlmcsd](../services/vlmcsd.md) | 各自客户端配置 |
 

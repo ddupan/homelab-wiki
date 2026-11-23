@@ -2,37 +2,42 @@
 title: Proxmox 日常管理入口
 lifecycle: active
 evidence: documented
-last_reviewed: 2026-09-25
+last_reviewed: 2026-11-23
 last_verified: 2026-09-25
+sources:
+  - homelab-infra `infrastructure/proxmox/README-ha.md`、`ansible/auth.yml`、`site.yml`、`ha.yml`、`inventory/`
+watch:
+  - homelab-infra:infrastructure/proxmox/README-ha.md
+  - homelab-infra:infrastructure/proxmox/ansible/inventory/
+  - homelab-infra:infrastructure/proxmox/ansible/auth.yml
+  - homelab-infra:infrastructure/proxmox/ansible/site.yml
+  - homelab-infra:infrastructure/proxmox/ansible/ha.yml
+  - homelab-infra:infrastructure/proxmox/ansible/roles/pve_auth/
+  - homelab-infra:infrastructure/proxmox/ansible/roles/pve_acme/
+  - homelab-infra:infrastructure/proxmox/ansible/roles/pve_ha/
+  - homelab-infra:infrastructure/sandbox-cluster/README.md
 ---
 
 # Proxmox
 
-Proxmox 承载 VM/LXC 与相应主机、网络和存储资源。
-本页依据 homelab-infra 工作区 `infrastructure/proxmox/README.md`、`README-ha.md`
-及已有 DNS 名称整理使用入口；初轮未检查集群成员、VM、HA 或存储现场状态。
-2026-09-25 的有限现场验证仅覆盖下文 sandbox 存储恢复与 LB 链路，不代表整套 PVE/HA 验收。
-源码 README 尚未跟踪，HA 文档有工作区修改；配置已进一步核对 `auth.yml`、`site.yml`、
-`ha.yml` 与对应 role defaults，不将文档中的历史阶段备注当作当前配置。
-
-维护者于 2026-09-16 明确：本组件优先 IaC，以代码为准。Ansible/Terraform 的声明及任务
-是配置依据，README 负责解释；代码存在不等于本轮已验证部署结果。
+Proxmox 承载 VM/LXC 与相应主机、网络和存储资源：三节点集群 `homelab`，
+pve1 `192.168.10.4`、pve2 `192.168.10.7`、pve3 `192.168.10.9`。
+节点配置由 `infrastructure/proxmox/ansible/` 管理，以代码为准。
 
 ## 打开管理界面
 
-DNS 清单记录 `pve1.ad.ddupan.top`、`pve2.ad.ddupan.top`、`pve3.ad.ddupan.top`。
-Proxmox 默认 HTTPS 管理端口是 `8006`，因此可按维护者确认的节点尝试：
+节点名为 `pve1.ad.ddupan.top`、`pve2.ad.ddupan.top`、`pve3.ad.ddupan.top`，
+Web UI 在 Proxmox 默认 HTTPS 端口 `8006`：
 
 ```text
 https://pve1.ad.ddupan.top:8006/
 ```
 
-这是节点名与上游默认端口组合出的入口示例，未验证可达性或证书配置。
 端口与节点代理行为见 [Proxmox pveproxy 文档](https://github.com/proxmox/pve-docs/blob/master/pveproxy.adoc)。
 `pve_auth` role 声明 `ad` realm，通过 LDAPS 连接 `dc1.ad.ddupan.top:636`，启用证书校验；
-域用户按此配置选择 `ad` realm，实际可用权限取决于账号同步及 ACL。`auth.yml` 独立管理该配置。
-`pve_acme` role 使用 OpenBao 内部 CA 为节点域名签证书，浏览器需具有相应 CA 信任。
-这些是代码声明，不是新的登录验证；不能因 Authelia 是 Web SSO 主入口就推断 PVE 已接入 OIDC。
+域用户登录时选择 `ad` realm，可用权限取决于账号同步及 ACL。`auth.yml` 独立管理该配置。
+`pve_acme` role 使用 OpenBao 内部 CA 为节点域名签证书，浏览器需信任该 CA。
+PVE 没有接入 iam-login OIDC。
 
 ## 第一次定位一台虚拟机
 
@@ -47,37 +52,32 @@ VMID 可能被复用，不能仅凭一个旧 VMID 判断当前对象归属。
 
 ## 持久配置与短命 VM 的职责
 
-源目录使用 Ansible 管理节点软件、内核、网络、LINSTOR/DRBD 与 watchdog 等主机配置。
-VM 和集群对象的具体管理工具以对应目录为准，不把迁移到 Terraform 的设想写成全部完成。
-UI 中临时改动需回写对应受管来源，避免后续自动化覆盖。
+Ansible 管理节点软件、内核、网络、LINSTOR/DRBD 与 watchdog 等主机配置。
+VM 和集群对象的管理工具以对应目录为准。UI 中临时改动需回写对应受管来源，避免后续自动化覆盖。
 
 动态 CI VM 的使用接口见 [Gitea Dynamic Runner](gitea-dynamic-runner.md)，
-其生命周期由 runner controller 负责，不能逐台登记进长期 Terraform state。
-每个动态 Pod/VM 应独立取得 SPIFFE 身份；workflow 决定登录与请求 token。
-源码 README 的 SDN-backed identity 和 AppRole bootstrap 段落属于早期设计记录，
-不作为当前统一身份原则或最新 runner 实现的依据。
+其生命周期由 runner controller 负责，不逐台登记进长期 Terraform state。
+每个动态 Pod/VM 独立取得 SPIFFE 身份；workflow 决定登录与请求 token。
 
 ## 网络、HA 与存储边界
 
-现有设计记录中的 VLAN/VNet 分段不能直接证明 guest 的机器身份；
-IP、MAC、VMID 的自报值不能代替可信身份验证。
+VLAN/VNet 分段不能证明 guest 的机器身份；IP、MAC、VMID 的自报值不能代替可信身份验证。
 修改 bridge、SDN 或路由 guest 时，先明确承载哪些业务与管理路径，不能只看当前登录是否仍连通。
 
-`README-ha.md` 记录了 VyOS guest 的 HA 和 watchdog 工作。它描述的是故障后重新启动的路径，
-不应承诺无中断切换，也不能推断其他 guest 全部启用 HA。
-`pve_ha` role 的资源默认值只列 `vm:100`，`ha.yml` 独立于节点基线 `site.yml`，
-避免基线维护顺带改变 HA/fencing 行为。watchdog 的实际选择还需结合 inventory 覆盖与任务实现；
-本轮不从旧 README 的 softdog 标题推断当前现场状态。
+集群中只有 `vm:100`（VyOS 路由器）是 HA 资源（`pve_ha` role 默认值），其他 guest 不启用 HA。
+HA 描述的是故障后重新启动的路径，不承诺无中断切换。因为有 HA 资源，fencing 在整个集群生效：
+失去 quorum 的节点会自重启。watchdog 使用各节点的硬件模块（pve1 `iTCO_wdt`，pve2/pve3 `sp5100_tco`，
+见 inventory `host_vars`），模块变更在节点重启后生效。`ha.yml` 独立于节点基线 `site.yml`，
+避免基线维护顺带改变 HA/fencing 行为。
 
 PVE 主机存储、DRBD 副本和 k3s 的 [OpenEBS](openebs.md) 是不同管理层，
 不能互相替代容量、冗余或恢复验证。快照和副本也不能自动证明具备独立备份。
 
 故障入口依次为目标任务日志、guest、宿主节点、存储和集群网络；
 涉及 quorum、fencing 或 watchdog 的处理先读 `README-ha.md`，不要套用普通单机重启排障。
-长期配置入口为 `infrastructure/proxmox/ansible/`，并按实际变更选择对应 playbook。
+长期配置入口为 `infrastructure/proxmox/ansible/`，按实际变更选择对应 playbook。
 
-来源文件的固定版本与工作区差异见[来源追溯](../sources.md#proxmox)。
-
+来源文件的固定版本见[来源追溯](../sources.md#proxmox)。
 
 ## Sandbox LB 与根文件系统恢复
 
@@ -90,9 +90,7 @@ PVE 主机存储、DRBD 副本和 k3s 的 [OpenEBS](openebs.md) 是不同管理�
 `10.60.0.13:6443`、OpenSandbox `10.60.0.13:8080`。数据库只转发到
 sandbox1 `10.60.0.11:5432`；K3s 转发到两个节点的 `6443`；OpenSandbox
 转发到两个节点的 `30080`。OpenSandbox `/health` 返回 200 不代表 K3s 控制面可用。
-配置依据为源码 `infrastructure/sandbox-cluster/README.md`、
-`infrastructure/proxmox/ansible/roles/vyos_router/` 及本轮 VyOS 现场检查；
-OpenSandbox 的 LB 条目在现场存在，不能推断旧 Ansible 模板已经管理该条目。
+当时 OpenSandbox 的 LB 条目在 VyOS 现场存在，但不在 Ansible 模板中。
 
 排障先检查 HAProxy 监听和每个 backend 的状态，再直连后端。若后端拒绝连接，
 检查 PostgreSQL、K3s 与根文件系统，而不是仅重启 LB。
@@ -124,15 +122,13 @@ I/O 错误；ext4 可能中止 journal 并进入只读。DRBD 后来恢复 UpToD
 `emergency_ro`；数据库恢复同步复制，采样 replay lag 为 0；两个 API 与 VIP 的
 `/readyz` 均为 ok，两个节点及全部 Pod Ready。故障证据为目标 DRBD 对端 PingAck
 超时、quorum 丢失及紧随其后的 ext4 写入错误；对端连接超时的上游原因尚未确定。
-本轮未修改 VyOS LB、DRBD quorum 策略或集群网络。此处保存恢复方法及有限验证边界，
-不代表已经消除存储网络复发风险。
+当时未修改 VyOS LB、DRBD quorum 策略或集群网络，存储网络复发风险没有因此消除。
 
-
-本次进一步复盘将触发线索收敛为：新 PG HDD 数据卷在 17:12 开始的初始同步发生重叠，
+事后复盘将触发线索收敛为：新 PG HDD 数据卷在 17:12 开始的初始同步发生重叠，
 随后多个既有 DRBD 资源失去 quorum；15:30–15:32 的 etcd rootfs 迁移与后来的新数据卷创建
 应分开记录。资源争用的具体瓶颈尚未实证。容器 `serial: 1` 和 etcd health 不等于 DRBD
 同步完成；新卷维护需在创建前建立同步预算，并在允许下一卷前等待所有必要副本同步。
-目前 PG 创建流程虽已在创建后加限速，仍存在初始未限速窗口，尚未补齐同步完成屏障。
+复盘时 PG 创建流程已在创建后加限速，但仍有初始未限速窗口，也没有同步完成屏障。
 
 事故报告由 wiki 统一维护：[2026-09-25 DRBD quorum 抖动与 sandbox 控制面中断](../incidents/2026-09-25-drbd-quorum-sandbox.md)。
 其中保存统一 UTC 时间线、跨资源影响边界、相关操作会话和后续验收条件；本页保留可复用恢复方法。

@@ -17,30 +17,20 @@
 设计历史与范围外项目见[workload-sts](architecture/workload-sts-history.md)、
 [旧监控栈](services/victoriametrics-legacy.md)及[外部消费者](services/external-consumers.md)。
 
-## 当前证据边界
+## 以什么为准
 
-首轮盘点日期为 **2026-09-16**，依据 `/home/panxiao81/services` 工作区，基线 commit 为
-`ebe0ec154dab557598075b5cf6d3629c3c23fe2a`。该工作区包含未提交修改和未跟踪文件。
-后续按维护者提供的线索补读了 SPIFFE/SPIRE #34 与 runbook、workload-sts 归档决策、
-PostgreSQL Tenant Operator 的 README 与架构文档，以及 Gitea Dynamic Runner README。
-具体来源和查阅范围见各页；后续使用指南已按对应源码和上游接口文档逐项补充。
-未补充的状态仍以初轮证据为限；来源文件与已提交版本的比较见[来源追溯](sources.md)。
-LAN DNS 已按维护者于 2026-09-16 提供的现状更新，未查询现场。
-Authelia 同日由维护者明确为 active、唯一的主 OIDC broker，已同步到服务总览。
-后续状态查询先向维护者确认动态工作与资料来源，授权范围内不重复询问。
-初轮没有查询运行环境；后续对旧 VictoriaMetrics 栈做了维护者明确授权的有限只读检查，
-随后按明确要求删除旧配置和数据卷，
-检查范围和结果见对应页面。“文档记录已部署”不等于今天已验证健康。
-本库中的入口地址来自原有记录，也尚未逐一验证可达性。
+**[homelab-infra](https://git.ddupan.top/panxiao81/homelab-infra) 的 main 就是当前环境**（维护者 2026-11-23 约定）。
+本库说明怎么使用和维护它；与代码不一致时以代码为准，并回来修正对应页面。服务表中的来源路径均相对于该仓库。
+页面依赖的源码路径列在 frontmatter `watch` 中，源码变化后由每周的过时检查提醒复核。
 
-基础设施源码仓库：[homelab-infra](https://git.ddupan.top/panxiao81/homelab-infra)。
-服务表中的来源路径均相对于该仓库；尚未提交的来源可能只能在上述工作区找到。
+`last_verified` 是最近一次现场验证的日期，没有就为 null；代码存在不代表服务此刻健康。
+历史上的盘点与状态对齐记录见[首轮状态对齐记录](verification.md)与[来源追溯](sources.md)。
 
 ## 内容归属
 
 本库保存全局导航、跨服务设计与约束、面向使用者的指南及跨服务 runbook。
-e5renew、research-auto 是 GitHub 上的[外部消费者](services/external-consumers.md)，不属于
-homelab 基础设施；本库不接管其应用文档或运行状态。
+[e5renew](services/e5renew.md)、[research-auto](services/research-auto.md) 由 homelab 的 Flux 部署，本库只记部署与依赖，
+应用本身的文档留在各自仓库。
 紧贴实现的部署参数与操作细节继续保存在源码仓库的 README/runbook，双方以链接关联，
 不复制维护两份事实。单次变更由 commit/PR 记录，历史计划不能代替现状说明。
 

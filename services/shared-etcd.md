@@ -2,19 +2,38 @@
 title: Homelab 共享 etcd
 lifecycle: experimental
 evidence: live-verified
-last_reviewed: 2026-09-27
+last_reviewed: 2026-11-23
 last_verified: 2026-09-25
+sources:
+  - homelab-infra `infrastructure/etcd/`、`infrastructure/chef/policies/etcd-pve*.rb`
+  - https://git.ddupan.top/panxiao81/homelab-infra/pulls/159
+watch:
+  - homelab-infra:infrastructure/etcd/
+  - homelab-infra:infrastructure/chef/policies/etcd-pve1.rb
+  - homelab-infra:infrastructure/chef/policies/etcd-pve2.rb
+  - homelab-infra:infrastructure/chef/policies/etcd-pve3.rb
+  - homelab-infra:infrastructure/shared-postgresql/ansible/limit-resync.yml
 ---
 
 # Homelab 共享 etcd
 
 为 homelab 服务提供共享的配置、协调与选主存储。维护者已接受共享定位；首个消费者是
-k3s 外 PostgreSQL 的 Patroni。三成员基础服务已部署，现有监控已接入，自动续签已启用；现有 k3s datastore 未迁移。
+k3s 外 PostgreSQL 的 Patroni（`patroni-pg-prod`），第二个是 sandbox K3s datastore 的 Patroni（`patroni-pg-sandbox`）。三成员基础服务已部署，现有监控已接入，自动续签已启用；现有 k3s datastore 未迁移。
 
 ## 入口与第一次接入
 
-部署拓扑为 laptop 原生 systemd、pve1/pve2 各一个无特权 LXC（150/151）。地址为
-192.168.10.127、10.60.0.20、10.60.0.21，客户端端口 2379，三端点健康检查已通过。两个 LXC 的 rootfs 位于 `pve-rg` SSD DRBD 池。
+三个成员都在 PVE LXC 中：etcd-pve1（pve1 LXC 150，10.60.0.20）、etcd-pve2（pve2 LXC 151，10.60.0.21）、
+etcd-pve3（pve3 LXC 152，10.60.0.22），客户端端口 2379。etcd-pve3 取代了原 laptop 成员
+（#570；消费者 endpoint 改换见
+[1ae6cfc](https://git.ddupan.top/panxiao81/homelab-infra/commit/1ae6cfc)，laptop 侧抓取与检查移除见
+[4cefb18](https://git.ddupan.top/panxiao81/homelab-infra/commit/4cefb18)）。
+pve1/pve2 两个 LXC 的 rootfs 位于 `pve-rg` SSD DRBD 池。
+
+三个成员的安装、配置、证书续签和快照都由 Cinc 的 `homelab_data::etcd` 负责（policy 在
+`infrastructure/chef/policies/etcd-pve*.rb`，[1c5f712](https://git.ddupan.top/panxiao81/homelab-infra/commit/1c5f712)、
+[424b46a](https://git.ddupan.top/panxiao81/homelab-infra/commit/424b46a)）；原 Ansible 部署与 laptop 续签控制端已删除
+（[48b4868](https://git.ddupan.top/panxiao81/homelab-infra/commit/48b4868)）。Ansible 只剩 LXC 创建、成员增删
+（`member-join.yml` / `member-remove.yml`）、认证初始化、消费者收敛和检查入口；Terraform 管 Bao PKI 角色与 policy。
 实际接入前由管理流程交付三个 TLS endpoints、中央 CA、独立客户端证书和 Bao 秘密引用。
 使用分配身份在自己的 prefix 内 put/get/delete 验证，并确认跨 prefix 被拒绝；不要使用管理员证书接应用。
 
@@ -30,13 +49,14 @@ Patroni etcd3 gateway 使用无 CN 的 mTLS 证书加独立账号密码，不能
 共享 etcd 的创建、维护和快照与数据库生命周期分离；删除 PostgreSQL 不删除 etcd。
 全集群快照恢复必须协调所有消费者，不能作为单个业务的回滚。
 
-源码实现提供每日每成员本地快照、独立认证初始化、消费者收敛和逐成员更新入口。
+实现提供每日每成员本地快照、独立认证初始化、消费者收敛和逐成员更新入口。
 三个成员的原生指标已接入现有 VictoriaMetrics，不增加 exporter；内网 2381 listener 不提供 KV API。
-六条规则覆盖成员采集、采集可见成员不足、无 leader、容量、fsync 和选举，现场三目标 up=1、规则 health=ok。
+六条规则覆盖成员采集、采集可见成员不足、无 leader、容量、fsync 和选举（2026-09 现场三目标 up=1、规则 health=ok）。
 Alertmanager 已接入 [Telegram 通知](grafana.md#telegram-告警接入)，warning/critical 可向外通知；备份/证书/续签检查的主机采集已于 2026-09-27 部署，
 新增规则已随 PR #166 合并并由 Flux 接管，见[维护告警](shared-postgresql.md#维护告警2026-09-27)。
 
-自动续签已启用：维护者恢复 OIDC 管理会话后，独立 cert auth、受限 policy 与每日 timer 已部署。
+每个成员由 Cinc 在本机续签证书（见上文），流程见源码 README。以下是 2026-09 laptop 控制端时期的记录：
+维护者恢复 OIDC 管理会话后，独立 cert auth、受限 policy 与每日 timer 已部署。
 登录使用 laptop 现有 peer 证书，按 DNS SAN 限制身份；无 CN gateway 证书不能用于 Bao cert
 登录（identity alias 为空），不会改动 etcd gateway 的无 CN 要求。首次实际续签流程三成员均
 `changed=0`、service Result=success；程序固定副本由 root 管理，短期 token 用后撤销。
@@ -57,6 +77,7 @@ Raft term/index 一致已重新验证，两容器根卷与新增 mp0 均可写�
 
 ## 证据与阶段边界
 
+以下为 2026-09 首期部署记录（当时成员为 laptop + 两台 PVE LXC，laptop 成员后由 etcd-pve3 取代）。
 2026-09-25 维护者指定 laptop + 两台 PVE 各一个新 LXC，并明确复用 Bao 中央 CA；旧 Vault 迁移后置。
 现场部署已应用独立 Bao PKI roles/policies，创建 LXC 150/151 并启用三成员 mTLS、认证及消费者 RBAC。
 PVE 两个 LXC 已直接迁移底层 rootfs 到 `pve-rg`；逐成员停机迁卷、启动后检查 quorum，未重建容器或数据库。
@@ -68,5 +89,4 @@ PVE 两个 LXC 已直接迁移底层 rootfs 到 `pve-rg`；逐成员停机迁卷
 测试进程 RSS 约 37–40 MiB 不是生产容量承诺。Terraform validate 与 Ansible lint 通过。
 证书签发、秘密创建、gateway 登录和机器身份续签均已在真实服务验证。
 
-来源为维护者指令、只读前置核查及 homelab-infra `infrastructure/etcd/`；
-文档已直接发布 main（[文档 acd4b55](https://git.ddupan.top/panxiao81/homelab-infra/commit/acd4b55)），实现见 [IaC PR #159](https://git.ddupan.top/panxiao81/homelab-infra/pulls/159)，已合并。与数据库的关系见[共享 PostgreSQL](shared-postgresql.md#共享-etcd-设计边界)。
+实现见 [IaC PR #159](https://git.ddupan.top/panxiao81/homelab-infra/pulls/159)。与数据库的关系见[共享 PostgreSQL](shared-postgresql.md#共享-etcd-设计边界)。

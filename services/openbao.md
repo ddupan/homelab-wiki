@@ -2,8 +2,14 @@
 title: OpenBao 使用指南
 lifecycle: active
 evidence: live-verified
-last_reviewed: 2026-09-25
+last_reviewed: 2026-11-23
 last_verified: 2026-09-25
+sources:
+  - homelab-infra infrastructure/openbao/README.md、ansible/roles/openbao_bootstrap/
+  - 维护者 2026-11-23 说明：local-agent 证书路径已不存在，机器路径为 ai-agent
+watch:
+  - homelab-infra:infrastructure/openbao/
+  - homelab-infra:platform/spire/README.md
 ---
 
 # OpenBao
@@ -11,21 +17,25 @@ last_verified: 2026-09-25
 OpenBao 提供秘密管理与内部 CA，部署在 Kubernetes 之外的独立主机上。
 日常使用是以自己的身份登录，按已有 policy 读取秘密或申请短期凭据。
 
-本页依据 homelab-infra 工作区 `infrastructure/openbao/README.md` 整理，
-CLI 语法参考下列官方文档。登录和取密指南仍以文档为据；2026-09-25 已现场验证
-服务解封、中央指标、ESO 秘密刷新及本地快照监控，范围见本文末节。
+CLI 语法参考下列官方文档。
 
 ## 人的登录入口
 
-前提是客户端能解析并访问内部域名，已安装 `bao` CLI，且账号具备相应 OIDC 授权。
+前提是客户端能解析并访问内部域名 `bao.lab.ddupan.top`（仅 LAN/Tailscale），已安装 `bao` CLI，
+且账号属于 AD 组 `platform-admins`。
 
 ```bash
-export BAO_ADDR=https://bao.ad.ddupan.top:8200
-bao login -method=oidc -no-print
+export BAO_ADDR=https://bao.lab.ddupan.top:8200
+bao login -method=oidc -path=oidc-sso -no-print
 ```
 
-按提示通过浏览器进入 Authelia，完成登录和二次认证。
-使用域名进行 TLS 校验，不用 IP 地址代替，也不关闭证书校验。
+按提示通过浏览器进入 [iam-login](iam-login.md)（`sso.ddupan.top`）登录。人的登录挂载是 `auth/oidc-sso`，
+默认 role `admin` 要求 `groups` claim 含 `platform-admins`；挂载与 client 在 homelab-infra
+`apps/iam-login/terraform/clients.tf` 声明。原 Authelia 挂载 `auth/oidc` 已随 Authelia 退役。
+客户端使用 `bao.lab.ddupan.top`（[f42b1a4](https://git.ddupan.top/panxiao81/homelab-infra/commit/f42b1a4)）；
+`bao.ad.ddupan.top` 只为已签发证书中的 AIA/CRL URL 与 ACME 账户长期保留，不作为客户端地址
+（`infrastructure/openbao/README.md`）。
+使用域名进行 TLS 校验，不用 IP 地址代替，也不关闭证书校验：Let's Encrypt 证书只有 DNS SAN。
 `-no-print` 避免显示 token，但成功登录后仍会把它存入本机 token helper，供后续命令使用。
 因此应在自己的受控会话中登录。参见 [OpenBao login](https://openbao.org/docs/commands/login/)。
 
@@ -63,21 +73,19 @@ Kubernetes 应用通常消费 ESO 投射的 Secret。修改秘密应通过其受
 
 | 调用者 | 本库已记录的认证路径 |
 |---|---|
-| 人 | Authelia OIDC 登录 |
+| 人 | iam-login OIDC，`auth/oidc-sso` |
 | laptop 本地开发进程（UID 1000） | SPIFFE `spiffe://ddupan.top/dev/panxiao81`，JWT role 为 `local-development` |
-| 本地 agent 旧证书路径 | 独立客户端证书，cert auth role 为 `local-agent` |
+| 集群内 AI agent（namespace `agents`、SA `ai-agent`） | kubernetes auth role `ai-agent`，policy `ai-agent-ssh`：只能签 `ssh-client-signer/sign/ai-agent` 的 SSH 短证书（证书 5 分钟、最长 15 分钟；token 10 分钟） |
 | SPIFFE workload | 按 [SPIRE 接入说明](spire.md) 与对应 OpenBao role 配置换取 token |
 | Ayatori Dev/Prod 的 manager 与 ESO | kubernetes auth `kubernetes-ayatori-<env>`（k0s SA，登录 JWT 兼作 TokenReview 凭据），见 [Ayatori](ayatori.md) |
 
-源码记录的本地 agent 证书与私钥由 Ansible 安装在 `/etc/homelab-agent/openbao/`，
-不要复制到仓库或 workflow。其 token TTL 为 15 分钟、最长 1 小时；权限包括受限的 SSH 签名、
-自身证书续期及 `kv/agents/local/*`，明确不包含 `kv/k8s/*`。
-证书注册、登录与续期按源码 README 操作，不能从 SPIFFE 的整体设计推断该路径已迁移。
-
-本机开发 SPIFFE 路径与上述旧证书路径不同：通过
+**laptop 上的 agent 与开发进程应首先使用这条 SPIFFE 路径**取得 homelab 秘密，只有被拒绝时才请维护者做人类 OIDC 登录
+（homelab-infra `CLAUDE.md`、`platform/spire/README.md`）。身份只按 UID 1000 匹配，`sudo` 下不生效。
+本机开发 SPIFFE 路径：通过
 `/run/spire/agent-sockets/spire-agent.sock` 获取 `aud=openbao` 的 JWT-SVID，
 再调用 `auth/jwt-spire/login`、指定 `role=local-development`。
-该角色授予 `kv/data/k8s/*` 与 `kv/data/infra/*` 的 create/read/update，token TTL 为 5 分钟。
+该角色授予 `kv/k8s/*` 与 `kv/infra/*` 的读写及对应 metadata 列表、签发 `ai-agent` SSH 短证书、
+查询与撤销自身 token，不允许删除/销毁 KV 数据或管理 auth；token TTL 为 5 分钟（`platform/spire/README.md`）。
 2026-09-25 已实际用该身份读取 Backstage 数据库密码并完成[数据库接入](backstage.md)，
 无须更改策略或改用人类 OIDC。token/JWT 仅在进程内存中传递，不输出或写入文档。
 依据为 homelab-infra `platform/spire/README.md`、
@@ -94,7 +102,7 @@ Dynamic Runner 提供执行环境和 workload 身份，具体向 OpenBao 请求�
 连接失败时先区分内部 DNS、网络、TLS 与认证问题；OIDC 回调问题需结合客户端浏览器所在位置排查。
 
 部署、PKI、SSH 签名、本地 agent 身份和恢复细节见 homelab-infra
-`infrastructure/openbao/README.md`。服务依赖主机持久存储及 Raft 数据，人的登录还依赖 Authelia。
+`infrastructure/openbao/README.md`。服务依赖主机持久存储及 Raft 数据，人的登录还依赖 iam-login 与 Samba AD。
 根密钥与恢复身份不应依赖 Kubernetes 或只能由 OpenBao 自身解密的秘密；
 日常登录成功不等于已完成备份或灾难恢复验收。
 
@@ -115,7 +123,17 @@ token 仅保存于内存卷；指标身份不能读取业务秘密，匿名 metr
 或无成功记录持续 15 分钟为 critical；采集失联/损坏也有专用告警。
 标准主机指标复用现有主机规则。异地副本与恢复演练仍需独立验收。
 
-维护者用 working PC 的 YubiKey 解密 VM 上保存的加密 unseal share，重启后人工解封。
+2026-09-25 时维护者用 working PC 的 YubiKey 解密加密 unseal share，重启后人工解封。
 本次服务配置变更、采集上线与恢复验收已完成，详细操作与证据见
 [OpenBao 监控接入维护 runbook](../guides/openbao-monitoring-maintenance.md)。
-后续重启仍需同样的人在场解封流程；不能因本次恢复成功假定已经自动解封。
+
+## 自动解封（TPM pkcs11 seal）
+
+**自 2026-11-05 起 bao1 从 TPM 自动解封**（OpenBao 2.7.2，`pkcs11` KMS 插件经 tpm2-pkcs11；
+[PR #603](https://git.ddupan.top/panxiao81/homelab-infra/pulls/603)、[PR #607](https://git.ddupan.top/panxiao81/homelab-infra/pulls/607)；
+`group_vars/all/vars.yml` 中 `openbao_pkcs11_seal: true`）。服务、VM 或 laptop 重启不再需要人在场解封。
+上述人工解封流程只在 TPM 被更换/清空、或节点仍为 Shamir 时使用（`infrastructure/openbao/unseal.sh`）。
+
+- 原 Shamir key 现在是 **recovery key**，不能再解密任何数据；seal 密钥以 YubiKey 加密的
+  `tpm-seal-key.gpg` 托管在仓库，TPM 与该托管同时丢失即丢失数据。
+- TPM 更换或新节点的恢复、回滚到 Shamir 的步骤见 `infrastructure/openbao/README.md`「TPM seal」。

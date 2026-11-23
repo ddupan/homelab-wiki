@@ -2,7 +2,7 @@
 title: laptop Incus
 lifecycle: experimental
 evidence: live-verified
-last_reviewed: 2026-10-04
+last_reviewed: 2026-11-23
 last_verified: 2026-10-04
 sources:
   - 维护者于 2026-09-25 授权通过 Ansible 安装 Incus，保留 libvirt 与裸机 k8s
@@ -19,19 +19,38 @@ sources:
   - 2026-10-04 嵌套 Incus 的 PKI 模式验证、laptop CA 信任开启与 PR #200 CI plan 现场验证
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/198
   - 2026-10-04 开启 security.nesting 的 plan/apply、重启与 Ayatori 部署现场验证
+  - https://git.ddupan.top/panxiao81/homelab-infra/commit/dc1510f
+  - https://git.ddupan.top/panxiao81/homelab-infra/commit/3565858
+  - homelab-infra `infrastructure/incus/README.md`、`terraform/main.tf`、`ansible/group_vars/incus_hosts.yml`、`apps/iam-login/terraform/clients.tf`
+  - https://git.ddupan.top/panxiao81/homelab-infra/commit/011704c
+watch:
+  - homelab-infra:infrastructure/incus/
 ---
 
 # laptop Incus
 
-用于后续 Linux 系统容器和新 Linux VM 的管理，已安装并开放 Web UI/Authelia OIDC；承载 [Ayatori](ayatori.md) 开发、生产两个控制面容器（2026-10-04 已部署）。
+用于后续 Linux 系统容器和新 Linux VM 的管理，已安装并开放 Web UI/OIDC（2026-10-09 起经 iam-login）；承载 [Ayatori](ayatori.md) 开发、生产两个控制面容器（2026-10-04 已部署）。
 既有 VM 留在 libvirt，k8s 留在裸机；不引入 Incus SDN/LB。
 etcd 和共享 PostgreSQL 由各自服务管理，本次不迁移。
 
 ## 入口与第一次使用
 
-Web 入口：<https://incus.ad.ddupan.top>，选择 **Login with SSO**，由 Authelia 登录。
-仅允许 `panxiao81`，要求 MFA；该用户获得 Incus 完整管理权限，不绑定现有组。
-后续统一迁移新 IdM，当前不建立永久组模型。
+Web 入口：<https://incus.lab.ddupan.top>（仅 LAN/Tailscale；旧名 `incus.ad.ddupan.top` 过渡期并存，等 CLI remote
+都改到 lab 后退役），选择 **Login with SSO**，在 [iam-login](iam-login.md)（`sso.ddupan.top`）用 AD 密码 + passkey 登录。
+
+授权在 Incus 这边做：`authorization.client.oidc=scriptlet`，只有 access token 的 `groups` 含
+`platform-admins`（变量 `incus_admin_group`）的人可以操作，其余一律拒绝；不配授权时 Incus 会让任何 OIDC 用户获得完整权限。
+TLS 客户端（CI 短期证书、本机 Unix socket）不受影响。以上见 homelab-infra
+`infrastructure/incus/ansible/group_vars/incus_hosts.yml`（[dc1510f](https://git.ddupan.top/panxiao81/homelab-infra/commit/dc1510f)、
+[3565858](https://git.ddupan.top/panxiao81/homelab-infra/commit/3565858)）。
+OIDC client `incus`（public、PKCE、device 授权）在 `apps/iam-login/terraform/clients.tf` 声明，不再由 Authelia 或 Ansible 管理。
+
+CLI 也可经 OIDC 设备码登录（客户端在本机保存 token，不写入 Git）：
+
+```bash
+incus remote add laptop https://incus.lab.ddupan.top --auth-type=oidc
+# 已有 remote：incus remote set-url laptop https://incus.lab.ddupan.top
+```
 
 在 laptop 上通过本地 Unix socket 使用，需要 sudo 权限；也是网页登录不可用时的恢复入口：
 
@@ -43,6 +62,8 @@ sudo incus network list local:
 ```
 
 Ayatori 基础容器由源码 `infrastructure/incus/terraform/` 管理；网络连接既有非受管 `br0`。
+该 Terraform root 由 CI 接管（在 `.gitea/workflows/terraform.yml` 的 `TF_ROOTS` 中）：main 即期望状态，
+**对 Terraform 管理资源的手工改动会在下一次合并时被回滚**，修改请走 PR（见下文 CI 访问）。
 HTTPS listener 为 `192.168.10.127:8443`；域名通过共享 Envoy 转发，后端证书显式验证。
 没有新增宿主管理员组成员。
 
@@ -54,11 +75,15 @@ HTTPS listener 为 `192.168.10.127:8443`；域名通过共享 Envoy 转发，后
 - 安装 playbook 不执行 `incus admin init`；Terraform 单独管理 Ayatori 存储池和两个实例，不接管 libvirt、k3s、br0、路由或防火墙。
 - 历史 `data/incus`（含 GNS3 与快照）已按维护者明确要求删除，不能恢复为旧服务；安装 playbook 不包含删除逻辑。
 - 当前依赖宿主 Ubuntu 24.04 amd64、systemd、APT 与 Zabbly 源。未来虚拟机还依赖可用 KVM。
-- Web/OIDC 另依赖 k3s、Envoy、Authelia；这些入口不可用时本地 `sudo incus` 仍可管理。
-- `access.yml` 管理 Incus 配置、独立入口资源和 Authelia client；`dns.yml` 仅协调 `incus`、`ayatori-dev`、`ayatori-prod` 三条 AD A 记录。
-- Authelia 更新基于 live Helm values 合并单个 client/policy，保留其他客户端；不要直接用滞后的本地 values 全量覆盖。
+- Web/OIDC 另依赖 k3s、Envoy、iam-login 与 Samba AD；这些入口不可用时本地 `sudo incus` 仍可管理。
+- `access.yml` 管理 Incus 服务端配置（OIDC、授权 scriptlet、listener、`server.ca`）和独立入口资源；
+  OIDC client 在 iam-login 的 Terraform。`dns.yml` 只协调 AD 里的旧名 `incus.ad.ddupan.top`；
+  `incus.lab` 由 external-dns 按 HTTPRoute 发布，`ayatori-{dev,prod}.lab.ddupan.top` 由本 root 的 Terraform 注册到 PowerDNS。
 - 共享 Envoy 后端 TLS 允许 1.2–1.3，由 Flux 管理；不升级网关，不修改前端证书或其他路由。
-- 重建安装使用源码 README 中的 Ansible 命令。实例和数据备份恢复尚未建立，需在承载持久数据前补齐。
+- 重建安装使用源码 README 中的 Ansible 命令。
+- 备份：Ayatori 容器的 k0s 状态（etcd 与 PKI）每日 `k0s backup` 到独立 custom volume
+  `ayatori-<env>-backup`（容器内 `/var/backups/ayatori`），重建实例不丢失；实例另有每日快照、保留 7 天
+  （[011704c](https://git.ddupan.top/panxiao81/homelab-infra/commit/011704c)）。两者都与实例同池，**没有离机副本**。
 
 ## 故障入口
 
@@ -118,9 +143,11 @@ PR #200 的 CI plan 经 HTTPS + 短期证书访问 Incus，结果无变更。
 homelab-infra `infrastructure/ayatori/ansible/` 经 SSH 执行，不经 cloud-init，见 [Ayatori](ayatori.md)。
 `ayatori-dev` 与 `ayatori-prod` 为 Ubuntu 24.04 非特权容器，各限额 2 CPU、2 GiB RAM、
 20 GiB rootfs；存储池 `ayatori` 位于独立 ZFS dataset `data/incus-ayatori`。
-网络接入既有 br0，固定 MAC，静态地址 `192.168.10.11`（`ayatori-dev.ad.ddupan.top`）与
-`192.168.10.12`（`ayatori-prod.ad.ddupan.top`），位于 NEC IX DHCP 池（`.128–.250`）之外；
-地址只在源码 `infrastructure/dns/records.yml` 声明一次，Terraform 与 AD DNS 同源读取。
+网络接入既有 br0，固定 MAC，静态地址 `192.168.10.11`（`ayatori-dev.lab.ddupan.top`）与
+`192.168.10.12`（`ayatori-prod.lab.ddupan.top`），位于 NEC IX DHCP 池（`.128–.250`）之外；
+地址在 `infrastructure/incus/terraform/main.tf` 声明，并由同一 root 注册 `lab.ddupan.top` 记录
+（[163f58d](https://git.ddupan.top/panxiao81/homelab-infra/commit/163f58d)）；原 `ad.ddupan.top` 记录已于 2026-10-05 退役
+（[58cca73](https://git.ddupan.top/panxiao81/homelab-infra/commit/58cca73)）。
 
 容器初始化全部由 Terraform 写入的 cloud-init 完成，不再有容器侧 Ansible：
 `network-config` 配静态地址、网关 `.1`、resolver `.127`/`.1`；user-data 创建 `panxiao81`
@@ -134,13 +161,13 @@ homelab-infra `infrastructure/ayatori/ansible/` 经 SSH 执行，不经 cloud-in
 ⚠ 镜像模板只在创建/复制时渲染 cloud-init seed。修改已有实例的 cloud-init 配置不会生效，
 重启或 `cloud-init clean` 都不行；改地址或初始化内容须重建实例。
 
-首次使用：`incus exec local:ayatori-dev -- bash`，或 `ssh panxiao81@ayatori-dev.ad.ddupan.top`。
+首次使用：`incus exec local:ayatori-dev -- bash`，或 `ssh panxiao81@ayatori-dev.lab.ddupan.top`。
 
 Terraform 经本机 Unix socket 管理；state 于 2026-10-04 迁至 S3 `tfstate` bucket 的
 `incus/terraform.tfstate`（原生 lockfile，[PR #194](https://git.ddupan.top/panxiao81/homelab-infra/pulls/194)），
 经 `infrastructure/incus/run.py` 从 Bao 取受限身份运行。迁移后 S3 上 plan 无变更；laptop 原本地
 state 改名为 `*.pre-s3-20261004` 留作回退。CI 接管见下节。
-容器离机备份仍待补齐。源码提交见上文；资源与用户初始化细节见源码 README。
+容器离机备份仍待补齐（见上文“备份”）。源码提交见上文；资源与用户初始化细节见源码 README。
 
 2026-09-25 验证：两个容器均 RUNNING，cloud-init 完成；DHCP 分别取得
 `192.168.10.131`（dev）、`192.168.10.132`（prod）。实际公钥 SSH 和 sudo 成功，

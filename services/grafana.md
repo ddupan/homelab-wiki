@@ -2,25 +2,38 @@
 title: Grafana 与可观测性使用指南
 lifecycle: active
 evidence: documented
-last_reviewed: 2026-09-25
+last_reviewed: 2026-11-23
 last_verified: null
+sources:
+  - homelab-infra platform/observability/README.md
+  - homelab-infra platform/observability/grafana/values.yaml、dashboards/homelab-memory.json
+  - homelab-infra platform/observability/metrics/exporters/README.md
+  - homelab-infra apps/iam-login/terraform/clients.tf
+  - homelab-infra PR #147、#148、#152
+watch:
+  - homelab-infra:platform/observability/README.md
+  - homelab-infra:platform/observability/grafana/
+  - homelab-infra:platform/observability/metrics/vmalertmanager.yaml
+  - homelab-infra:platform/observability/metrics/alertmanager-external-secret.yaml
+  - homelab-infra:platform/observability/metrics/exporters/README.md
+  - homelab-infra:platform/observability/metrics/scrapes/kubelet.yaml
+  - homelab-infra:apps/iam-login/terraform/clients.tf
 ---
 
 # Grafana 与可观测性
 
-从 <https://grafana.ad.ddupan.top> 查看 homelab 的指标、日志和追踪。
-使用 Authelia OIDC 登录；远程访问需要到 LAN 的路由及内网 DNS。
-
-本页依据现有 observability README、Grafana 数据源配置、内存看板 JSON 和 exporter 说明整理，
-部分来源仍在源码工作区、尚未提交。看板使用说明未逐项现场验证；
-2026-09-25 的通知链路与采集故障验证范围见下文。
+从 <https://grafana.lab.ddupan.top> 查看 homelab 的指标、日志和追踪。
+旧名 `grafana.ad.ddupan.top` 只做 301 跳转（OAuth state cookie 按主机名，两个名字不能混用）。
+使用 [iam-login](iam-login.md)（`sso.ddupan.top`）OIDC 登录；OIDC 客户端由 `apps/iam-login/terraform/clients.tf` 注册，
+secret 经 OpenBao `kv/k8s/grafana-sso` 与 ESO 同步。原专用 Tailscale Ingress 已停用，
+远程访问需要到 LAN 的路由及内网 DNS。
 
 整体接入范围、已确认盲点和补齐顺序见 [监控覆盖与补齐计划](../guides/monitoring-coverage.md)。
 第一批已接入的规则、阈值、静默和排障方法见 [基础监控与告警运维](../guides/monitoring-foundation.md)。
 
 ## 先看主机内存与 Swap
 
-1. 打开 [Homelab 内存与 Swap](https://grafana.ad.ddupan.top/d/homelab-memory)。
+1. 打开 [Homelab 内存与 Swap](https://grafana.lab.ddupan.top/d/homelab-memory)。
 2. 时间范围选择最近 1 小时，需要定位问题时改成问题发生的具体时段。
 3. 先看“主机物理内存”“Swap 使用量”“Swap 换页速率”，再看程序/虚拟机 PSS 和 Pod working set。
 4. 对比异常发生前后的曲线，记录时间与相关程序或 Pod，便于继续查日志。
@@ -85,7 +98,6 @@ VictoriaLogs 使用 LogsQL。上述 limit 限制返回数量，不保证返回�
 发送失败计数为 0，维护者已确认收到测试告警；测试在 60 秒后自动恢复。
 恢复通知按 5 分钟组内间隔发出，发送总计数从 2 增至 3，失败计数仍为 0。
 恢复消息的收件端确认未单独取得；总计数也包含一条既有 TooManyScrapeErrors 通知。
-本次验证限于通知链路，不刷新整个 Grafana 服务的 `last_verified`。
 
 - 接收频道：<https://t.me/ddupan_alerting>，数字 chat ID 为 `-1003956377923`。
 - bot：`@ddupan_alerting_bot`。2026-09-25 通过 Telegram `getChat` / `getChatMember`
@@ -130,7 +142,7 @@ Grafana HelmRelease Ready、两个 Deployment 就绪；68 条规则无评估错�
 Grafana API 已确认 provisioned 数据源，并通过其代理成功读取 `/api/v2/status`、
 `/api/v2/alerts` 和 `/api/v2/silences`。现场插件的 Save & test 使用前端代理请求 status；
 通用 `/api/datasources/uid/alertmanager/health` 不适用于这个前端插件，会返回 Plugin unavailable。
-本轮没有执行浏览器 OIDC 登录与手工创建静默，不将 API 验证写作浏览器端验收。
+该次验证经 API 完成，未在浏览器中登录或手工创建静默。
 
 功能边界见 [Grafana Alertmanager 文档](https://grafana.com/docs/grafana/latest/datasources/alertmanager/)。
 
@@ -150,16 +162,16 @@ Grafana API 已确认 provisioned 数据源，并通过其代理成功读取 `/a
   Kubernetes 容器指标继续由 `VMNodeScrape/cadvisor` 的 `/metrics/cadvisor` 提供。
   后续需要 Docker 容器指标时，先部署 exporter 并验证端口，再增加采集目标。
 
-配置依据：[homelab-infra PR #148](https://git.ddupan.top/panxiao81/homelab-infra/pulls/148)，
+配置变更：[homelab-infra PR #148](https://git.ddupan.top/panxiao81/homelab-infra/pulls/148)，
 2026-09-25 已合并并由 Flux 应用 `a43b7d3c26f9724b9d5b2ad45058f2d1632741af`。
 现场确认 kubelet 恢复 up，旧 :8080 目标消失。此次验收期间另发现共享 etcd
-`10.60.0.20:2381` 拒绝连接，因此不能将本次两项修复等同于全部采集目标健康或
-`TooManyScrapeErrors` 已恢复；后续状态需重新检查 targets，etcd 的操作背景另行对齐。
+`10.60.0.20:2381` 拒绝连接，因此这两项修复不代表全部采集目标健康或
+`TooManyScrapeErrors` 已恢复；当前状态以 vmagent targets 为准。
 
 ## 出问题时与维护入口
 
 - 域名打不开：先区分内网 DNS、到 LAN 的路由和浏览器证书错误。
-- 登录后无权限：检查 Grafana 的账号/角色授权，Authelia 登录不等于管理员权限。
+- 登录后无权限：检查 Grafana 的账号/角色授权，iam-login 登录成功不等于管理员权限。
 - 看板空白：检查时间范围、数据源和筛选条件，再区分缺少采集与查询失败。
 - 指标与日志不一致：先对齐时间和目标实例，再判断是否为采集范围不同。
 

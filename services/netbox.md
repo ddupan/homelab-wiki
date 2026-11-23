@@ -1,59 +1,48 @@
 ---
-title: NetBox 使用指南
-lifecycle: experimental
-evidence: documented
-last_reviewed: 2026-09-16
+title: NetBox（已退役）
+lifecycle: retired
+evidence: configuration
+last_reviewed: 2026-11-23
 last_verified: null
+sources:
+  - https://git.ddupan.top/panxiao81/homelab-infra/commit/9532e11f413d3557c456139c63ed9413527eeb05
+  - homelab-infra `CLAUDE.md`、`infrastructure/network/README.md`、`infrastructure/network/ipam.yml`
+watch:
+  - homelab-infra:infrastructure/network/ipam.yml
+  - homelab-infra:infrastructure/network/README.md
+  - homelab-infra:infrastructure/dns/generate.py
 ---
 
-# NetBox
+# NetBox（已退役）
 
-NetBox 用于浏览网络设备、接口与 IP 地址关系，目前是已部署的评估环境。
-权威拓扑保存在 homelab-infra 的 `apps/netbox/terraform/topology.yml`，NetBox 是它的派生镜像。
-已有配置生成试验，不代表真实网络已由 NetBox 自动驱动。
+> **已于 2026-10-04 退役**（[9532e11](https://git.ddupan.top/panxiao81/homelab-infra/commit/9532e11f413d3557c456139c63ed9413527eeb05)
+> “chore: 下线 NetBox”）。该 commit 删除了 `apps/netbox/` 整个目录（README、拓扑、生成脚本与清单），
+> 并移除 Authelia 中的 NetBox 规则。`https://netbox.ad.ddupan.top`、`netbox-admins` 组与
+> `apps/netbox/terraform/topology.yml` 均不再是有效入口。
 
-本页依据工作区 `apps/netbox/README.md` 及相关设计记录整理；本轮没有登录或查询现场。
+## 退役原因
 
-## 打开与登录
+NetBox 是一份没人读的派生镜像，对单节点 laptop 又太重。
+维护者明确要求**不要重新引入 UI 形式的网络事实来源**（source of truth）。
 
-在能访问 LAN 的环境打开 [NetBox](https://netbox.ad.ddupan.top)，通过 Authelia 登录并完成二次认证。
-源码记录入口访问限制为 AD 的 `netbox-admins` 组；有 AD 账号本身并不足以获得访问权限。
+## 替代入口
 
-这里使用网关的 Authelia **forward-auth**，NetBox 接收经网关认证的用户与组信息。
-NetBox 没有独立的 OIDC client；不要因 Authelia 是主 OIDC broker 就替它配置另一套 OIDC 登录。
-正常使用从域名入口进入，不能绕过网关或自行构造 Remote-User 等身份头。
+| 需要的信息 | 现在去哪里 |
+|---|---|
+| 网段、地址池、DHCP 范围、VLAN、AS 号 | homelab-infra `infrastructure/network/ipam.yml`，规则见同目录 `README.md` |
+| 某个地址是否已被占用 | DNS（`lab.ddupan.top`）：谁创建资源，谁注册名字，见 [LAN DNS](lan-dns.md) |
+| 找下一个空闲地址 | `infrastructure/dns/generate.py --next-free <prefix>`，读现网 zone，需要 PowerDNS API key（Bao `kv/k8s/powerdns`） |
+| 路由职责与 BGP 邻居 | `infrastructure/network/README.md`、[VyOS 路由器](vyos-router.md) |
 
-## 第一次浏览设备与地址
+`ipam.yml` 只放 DNS 表达不了的部分（地址池、保留段、AS）；已用的单个地址以 DNS 为准
+（[075f2a2](https://git.ddupan.top/panxiao81/homelab-infra/commit/075f2a2)）。`generate.py` 会校验
+`ipam.yml` 的网段彼此不重叠。
 
-1. 在 Devices 列表中搜索要了解的设备，打开详情，查看角色、主要地址与 Interfaces。
-2. 从接口查看关联的 IP 地址；有连接记录时，再沿关联对象查看另一端。
-3. 在 IPAM 的 Prefixes 中搜索目标网段，例如源拓扑记录中的 `192.168.10.0/24`。
-4. 查看该前缀下的地址记录，再打开地址详情，确认其关联接口和设备。
+## 历史
 
-这条路径用于回答“这个地址记录给谁、接口属于哪台设备”等问题。
-NetBox 中的地址状态来自资产记录，不会自动证明主机在线、地址当前无占用或 DHCP 已下发。
-排查实时故障仍需相应运行证据；AI 查询现场前须按本库规则先与维护者对齐范围。
-对象概念可参考 [NetBox IPAM 文档](https://netbox.readthedocs.io/en/stable/features/ipam/)。
+2026-09 期间 NetBox 作为评估环境部署：以 Git 中的 `topology.yml` 为权威，NetBox 为只读派生镜像，
+登录经 Authelia forward-auth 限制为 AD `netbox-admins` 组，另有面向 VyOS OSPF 与 Samba AD DNS 的配置生成试验。
+这些路径随 9532e11 一并删除；OSPF 已于 2026-10-16 退役（见 [VyOS 路由器](vyos-router.md)），
+Authelia 已于 2026-10-11 退役（见 [Authelia](authelia.md)）。原页面的浏览与修改步骤已不适用，不再保留。
 
-## 发现记录需要修改时
-
-先在 Git 中修改 `apps/netbox/terraform/topology.yml`，由维护者按该目录 README
-审查 Terraform plan 并同步镜像；不要把 UI 编辑作为持久修改入口。
-镜像中的手工改动可能与下次同步冲突；从拓扑文件移除对象也可能在 plan 中产生删除，需审查影响。
-
-资产记录不保存 Wi-Fi 密码等秘密，凭据由 [OpenBao](openbao.md) 等既有秘密管理流程提供。
-面向 VyOS OSPF 与 Samba AD DNS 的生成脚本属于评估成果，运行生成器与实际应用网络配置是不同步骤；
-看到 NetBox 记录更新，不能宣称路由、DNS 或 DHCP 已同步。
-
-## 遇到问题先看哪里
-
-- 无法访问域名：检查 LAN DNS、路由及共享 Envoy 入口。
-- 登录后被拒绝：核对 Authelia 访问规则及 AD 组；不要通过直接访问后端绕过认证。
-- 记录缺失或不一致：对照 Git 拓扑和上一次同步记录，区分来源缺失与镜像尚未同步。
-- 数据库或应用异常：转到部署 README，检查对应依赖和恢复流程。
-
-部署、依赖、认证边界、拓扑同步与配置生成细节见 homelab-infra `apps/netbox/README.md`。
-应用使用数据库与 Redis，登录链路依赖 LAN DNS、Envoy、Authelia 和 Samba AD。
-本地管理员属于故障恢复入口，日常浏览不使用该路径。
-
-来源文件的固定版本与工作区差异见[来源追溯](../sources.md#netbox)。
+旧版来源文件的固定版本见[来源追溯](../sources.md#netbox)。

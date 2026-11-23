@@ -2,8 +2,13 @@
 title: SeaweedFS S3 使用指南
 lifecycle: active
 evidence: documented
-last_reviewed: 2026-09-25
+last_reviewed: 2026-11-23
 last_verified: null
+sources:
+  - homelab-infra apps/seaweedfs/README.md、infrastructure/dns/README.md
+  - 维护者 2026-11-23 说明：正式入口为 s3.lab.ddupan.top
+watch:
+  - homelab-infra:apps/seaweedfs/
 ---
 
 # SeaweedFS 对象存储
@@ -11,18 +16,19 @@ last_verified: null
 SeaweedFS 为应用提供 S3 兼容对象存储，zot Registry 是它的消费者之一。
 普通应用使用自己的 bucket 和 S3 身份；容器镜像通过 [zot](zot.md) 发布与拉取。
 
-本页依据 homelab-infra 工作区 `apps/seaweedfs/README.md` 和 `apps/zot/README.md` 整理，
-客户端语法参考 AWS CLI 官方文档。本轮未查询现场或读写对象。
+客户端语法参考 AWS CLI 官方文档。
 
 ## 连接入口与身份
 
 | 场景 | endpoint |
 |---|---|
-| LAN 客户端的 HTTPS S3 入口 | `https://s3.ad.ddupan.top` |
+| LAN 客户端的 HTTPS S3 入口 | `https://s3.lab.ddupan.top` |
 | Kubernetes 集群内 Service | `http://seaweedfs-s3.seaweedfs.svc.cluster.local:8333` |
 
+旧名 `s3.ad.ddupan.top` 仍可解析，客户端迁完后退役；新客户端一律用 `s3.lab`。
+
 首次接入先明确自己的 bucket、需要的 Read/Write/List 等权限及凭据获取方式。
-当前所读配置使用静态 S3 AK/SK，由 OpenBao 管理；SeaweedFS OIDC/STS 尚未接入。
+S3 使用静态 AK/SK，由 OpenBao 管理；SeaweedFS OIDC/STS 尚未接入。
 zot 前端的 SPIFFE 登录不代表通用 S3 客户端已经能用 SPIFFE 换取 S3 凭据。
 
 应用使用专属身份，不复用 zot 或 Terraform 的存储凭据。
@@ -37,7 +43,7 @@ Kubernetes Secret 是 ESO 生成的消费副本，身份或凭据变更应修改
 将下例 bucket 替换为自己的已授权 bucket，先只读列出少量对象：
 
 ```bash
-aws --endpoint-url https://s3.ad.ddupan.top s3api list-objects-v2 \
+aws --endpoint-url https://s3.lab.ddupan.top s3api list-objects-v2 \
   --bucket YOUR_APP_BUCKET --max-items 10 --no-cli-pager
 ```
 
@@ -51,9 +57,9 @@ aws --endpoint-url https://s3.ad.ddupan.top s3api list-objects-v2 \
 仅在自己的测试 bucket/prefix 以及具备写权限时操作。替换占位符，并使用尚未占用的 key：
 
 ```bash
-aws --endpoint-url https://s3.ad.ddupan.top s3 cp ./hello.txt \
+aws --endpoint-url https://s3.lab.ddupan.top s3 cp ./hello.txt \
   s3://YOUR_APP_BUCKET/YOUR_UNUSED_TEST_KEY
-aws --endpoint-url https://s3.ad.ddupan.top s3 cp \
+aws --endpoint-url https://s3.lab.ddupan.top s3 cp \
   s3://YOUR_APP_BUCKET/YOUR_UNUSED_TEST_KEY ./hello.downloaded.txt
 cmp ./hello.txt ./hello.downloaded.txt
 ```

@@ -2,60 +2,46 @@
 title: Gitea Dynamic Runner
 lifecycle: experimental
 evidence: documented
-last_reviewed: 2026-09-21
+last_reviewed: 2026-11-23
 last_verified: null
 sources:
   - https://git.ddupan.top/panxiao81/gitea-dynamic-runner/src/branch/main/README.md
   - https://git.ddupan.top/panxiao81/homelab-infra/src/branch/main/platform/dynamic-runner/README.md
   - https://git.ddupan.top/panxiao81/ci-actions/src/tag/v1
+  - homelab-infra platform/dynamic-runner、platform/sandbox-dynamic-runner、platform/sandbox-ci-runners、platform/sandbox-kata 的 README
+  - homelab-infra infrastructure/gcp-ci/terraform/README.md
+  - gitea-dynamic-runner README（2026-09-16 查阅，历史架构部分）
+watch:
+  - homelab-infra:platform/dynamic-runner/
+  - homelab-infra:platform/sandbox-dynamic-runner/
+  - homelab-infra:platform/sandbox-ci-runners/
+  - homelab-infra:platform/sandbox-kata/
+  - homelab-infra:infrastructure/gcp-ci/terraform/
 ---
 
 # Gitea Dynamic Runner
 
 原名 `gitea-microvm-runner`，现为
 [gitea-dynamic-runner](https://git.ddupan.top/panxiao81/gitea-dynamic-runner)。
-它为 Gitea Actions 按需创建一次性执行环境，支持 Kubernetes Pod 和 Cloud Hypervisor
-microVM；每个环境只执行一个 job，结束后销毁环境及本地状态。
+它为 Gitea Actions 按需创建一次性执行环境（Kubernetes Pod、OpenSandbox/Kata VM、GKE Autopilot Pod）；
+每个环境只执行一个 job，结束后销毁环境及本地状态。
 
-更名由维护者提供；以下组件与接口说明依据 2026-09-16 查阅的项目 README。
-维护者进一步明确：**项目正在积极开发，具体启用范围和实现进度以该项目文档为准。**
-本页保留用途、设计原则和该次 README 的摘要，仅补充维护者明确提供的阶段与容量，不复制维护完整部署范围或消息队列参数清单。
-本轮未查询现场，不将设计接口视为已完成的上线验收。
-
-## 当前开发与启用阶段
-
-维护者于 2026-09-16 补充：开发接近完成，动态 `pod` 已上线测试，`vm` 正在工作；
-纯 `self-hosted` 的旧常驻 runner 准备退役。
-
-| 执行环境 | workflow labels | 系统总并发量 | 阶段 |
-|---|---|---:|---|
-| Pod | `[self-hosted, pod]` | 4 | 已上线测试 |
-| VM | `[self-hosted, vm]` | 1 | 正在工作，具体进度以项目文档为准 |
-
-并发量是对应环境在系统中的总容量，不按仓库或 workflow 分别分配一份额度。
-本页记录维护者提供的阶段与容量，不将“上线测试”写成完整正式验收；
-旧常驻 runner 也尚未标记为已退役。后续变化继续以项目文档为准。
+**项目正在积极开发，具体启用范围和实现进度以该项目文档为准。**
 
 ## workflow 如何选择执行环境
 
-README 定义两种稳定接口，在 workflow 的 job 中选择：
+每个池只声明一个 label，job 的 `runs-on` 也只写这一个。
 
-```yaml
-runs-on: [self-hosted, pod]
-```
+| `runs-on` | 池 / 成员 | 执行方式与部署位置 | 容量 |
+|---|---|---|---|
+| `[self-hosted]` | `pod-sandbox`（迁移期间另带别名 `pod`） | sandbox 集群的 Kubernetes Pod，`platform/sandbox-dynamic-runner` | 见该目录配置 |
+| `[self-hosted-large]` | `pod-laptop` | laptop k3s 的 Kubernetes Pod，`platform/dynamic-runner` | `POD_CAPACITY=4` |
+| `[self-hosted-vm]` | `vm` | OpenSandbox `ci-vm` Pool 的 Kata VM（`kata-clh-runtime-rs`），`platform/sandbox-ci-runners`、`platform/sandbox-kata` | `VM_CAPACITY=1` |
+| `[cloud]` / `[cloud-small]` | `cloud-scheduler` | GKE Autopilot 一次性 Pod（`infrastructure/gcp-ci/terraform`），每个 job 一个 ephemeral runner | 默认 2 vCPU / 4 GiB；`cloud-small` 0.5 vCPU / 1 GiB；实际上限为试用账号 GCE 配额 |
 
-```yaml
-runs-on: [self-hosted, vm]
-```
-
-| 接口 | 执行方式 | 使用时需要理解的边界 |
-|---|---|---|
-| `pod` | 动态 Kubernetes privileged Pod；workflow 使用 host executor | 旧 README 要求 pipeline 按需 setup Docker；Docker 的新约定见下文。host executor 指 Pod 内执行环境 |
-| `vm` | 动态 Cloud Hypervisor microVM | 每个任务创建独立 COW disk、seed 和 TAP，guest runner 执行一个 job 后关机并清理 |
-
-两种接口不能仅凭“环境一次性”就认定具有相同的隔离边界。
-接入前需要结合项目设计约束和实际部署确认任务的信任范围。
-旧 homelab-infra 文档中的 `kind-microvm` 是早期记录，不作为本项目当前 workflow 接口。
+容量是池的总容量，不按仓库或 workflow 分配。满载时 worker 不领取，task 在 Gitea 显示等待，由池内其他成员领取。
+旧写法 `[self-hosted, pod]`、`[self-hosted, vm]` 已不是当前接口；`pod` 别名只在迁移期间保留。
+各池接口不能仅凭“环境一次性”就认定具有相同的隔离边界，接入前结合项目设计约束确认任务的信任范围。
 
 ### Docker 可用性约定更新
 
@@ -64,12 +50,23 @@ runs-on: [self-hosted, vm]
 kind 等其他工具也默认就绪。数据库集成测试不因使用 Docker 而要求 VM。
 消费方 workflow 应检查 Docker 是否可用，而不重复启动 daemon、强制 storage driver 或
 覆盖 runner 提供的 endpoint。[Ayatori #6](https://git.ddupan.top/panxiao81/ayatori/pulls/6)
-正在按此约定调整。此处依据维护者说明，不表示后端修复已经部署或远端集成已经通过，
-`last_verified` 保持不变。
+按此约定调整。
 
 ## 组件如何协作
 
-当前 README 描述的 bootstrap 路径为：
+单副本 Go controller 在同一进程运行原生 Kubernetes worker、
+OpenSandbox worker 和 SPIFFE mTLS facade。每个 worker 各自是一个 Gitea runner 池成员（`TASK_SOURCE=gitea`），
+持有自己的 registration，只在本地容量池有空位时 `FetchTask`，由 Gitea 在池内分发。sandbox 集群另有一个只运行
+`kubernetes-worker` 的实例（`pod-sandbox`）。原先的 scheduler、NATS 队列与 Lease 已于 2026-10-05 移除
+（gitea-dynamic-runner `docs/runner-registration-migration.md`）。云端池由 `cloud-scheduler` 为每个排队 job
+注册 ephemeral runner，Pod 直连 Gitea。
+
+registration 位于 Bao `kv/k8s/dynamic-runner-pod-laptop`、`kv/k8s/dynamic-runner-vm` 等路径，只挂载给 controller，
+不进入 executor。Deployment 为 `replicas: 1` + `Recreate`，同一 registration 与 facade 不能由两个实例同时持有。
+
+### 历史：webhook + NATS 架构（2026-10-05 前）
+
+2026-09-16 查阅的项目 README 描述的 bootstrap 路径为：
 
 ```text
 Gitea workflow_job webhook
@@ -86,12 +83,15 @@ Gitea workflow_job webhook
 或 capacity 扩容。这是 runner 所属 Account 和 stream 内的协调约定，不是跨 NATS Account
 的全局命名要求。具体 durable 名称和后续调度改动以项目文档为准。
 
-[NATS](nats.md) 作为集群共享服务部署；维护者说明当前只有 Dynamic Runner 消费它，
-不因此将 NATS 视为 runner 私有组件。
+[NATS](nats.md) 作为集群共享服务部署；当时只有 Dynamic Runner 消费它，2026-10-05 后已无消费者。
 
-webhook → NATS 是尽快验证 Pod/VM 生命周期的 bootstrap 实现。
-长期目标是 controller 兼容 Gitea Runner 协议，直接注册、声明 labels、领取 task，
-再交给 Pod/VM executor；不能把该目标描述为已经实现。
+webhook → NATS 是尽快验证 Pod/VM 生命周期的 bootstrap 实现。当时的长期目标“controller 兼容
+Gitea Runner 协议，直接注册、声明 labels、领取 task”已由上文的 runner 池成员架构取代。
+当时的 VM 后端是 Cloud Hypervisor microVM（`microvm-runner-launch`），现行 VM 池为 OpenSandbox/Kata；
+旧 homelab-infra 文档中的 `kind-microvm` 是更早的记录。
+
+当时维护者提供的阶段（2026-09-16）：动态 `[self-hosted, pod]` 上线测试（并发 4），`[self-hosted, vm]` 正在工作（并发 1），
+纯 `self-hosted` 旧常驻 runner 准备退役（已于 2026-09-21 删除，见下文）。
 
 ## 设计原则：runner 提供环境，workflow 消费身份
 
@@ -118,24 +118,23 @@ API socket，workflow 明确声明 role、audience 和用途，目标服务 poli
 
 因此，身份相关的环境验收应关注 Pod/VM 能否取得各自身份和是否保持隔离；
 具体服务的登录与 token 使用由对应 workflow 验收。
-本段记录设计职责，不表示获取身份的能力已经在所有 backend 完成实现或现场验证。
 
 ## 基础设施归属与运行凭据
 
 - `jwt-broker` 是早期共享 Kubernetes runner 的过渡实验；目标架构不部署它。
-- 以下 NATS、webhook 与 runner registration 凭据用于执行平台本身运作，
-  与 workflow 自行请求的下游业务 token 分开管理。
-- NATS 密码、webhook secret 和 registration token 从文件读取，不复制进知识库。
+- runner registration、facade capability key 等凭据用于执行平台本身运作（现行路径见上文），
+  与 workflow 自行请求的下游业务 token 分开管理，不复制进知识库。旧架构的 NATS 密码与 webhook secret 已随之不再使用。
 - registration token 不写入 seed image；worker 通过单次 nonce endpoint 交给 guest。
 - base image 不携带 runner identity、registration token、SSH 密码或 host key。
 - runner 软件保存在本项目；Kubernetes、OpenBao、LXC、bridge 和容量配置保留在 homelab-infra。
-- homelab-infra 的 `platform/gitea-runner/` 是此前的常驻 runner；本 README 不能证明它已被替换或退役。
+- homelab-infra 的 `platform/gitea-runner/` 是此前的常驻 runner，已于 2026-09-21 删除
+  （[bb24c76](https://git.ddupan.top/panxiao81/homelab-infra/commit/bb24c76704a018df967bfe007539fde9c9b2a46e)）。
 
 ## 继续阅读
 
-- [项目 README](https://git.ddupan.top/panxiao81/gitea-dynamic-runner/src/branch/main/README.md)：接口、组件、开发命令与安全边界，本轮已查阅。
-- [设计原则](https://git.ddupan.top/panxiao81/gitea-dynamic-runner/src/branch/main/docs/design-principles.md)：README 指向的完整设计约束，本轮未逐篇复核。
-- [Runner 协议路线](https://git.ddupan.top/panxiao81/gitea-dynamic-runner/src/branch/main/docs/runner-protocol-roadmap.md)：README 指向的长期调度路线与迁移边界，本轮未逐篇复核。
+- [项目 README](https://git.ddupan.top/panxiao81/gitea-dynamic-runner/src/branch/main/README.md)：接口、组件、开发命令与安全边界。
+- [设计原则](https://git.ddupan.top/panxiao81/gitea-dynamic-runner/src/branch/main/docs/design-principles.md)：README 指向的完整设计约束。
+- [Runner 协议路线](https://git.ddupan.top/panxiao81/gitea-dynamic-runner/src/branch/main/docs/runner-protocol-roadmap.md)：README 指向的长期调度路线与迁移边界。
 - [SPIFFE/SPIRE](spire.md)：统一机器身份的设计定位与阶段依据。
 - [`ci-actions@v1`](https://git.ddupan.top/panxiao81/ci-actions/src/tag/v1)：workflow 可复用的 SPIFFE/OpenBao 登录与 Nexus 配置 Action。
 

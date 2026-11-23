@@ -2,23 +2,32 @@
 title: NATS
 lifecycle: retired
 evidence: live-verified
-last_reviewed: 2026-10-06
+last_reviewed: 2026-11-23
 last_verified: 2026-10-06
 sources:
   - 维护者于 2026-09-16 提供的部署与消费者说明
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/278
+  - homelab-infra platform/nats/README.md、values.yaml
+watch:
+  - homelab-infra:platform/nats/
+  - homelab-infra:clusters/homelab/apps/nats.yaml
 ---
 
 # NATS
 
 **NATS 已停用并缩容到零，配置、PVC 与 Service 保留供恢复。**
-2026-10-05 的源码 README 记录 Dynamic Runner 已移除 JetStream 依赖；
-2026-10-06 排障现场确认 nats namespace 无 Pod，残留采集造成空抓取池告警。
-本次通过 [PR #278](https://git.ddupan.top/panxiao81/homelab-infra/pulls/278)
-停用 PodMonitor，现场清理残留 VMPodScrape；验收范围为无 Pod、无采集对象、
-Helm v13 和 Flux Ready，未验证停用前的消息业务。恢复时同时将 replicas 改回 1、启用
-`promExporter.podMonitor.enabled`，并从 Git 历史恢复 NATS 专用告警。
-以下 Account 与接入说明仅供恢复时参考，不代表入口当前可用。
+2026-10-05 Dynamic Runner 移除了对 JetStream 的依赖，NATS 从此没有消费者。
+2026-10-06 现场确认 nats namespace 无 Pod，残留采集造成空抓取池告警，随后由
+[PR #278](https://git.ddupan.top/panxiao81/homelab-infra/pulls/278)
+停用 PodMonitor 并清理残留 VMPodScrape；当时验收了无 Pod、无采集对象、Helm v13 和 Flux Ready。
+
+当前状态：`platform/nats/values.yaml` 设置 `statefulSet.merge.spec.replicas: 0`，PodMonitor 停用，
+Flux 仍部署该目录（`clusters/homelab/apps/nats.yaml`）。目录与 PVC 留待确认不再需要时单独移除；
+本页 `lifecycle: retired` 指无消费者、已停用，不表示配置已移除。
+恢复时将 replicas 改回 1、启用 `promExporter.podMonitor.enabled`，并从 Git 历史恢复 NATS 专用告警。
+以下 Account 与接入说明供恢复时参考，入口目前不可用。
+重新启用时新客户端应连 `tls://nats.lab.ddupan.top:4222`（证书同时含 lab 与 ad 名称，
+[99f1ca3](https://git.ddupan.top/panxiao81/homelab-infra/commit/99f1ca3)）。
 
 ## 多租户边界
 
@@ -29,7 +38,6 @@ NATS 原生通过 **Account** 提供多租户隔离。不同 Account 拥有各�
 因此，讨论队列与 consumer 必须同时明确所属 Account、stream 和消费者约定，
 不能把不同租户的名称当作集群全局冲突。跨 Account 通信需要显式配置，
 同一 Account 内的 worker 协调则遵循所属项目的约定。
-这一共享服务的隔离定位由维护者于 2026-09-16 补充。
 
 ## 如何接入与维护
 

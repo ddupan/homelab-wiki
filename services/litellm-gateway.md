@@ -1,70 +1,37 @@
 ---
-title: LiteLLM 网关使用指南
-lifecycle: unknown
+title: LiteLLM 网关（已退役）
+lifecycle: retired
 evidence: configuration
-last_reviewed: 2026-09-16
+last_reviewed: 2026-11-18
 last_verified: null
 ---
 
-# LiteLLM gateway
+# LiteLLM gateway（已退役）
 
-为客户端提供模型 API 代理。维护者于 2026-09-16 表示没有需要补充的动态改动或退役事项；
-本页依据 `apps/litellm-gateway/docker-compose.yml` 与 `config.yaml` 整理，不代表已验证运行状态。
+**已于 2026-11-03 退役**（[b8f8e1f](https://git.ddupan.top/panxiao81/homelab-infra/commit/b8f8e1f)）。
+不要再按本页接入；`apps/litellm-gateway/` 已从 homelab-infra main 删除。
 
-## 接入参数
+## 退役原因
 
-Compose 映射宿主 TCP `4000` 到网关 `4000`，没有在这些文件中记录统一访问域名。
-先由维护者提供实际 base URL、客户端认证要求及可用模型；不能把宿主端口自动当成公网入口。
-网关客户端的认证与网关访问上游模型的认证是两层配置，不能把服务端认证文件交给消费者。
+据退役 commit 说明：laptop 上的这套 LiteLLM 代理（ChatGPT 订阅 + HF embedding，宿主端口 `:4000`）
+自 2026-07-10 起未再运行（数据库最后写入当日），容器已不存在；仓库内没有使用者
+（research-auto 直接使用 litellm 库）；`4000` 端口现由 blocky 占用。
+该 commit 同时删除了 compose 目录、Renovate 中为其 PostgreSQL 加的规则，并从监控覆盖清单去掉 LiteLLM。
 
-配置中的模型别名包括 `chatgpt/gpt-5.4` 和 `hf/google/embeddinggemma-300m` 等，
-分别面向聊天和 embedding；这里只表示路由声明，不保证上游账号有权限或模型当下可用。
-完整别名以 `config.yaml` 为准。不要因名字含有 codex，就把这个网关与已退役的 codex-proxy 混为一体。
+## 现在用什么
 
-## 第一次聊天请求
+需要模型 API 时使用 [AI gateway](ai-gateway.md)（homelab-infra `apps/ai-gateway/`，`https://ai.lab.ddupan.top`）：统一入口、按客户端发放 key，
+`gpt-*`/`codex-*` 等模型经 CLIProxyAPI 走 ChatGPT 订阅，其余走 Anthropic API。
+用法与 key 申请见该目录 README。退役 commit 未把它写成本服务的直接替代，这里只说明当前的模型 API 入口。
 
-在已获授权的客户端环境中，将 `LITELLM_BASE_URL` 设置为维护者提供的 API 根地址，
-`LITELLM_MODEL` 设置为获准使用的聊天模型别名。
-如果该入口要求 Bearer key，通过既有秘密注入方式提供 `LITELLM_API_KEY`；是否需要 key 以实际接入约定为准。
-下面使用 Python 标准库，token 不放在命令行中；请求会调用上游模型并消耗对应配额。
+## 历史
 
-```python
-import json
-import os
-import urllib.request
+本服务曾是 `apps/litellm-gateway/` 下的 Docker Compose：网关映射宿主 TCP `4000`，附带独立的 PostgreSQL 16
+（卷 `postgres_data`，不是[共享 PostgreSQL](shared-postgresql.md)）与 Prometheus（卷 `prometheus_data`），
+挂载配置文件和宿主 `auth.json`（上游认证材料）。模型别名包括 `chatgpt/gpt-5.4` 和
+`hf/google/embeddinggemma-300m` 等。它与已退役的 codex-proxy 不是同一服务。
 
-base = os.environ["LITELLM_BASE_URL"].rstrip("/")
-headers = {"Content-Type": "application/json"}
-key = os.environ.get("LITELLM_API_KEY")
-if key:
-    headers["Authorization"] = "Bearer " + key
-payload = {
-    "model": os.environ["LITELLM_MODEL"],
-    "messages": [{"role": "user", "content": "Reply with OK."}],
-}
-request = urllib.request.Request(
-    base + "/chat/completions",
-    data=json.dumps(payload).encode(),
-    headers=headers,
-    method="POST",
-)
-with urllib.request.urlopen(request, timeout=60) as response:
-    result = json.load(response)
-print(result["choices"][0]["message"]["content"])
-```
+退役 commit 记录 `.gitignore` 中的 `auth.json` 条目暂留，直到本地凭据文件删除；该文件含上游凭据，
+不进入 wiki、日志或 AI 上下文。
 
-预期收到模型回复。接口结构参考 [LiteLLM 客户端文档](https://docs.litellm.ai/docs/proxy/user_keys)，
-本轮没有执行请求。该示例面向聊天模型，不能直接拿 embedding 模型替换。
-
-## 依赖与排障
-
-这套 Compose 包含独立的 PostgreSQL 16 和 Prometheus，数据库卷为 `postgres_data`，
-指标卷为 `prometheus_data`；这里的数据库不是[集群共享 PostgreSQL](shared-postgresql.md)。
-Compose 还挂载配置文件及宿主 `auth.json`，后者属于上游认证材料，不进入 wiki、日志或 AI 上下文。
-镜像配置使用 `dev` 标签，接入行为需与实际部署版本相符，不能仅凭最新上游文档认定功能已启用。
-
-连接失败先核对宿主与端口；401/403 需区分网关认证和上游认证；模型错误先核对别名及上游权限；
-超时或限额错误再检查上游响应。不要通过打印认证文件或完整带鉴权请求排障。
-部署来源为 homelab-infra `apps/litellm-gateway/`；消费者清单与备份情况未在所读文件中记录。
-
-来源文件的固定版本与工作区差异见[来源追溯](../sources.md#litellm-gateway)。
+来源文件在退役前的固定版本见[来源追溯](../sources.md#litellm-gateway)。

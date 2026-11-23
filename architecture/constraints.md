@@ -1,6 +1,6 @@
 # 架构约束索引
 
-审阅日期：2026-09-25。以下是现有仓库明确记录的约束摘要；Ayatori 条目来自其独立项目的
+审阅日期：2026-11-18。以下是现有仓库明确记录的约束摘要；Ayatori 条目来自其独立项目的
 已接受设计，其余来源路径相对于 homelab-infra。修改时必须读原文和对应代码，新出现的差异
 先向维护者确认；[首轮状态对齐](../verification.md)已完成。
 
@@ -20,18 +20,19 @@
 | OpenBao 恢复不能依赖 k3s 或读取自己内部的恢复凭据 | 先恢复信任根，再恢复消费者 | `infrastructure/openbao/README.md`、`CLAUDE.md` |
 | Terraform 管 API 配置，Ansible 管主机及不能安全纳管的密钥材料 | 不可读回秘密和根密钥不能靠反复重建实现收敛 | `infrastructure/openbao/README.md` |
 | LAN HTTP 入口为 Envoy Gateway；新增服务核对 parentRefs、DNS 和认证 | 不直接套用 archive 中的 Gateway 示例 | `platform/envoy-gateway/README.md`、`AGENTS.md` |
-| 人类认证仍由 Samba AD / Authelia 提供；Hydra 作为 Gitea 的实验性签发入口，通过 OIDC 复用 Authelia；workload 身份由 SPIRE 提供 | 2026-09-25 第一轮人类 PoC 扩展了原单 broker 接入边界，未迁移主入口、机器身份或应用权限 | [Authelia](../services/authelia.md)、[Hydra PoC](../services/hydra.md)、[SPIRE](../services/spire.md) |
+| 人类认证由 iam-login 提供（AD 密码 + Passkey，组映射到 `platform-admins`）；workload 身份由 SPIRE 提供 | 旧规则（2026-09-25）：Samba AD / Authelia 为主，Hydra 为 Gitea 的实验入口。新规则：Hydra 2026-10-05、Authelia 2026-10-11 退役，全部应用为 iam-login 的 OIDC client；Gateway 没有 forward-auth，无登录的应用用 Envoy `SecurityPolicy` 对接 iam-login | [iam-login](../services/iam-login.md)、[发布新服务](../guides/publish-service.md)、[SPIRE](../services/spire.md) |
 | SPIFFE 提供跨基础设施的统一机器身份入口，替代 workload-sts 统一 IAM 平台方案 | 服务信任 SPIFFE 身份、签发自己的 token 并维护自身权限；非 Kubernetes 身份不依赖 Kubernetes ServiceAccount，优先复用服务现有接入机制 | [核心设计与取舍](../services/spire.md#核心设计与取舍)，维护者于 2026-09-16 补充 |
 | 已由 Flux 接管的资源通过 Git 修改；brownfield 不全局开启 prune | 防止漂移回滚与误删；未接管资源不能假定受 Flux 管理 | `clusters/homelab/README.md` |
+| DNS 记录随创建它所命名对象的代码维护；只有无代码创建的主机进 `dns/terraform/hosts.tf` | 新增（2026-10-09 起）：不再集中到一份记录文件，服务名由 external-dns 从 HTTPRoute 发布到 `lab.ddupan.top` | [LAN DNS](../services/lan-dns.md)、`infrastructure/dns/README.md` |
 | DNS 各视图保留权威边界；只管理明确声明的 RRset | 不清理 Samba 自动维护的域记录；LAN 现状按维护者说明对齐，旧源码文档待同步 | `infrastructure/dns/README.md`、[LAN DNS](../services/lan-dns.md) |
-| 关键服务 DNS 应容忍单 DC 故障；完整 AD HA 不是前置条件 | 2026-09-30 已接受、待实现；备用需独立提供受保护记录并跨宿主故障域，保留 AD 动态记录所有权；冷启动和缓存过期也须通过验收 | [LAN DNS](../services/lan-dns.md)、[事故报告](../incidents/2026-09-30-dc-dns-openbao.md) |
+| 关键服务 DNS 应容忍单 DC 故障；完整 AD HA 不是前置条件 | 2026-09-30 已接受，维护者 2026-11-18 说明仍在进行中；备用需独立提供受保护记录并跨宿主故障域，保留 AD 动态记录所有权；冷启动和缓存过期也须通过验收 | [LAN DNS](../services/lan-dns.md)、[事故报告](../incidents/2026-09-30-dc-dns-openbao.md) |
 | DHCP 下发主 DNS Blocky、副 DNS 路由器；Blocky 上游为路由器 | 路由器同时承担上游与客户端备用角色；Samba AD 保留域 DNS 职责，不能把所有条件转发合并成一条普通上游 | [LAN DNS](../services/lan-dns.md)，维护者于 2026-09-16 说明 |
 | vyos-rtr 的 CLI 配置只有一个写入方 `vyos_router`，受管路径以 `match: enforce` 整体收敛 | 新规则（2026-11-18）：原先两个项目四个 play 各自追加 `set` 行，删不掉旧值，各自维护的归属范围一旦重叠就会互删；合并后模板即受管路径的全部事实。不得新增第二个写入方；不得把机器自生成的内容（wg42 私钥、login、hw-id）纳入受管路径 | [VyOS 路由器](../services/vyos-router.md)、homelab-infra #830 |
 | Docker 地址池不得与 DN42 的 172.20.0.0/14 重叠 | 本地直连路由会干扰 DN42；已有网络不自动改地址 | `infrastructure/docker/README.md` |
-| NetBox 目前是评估，拓扑由 Git 管理 | 不把网页编辑结果当作新的权威数据 | `apps/netbox/README.md`、`CLAUDE.md` |
-| 现有 privileged DinD runner 只运行可信 workflow | 实例级 runner 不能视为不可信任务隔离边界 | `platform/gitea-runner/README.md` |
+| 地址规划只在 Git（`infrastructure/network/ipam.yml`），已用地址以 DNS 为准；不引入 UI 权威数据 | 旧规则：NetBox 为评估、拓扑由 Git 管理。新规则：NetBox 2026-10-04 下线，原因是它只是无人阅读的派生镜像且对单节点过重 | [NetBox（已退役）](../services/netbox.md)、homelab-infra `CLAUDE.md` |
+| 实例级 runner 只运行可信 workflow | 旧规则针对 privileged DinD 常驻 runner，它已于 2026-09-21 删除；动态 runner 池同样是实例级共享，仍不能视为不可信任务的隔离边界 | [Dynamic Runner](../services/gitea-dynamic-runner.md) |
 | 每个动态 Pod/VM 应能独立取得自身 SPIFFE 身份；runner 只提供执行环境 | 登录目标、audience、token 交换及业务凭据生命周期由 workflow 决定；服务自行维护权限 | [Dynamic Runner 设计原则](../services/gitea-dynamic-runner.md)，维护者于 2026-09-16 明确 |
-| NATS 是集群共享消息服务，原生以 Account 隔离租户，目前仅 Dynamic Runner 消费 | 不把跨 Account 的名称当作全局冲突；runner 所属 Account 内的 durable 等业务约定由其项目文档维护 | [NATS](../services/nats.md)，维护者于 2026-09-16 说明 |
+| NATS 是集群共享消息服务，原生以 Account 隔离租户；2026-10-05 起缩容为 0、当前无消费者（Dynamic Runner 已移除 NATS 依赖），恢复启用时沿用此约束 | 不把跨 Account 的名称当作全局冲突；runner 所属 Account 内的 durable 等业务约定由其项目文档维护 | [NATS](../services/nats.md)，维护者于 2026-09-16 说明 |
 | zot 匿名入口只读；鉴权入口必须按具体身份授权 | 能认证不代表可以推送；不得给整个 trust domain 写权限 | `apps/zot/README.md` |
 
 通用变更约束：先做适用的 plan/check/diff，再操作现场；不将凭据和 Terraform state

@@ -283,10 +283,38 @@ homelab-infra：[#819](https://git.ddupan.top/panxiao81/homelab-infra/pulls/819)
 [#830](https://git.ddupan.top/panxiao81/homelab-infra/pulls/830)（`5deca70`，四个写入方合并为 `vyos_router`）。
 现场验证见 [VyOS 路由器](services/vyos-router.md#当前状态与证据)。
 
-未同步：
+源码同步（2026-11-23 确认均已合并）：
 
-- homelab-infra 源码文档（`vyos_router` 注释、`infrastructure/oci/README.md` 与 `ansible/README.md` 的 OSPF 描述、
-  `README-monitoring.md`、`pve_vm`/`pve_ha` 注释、`apps/tailscale/subnet-routes.sh` 注释）在 [#839](https://git.ddupan.top/panxiao81/homelab-infra/pulls/839)，尚未合并。
-  `pve_vm` 中 VM 100 的 description 从 “OSPF peer” 改为 “BGP peer”，合并后下次运行 Proxmox playbook 会同步到 PVE。
-- `platform/observability/metrics/rules/vyos.yaml` 的 `VyosOspfNoAdjacency`、`VyosOspfNeighborNotFull` 在 OSPF 退役后
-  已无数据、永远不会触发；BGP 由 `VyosBgpPeerDown` 覆盖。规则与对应测试待删除。
+- 源码文档的 OSPF 遗留描述与单一写入方说明：[#839](https://git.ddupan.top/panxiao81/homelab-infra/pulls/839)（752a9f5）。
+  `pve_vm` 中 VM 100 的 description 改为 “BGP peer”，下次运行 Proxmox playbook 时同步到 PVE。
+- 删除失效的 `VyosOspfNoAdjacency`、`VyosOspfNeighborNotFull`：[#844](https://git.ddupan.top/panxiao81/homelab-infra/pulls/844)（c081a40）。
+
+## 2026-11-18 wiki 全面追平
+
+依据 homelab-infra main（`b782ed8` 前后）、各组件 README 与维护者 2026-11-18 说明，更新全部服务页与总览；
+新增 ai-gateway、artifact-keeper、homepage、chef、ayatori-loadbalancer、sandbox-cluster、gcp、e5renew、research-auto；
+Authelia、Hydra、NetBox、litellm-gateway、旧常驻 runner、kata/microVM 试验目录移入总览“已退役”表。
+本轮为配置与文档证据，未做现场验证（VyOS 路由器除外），`last_verified` 均未刷新。
+
+维护者 2026-11-18 说明（据此写为现状）：pg-prod 已迁到 Ayatori LB；CI 依赖多数改走 artifact-keeper，少量仍在 Nexus；
+e5renew、research-auto 纳入本库，只记部署与依赖；ayatori-prod 接 iam-login 与 samba-ad 改读 Bao 已完成；
+Ayatori Compute 与 DNS HA 仍在进行中。
+
+维护者 2026-11-23 答复，已写入各页：
+
+- homelab-infra main 即当前环境，wiki 与代码冲突时以代码为准（写入首页“以什么为准”）。
+- SeaweedFS 正式入口为 `s3.lab.ddupan.top`；`s3.ad` 待客户端迁完后退役。
+- iam-login 控制台管理组为 `platform-admins`；改为 `lifecycle: active`。没有发布周期，main 即当前版本，持续交付。
+- OCI 与 homelab 之间有 WireGuard 隧道与 Tailscale 两条私有路径，RP 换 token 不走公网。
+- OpenBao 没有 `local-agent` 证书路径；机器路径为 kubernetes auth role `ai-agent`（policy `ai-agent-ssh`）。
+- Incus 备份按 011704c 写为：Ayatori 的 k0s backup 卷与每日快照，均同池，无离机副本。
+
+wiki 侧已无待确认项。以下是源码仓库的同步工作，应在 homelab-infra 开 issue / PR 处理，不在本库跟踪：
+
+- pg-prod 的 VyOS 旧入口遗留：`infrastructure/shared-postgresql/README.md`、`probes.yaml` 对 `192.168.10.2:5432` 的探测、
+  `scrapes/vyos.yaml` 与 `rules/vyos.yaml` 的 homelab-pg-proxy 指标、samba-ad `dns.yml` 的 `pg-prod.ad` A 记录。
+- 过时的源码 README：`apps/seaweedfs`（仍写 `s3.ad`）、`apps/iam-login`（管理组写 Domain Admins）、samba-ad（`--ask-vault-pass`）、
+  chef（LB 节点“待部署”）、loadbalancer（部署步骤）、gcp-billing（gcp-ci 是否在 CI）、shared-postgresql、blocky/dns（“尚未成为 LAN resolver”）。
+- 本库 `.gitea/workflows/`（docs、techdocs、stale）仍用 `[self-hosted, pod]`，依赖 sandbox 池迁移期的 `pod` 别名；别名取消前改为 `[self-hosted]`。
+
+本次同时按 4e0fdb8 的新写作规则，去掉了服务页正文中的整理过程说明，来源移入 frontmatter，并为依赖源码的页面加上 `watch`。

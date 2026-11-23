@@ -1,8 +1,8 @@
 ---
 title: Hydra 与 OIDC 上游适配器
-lifecycle: experimental
+lifecycle: retired
 evidence: live-verified
-last_reviewed: 2026-10-01
+last_reviewed: 2026-11-23
 last_verified: 2026-10-01
 sources:
   - https://git.ddupan.top/panxiao81/iam-login/pulls/2
@@ -13,12 +13,19 @@ sources:
   - 维护者于 2026-09-25 确认 Hydra 登录成功返回原 Gitea 账号且仓库权限正常
   - https://git.ddupan.top/panxiao81/homelab-infra/pulls/168
   - 维护者于 2026-10-01 经 Spring 开发实例登录，确认返回原 Gitea 账号并可进入管理后台
+  - https://git.ddupan.top/panxiao81/homelab-infra/commit/82322df5b6124c7278b289cc2c53771e0135dd17
+watch:
+  - homelab-infra:archive/hydra/
 ---
 
 # Hydra 与 OIDC 上游适配器
 
-> **2026-10-04 起已被 [iam-login](iam-login.md) 取代**：Gitea 登录源（ID 3，现名 `sso`）已改指
-> `sso.ddupan.top`。Hydra 部署仅为回退保留，待下线。以下为历史记录。
+> **已于 2026-10-05 退役，由 [iam-login](iam-login.md) 取代。** Gitea 登录源（ID 3，现名 `sso`）
+> 于 2026-10-04 改指 `sso.ddupan.top` 后 Hydra 不再有消费者；
+> [82322df](https://git.ddupan.top/panxiao81/homelab-infra/commit/82322df5b6124c7278b289cc2c53771e0135dd17)
+> 将其移出 Flux、删除 Go 适配器 CI 与 hydra/hydra-login DNS 声明，清单存档到 homelab-infra `archive/hydra/`。
+> 该 commit 说明集群对象、DNS 记录在合并后手动删除，数据库与 `kv/k8s/hydra` 另行清理。
+> 下文入口均已失效，`last_verified` 仅指 2026-10-01 的历史验收。以下为历史记录。
 
 第一轮人类登录 PoC：Hydra 负责 OIDC 签发，薄的 Login/Consent 服务通过标准 OIDC
 验证上游身份。当前配置的上游是 Authelia，它继续连接 Samba AD 并执行人类 MFA。
@@ -31,9 +38,9 @@ sources:
 2026-10-01 起 Hydra 回调已切至其 Tailscale 开发实例（见下文切换记录）。应用代码、测试与 Native 构建发布归新仓库，环境部署归
 homelab-infra；首轮实现由 [issue #1](https://git.ddupan.top/panxiao81/iam-login/issues/1) 跟踪。
 完整的多主体 IAM 仍是[草案](../architecture/independent-iam-draft.md)；
-本轮不实现 SPIFFE 登录、agent 专用认证、动态授权或统一组迁移。
+该 PoC 不包含 SPIFFE 登录、agent 专用认证、动态授权或统一组迁移。
 
-## 入口与首次使用
+## 历史：入口与首次使用
 
 | 入口 | 用途 |
 |---|---|
@@ -69,7 +76,7 @@ Gitea 的新增登录源经 PR #143 接入，Helm revision 19 UpgradeSucceeded�
 ## 实现与维护
 
 - Hydra 固定 `v26.2.0` 与镜像 digest，使用独立 hydra PostgreSQL database/role。
-- 源码 `apps/hydra/login-consent`：标准 OIDC 上游适配器。校验 ID token issuer、audience、
+- 源码 `apps/hydra/login-consent`（现存档于 `archive/hydra/login-consent`）：标准 OIDC 上游适配器。校验 ID token issuer、audience、
   签名、有效期和 nonce，使用 PKCE S256 与单次、cookie 绑定的 state。
 - 当前只允许 Gitea client 和 openid/profile/email/groups；按请求 scope 释放 claims，
   不签发 refresh token，不提供通用自动 consent。主体为上游 issuer/sub 的稳定哈希。
@@ -82,7 +89,7 @@ Gitea 的新增登录源经 PR #143 接入，Helm revision 19 UpgradeSucceeded�
   已有客户端与 two_factor 策略；Authelia 暂未由 Flux 接管。
 
 源码、构建、claims/client 配置和恢复说明见
-[Hydra README](https://git.ddupan.top/panxiao81/homelab-infra/src/branch/main/apps/hydra/README.md)。
+[Hydra README（存档）](https://git.ddupan.top/panxiao81/homelab-infra/src/branch/main/archive/hydra/README.md)。
 Hydra 部署见 [PR #142](https://git.ddupan.top/panxiao81/homelab-infra/pulls/142)，
 Gitea 接入见 [PR #143](https://git.ddupan.top/panxiao81/homelab-infra/pulls/143)。
 
@@ -99,7 +106,7 @@ Gitea 接入见 [PR #143](https://git.ddupan.top/panxiao81/homelab-infra/pulls/1
 按 2026-09-27 明确的实现边界，React 只替换 Spring Security 默认 UI，密码 POST、
 因素状态和认证会话交由框架管理。待 MFA 页面要求近期密码因素，尚未实现的应用入口拒绝访问。监控 Basic 认证与人类登录会话隔离。
 
-本轮开发验证通过 JVM 测试，并从 JVM 通过 CA/域名验证读取真实 AD RootDSE。
+当时的开发验证通过 JVM 测试，并从 JVM 通过 CA/域名验证读取真实 AD RootDSE。
 2026-09-25 维护者已在 HTTPS 开发入口完成真实密码验证，成功进入待 MFA 页面，
 并反馈目录标识、邮箱及六个直接所属组的查询结果。此人类验收只覆盖 AD 第一因素与
 属性读取，不包括 MFA 或 Hydra 登录。新增路径尚未跑 Native；日常迭代不要求每轮原生编译。开发入口使用受限 Tailscale HTTPS，属于临时验收实例，不是生产入口。
@@ -116,7 +123,7 @@ Spring Security 官方 WebAuthn 流程，并以官方 JDBC 仓储和本地 Postg
 
 开发入口仍为 `https://laptop.tail7e769.ts.net:18082/signin`，限 Tailscale 可达。
 先验证 AD 密码，首次使用注册 passkey，再实际验证 passkey；注册成功本身不通过 MFA。
-已有凭据后的新增注册要求现有 MFA；本轮 UI 不开放凭据管理、删除或自助恢复。
+已有凭据后的新增注册要求现有 MFA；当时 UI 不开放凭据管理、删除或自助恢复。
 2026-09-29 开发实例已更新至 iam-login main `5f49a7c`，配置真实 Hydra 授权接入；
 新增 Login/Consent 的代码与隔离验证见下文。
 
@@ -141,7 +148,7 @@ challenge 过期/消费、断言重放及跨主体凭据拒绝。真实开发 HT
 2026-09-28 已通过 36 项 JVM 测试与隔离 Hydra v26.2.0 的浏览器授权码及注销流程：
 模拟 AD → WebAuthn → 原生表单确认 → Hydra code → 客户端兑换并验签 ID token。
 验证覆盖 issuer、audience、nonce、显式配置的旧 subject、直接组 claims 与授权码重放拒绝；
-独立 MFA 路径此前也通过浏览器回归。本轮另验证客户端 CRUD、Hydra 重启后的 PostgreSQL
+独立 MFA 路径此前也通过浏览器回归。同期另验证客户端 CRUD、Hydra 重启后的 PostgreSQL
 持久化、更新保留密钥、管理权限/CSRF 拒绝、再次授权确认、注销通知签名与 sid 关联，以及
 Spring 本地会话失效。这些是测试夹具结果，不是生产 Gitea 验收。
 
@@ -213,6 +220,6 @@ login/consent 时记录一条 error 级 “must be aborted”，属正常流程�
 
 开发 Admin 通道仅监听 loopback 18445，以自动重连 port-forward 跨过 Hydra 滚动更新；
 该临时进程与本地 JVM 容器必须保持运行。运行配置及回退备份在受限本地目录，不公开 Admin。
-客户端管理暂以有效 MFA 加 AD Domain Admins 直接成员为门槛。默认 Boot LDAP 健康探针
+客户端管理当时以有效 MFA 加 AD Domain Admins 直接成员为门槛（现行 iam-login 控制台的管理员组为 `platform-admins`）。默认 Boot LDAP 健康探针
 不对应本服务的用户 bind 仓储，开发配置已禁用该无效探针；数据库健康仍保留，AD 以真实
 认证验收为准。当前 Gitea client 没有登记任何 OIDC 注销端点，Gitea 联动注销尚未验收。
